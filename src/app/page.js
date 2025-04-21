@@ -48,7 +48,7 @@ export default function Home() {
       let newFov = baseCamera.current.fov;
       
       if (aspectRatio < 0.7) { // Very tall screens (mobile portrait)
-        newFov = 98;
+        newFov = 75;
       } else if (aspectRatio > 2) { // Very wide screens
         newFov = 40;
       }

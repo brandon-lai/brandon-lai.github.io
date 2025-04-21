@@ -19,7 +19,7 @@ export const metadata = {
 function Overlay() {
   return (
     <div style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none', width: '100%', height: '100%', fontWeight: 'bold' }}>
-      <div style={{ position: 'absolute', top: 40, left: 40, fontSize: '13px' }}>Welcome to my portfolio!</div>
+      <div style={{ position: 'absolute', top: 40, left: 40, fontSize: '13px' }}>Welcome to my website!</div>
       <div style={{ position: 'absolute', bottom: 40, right: 40, fontSize: '13px' }}>Updated: April 20, 2025</div>
     </div>
   )
