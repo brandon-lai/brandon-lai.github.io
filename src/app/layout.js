@@ -1,38 +1,37 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import Nav from "./components/Nav";
+import { SITE } from "./data/site";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata = {
-  title: "Brandon Lai",
-  description: "Brandon Lai's portfolio",
+  title: SITE.title,
+  description: SITE.description,
+  openGraph: {
+    title: SITE.title,
+    description: SITE.description,
+    type: "website",
+  },
 };
 
-function Overlay() {
-  return (
-    <div style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none', width: '100%', height: '100%', fontWeight: 'bold' }}>
-      <div style={{ position: 'absolute', top: 40, left: 40, fontSize: '13px' }}>Welcome to my website!</div>
-      <div style={{ position: 'absolute', bottom: 40, right: 40, fontSize: '13px' }}>Updated: April 20, 2025</div>
-    </div>
-  )
-}
+export const viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b0d" },
+  ],
+};
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Overlay />
-        {children}
+    <html lang="en" className={inter.variable}>
+      <body>
+        <Nav />
+        <main>{children}</main>
       </body>
     </html>
   );

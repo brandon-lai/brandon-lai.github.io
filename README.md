@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# brandon-lai.github.io
 
-## Getting Started
-
-First, run the development server:
+Personal site — a bento-grid portfolio built with Next.js (App Router), statically
+exported and deployed to GitHub Pages by `.github/workflows/nextjs.yml`.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev     # local dev at http://localhost:3000
+npm run build   # static export → ./out (what the Pages workflow uploads)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Where the content lives
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Everything you'll routinely edit is in `src/app/data/`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| File | What it controls |
+| --- | --- |
+| `data/site.js` | Wordmark, nav items, social icon links, hero heading + manifesto lines |
+| `data/tiles.js` | The bento grid on the home page — one entry per block |
+| `data/experience.js` | The work history on `/work`, newest first |
+| `data/eras.js` | The eight points on the `/beta` modernity scale |
 
-## Learn More
+Nothing else needs to change to fill the site in.
 
-To learn more about Next.js, take a look at the following resources:
+## Adding a block
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Append an entry to `TILES` in `src/app/data/tiles.js`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```js
+{
+  id: "my-project",
+  kind: "placeholder",          // which renderer draws the inside
+  size: "md",                   // how much grid it occupies
+  glyph: "🛠",
+  title: "My Project",
+  note: "Short blurb.",
+  caption: "<b>🛠 My Project</b> — shown in the gutter on hover",
+  href: "/work",                // adds the corner arrow link
+  // arrow: false,              // ...unless you suppress it
+}
+```
 
-## Deploy on Vercel
+**Sizes** (`size`) — the grid is 4 columns on desktop, 2 on tablet, 1 on phone:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| size | shape | good for |
+| --- | --- | --- |
+| `xs` | 1 col, short | stat chip |
+| `sm` | 1 col, square | icon, photo, small link card |
+| `tall` | 1 col, tall | vertical card, phone mock |
+| `md` | 2 cols, short | wide preview, embed |
+| `lg` | 2 cols, medium | project hero shot |
+| `xl` | 2 cols, very tall | the manifesto block |
+| `wide` | 4 cols, short | full-bleed banner |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The grid uses `grid-auto-flow: dense`, so blocks backfill gaps automatically —
+reordering the array is the fastest way to re-compose the page.
+
+**Kinds** (`kind`) map to renderers in `src/app/components/tiles/`:
+`hero`, `link-card`, `stat`, `placeholder`. To add your own, drop a component in
+that folder and register it in `components/tiles/index.js`.
+
+## Structure
+
+```
+src/app/
+  layout.js              root shell — fonts, Nav
+  page.js                home — renders the bento grid from data/tiles.js
+  about|work|contact/    content pages (work renders data/experience.js)
+  beta/                  "Beta" — one work history, eight eras
+    Lab.js               stage, scroll-through-time, fit-to-height scaling
+    EraSlider.js         the modernity scale (a real <input type="range">)
+    eras/                one renderer per era; register new ones in eras/index.js
+    lab.css              all era styling, scoped to this route
+  globals.css            design tokens + every class used above
+  components/
+    Nav.js               floating pill nav with the sliding indicator
+    TopBar.js            wordmark + social icons (not rendered — drop
+                         <TopBar /> into layout.js to bring it back)
+    Tile.js              block shell: surface, hover caption, corner arrow
+    Icons.js             inline SVG icons
+    tiles/               block renderers
+  data/                  ← edit these
+```
+
+Design tokens (colour, radius, grid geometry, easing) are the `:root` custom
+properties at the top of `globals.css`. Light and dark palettes are both defined
+there; dark follows the OS setting.
+
+> `components/Letter.js` and `components/LinkedInLogo.js` are left over from the
+> previous three.js homepage and are no longer imported. Delete them (and the
+> `three` / `@react-three/*` dependencies) once you're sure you don't want them.
