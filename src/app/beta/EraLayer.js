@@ -24,9 +24,15 @@ export default function EraLayer({ era, jobs, opacity, offset, blur }) {
       const layer = layerRef.current;
       const scene = sceneRef.current;
       if (!layer || !scene) return;
+
+      // Measure the era's own box rather than the fixed-width scene: a phone is
+      // only ~312px wide inside a 640px scene, and sizing it off the scene would
+      // shrink it as though it were the full width.
+      const art = scene.firstElementChild;
+      if (!art) return;
       // offsetWidth/Height ignore transforms, so this cannot feed back on itself
-      const w = scene.offsetWidth;
-      const h = scene.offsetHeight;
+      const w = art.offsetWidth;
+      const h = art.offsetHeight;
       if (!w || !h) return;
 
       // measure the layer's content box so the padding that clears the nav is
