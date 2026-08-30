@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { NAV } from "../data/site";
+import { NAV, NAV_LOCKED_LINES } from "../data/site";
 
 const normalize = (p) => {
   if (!p) return "/";
@@ -11,10 +11,16 @@ const normalize = (p) => {
   return trimmed === "" ? "/" : trimmed;
 };
 
+const BUBBLE_MS = 2200;
+
 export default function Nav() {
   const pathname = normalize(usePathname());
   const listRef = useRef(null);
   const [pill, setPill] = useState(null);
+  const [bubble, setBubble] = useState(null);
+
+  const line = useRef(0);
+  const timer = useRef(null);
 
   const measure = useCallback(() => {
     const list = listRef.current;
@@ -36,6 +42,24 @@ export default function Nav() {
     return () => window.removeEventListener("resize", measure);
   }, [measure, pathname]);
 
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  const knock = (event) => {
+    const list = listRef.current;
+    if (!list) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const parent = list.getBoundingClientRect();
+
+    setBubble({
+      x: rect.left - parent.left + rect.width / 2,
+      text: NAV_LOCKED_LINES[line.current % NAV_LOCKED_LINES.length],
+    });
+    line.current += 1;
+
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setBubble(null), BUBBLE_MS);
+  };
+
   return (
     <div className="nav-fixed">
       <nav className="nav" ref={listRef} aria-label="Primary">
@@ -48,8 +72,26 @@ export default function Nav() {
               : undefined
           }
         />
+
         {NAV.map((item) => {
           const active = normalize(item.href) === pathname;
+
+          if (item.disabled) {
+            return (
+              <button
+                key={item.href}
+                type="button"
+                className="nav-item"
+                data-active="false"
+                data-locked="true"
+                aria-disabled="true"
+                onClick={knock}
+              >
+                {item.label}
+              </button>
+            );
+          }
+
           return (
             <Link
               key={item.href}
@@ -63,6 +105,12 @@ export default function Nav() {
             </Link>
           );
         })}
+
+        {bubble && (
+          <span className="nav-bubble" style={{ left: `${bubble.x}px` }} role="status">
+            {bubble.text}
+          </span>
+        )}
       </nav>
     </div>
   );

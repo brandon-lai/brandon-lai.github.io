@@ -9,13 +9,26 @@ export const SITE = {
   url: "https://brandon-lai.github.io",
 };
 
-/** Top-centre pill nav. `dot: true` puts a small red "new" dot on an item. */
+/**
+ * Top-centre pill nav. `dot: true` puts a small red "new" dot on an item.
+ * `disabled: true` greys the item out and pops a bubble instead of navigating —
+ * drop the flag to switch a page back on.
+ */
 export const NAV = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Work", href: "/work", dot: true },
-  { label: "Contact", href: "/contact" },
+  { label: "Home", href: "/", disabled: true },
+  { label: "About", href: "/about", disabled: true },
+  { label: "Work", href: "/work", dot: true, disabled: true },
+  { label: "Contact", href: "/contact", disabled: true },
   { label: "Beta", href: "/beta" },
+];
+
+/** Shown, in order, when someone knocks on a door that isn't open yet. */
+export const NAV_LOCKED_LINES = [
+  "Not ready yet.",
+  "Still building this one.",
+  "Come back later.",
+  "This one's in the oven.",
+  "Soon. Probably.",
 ];
 
 /** Top-right icon links. `icon` maps to a key in components/Icons.js */

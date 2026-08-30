@@ -1,28 +1,33 @@
-import Tile from "./components/Tile";
-import { TILE_KINDS } from "./components/tiles";
-import { TILES } from "./data/tiles";
+"use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+/**
+ * `/` forwards to `/beta` for now. The bento grid still exists untouched in
+ * components/HomeGrid.js — to put it back, drop the redirect and return
+ * <HomeGrid /> instead.
+ *
+ * This is a client-side replace because the site is a static export, where
+ * Next's redirects() and the server-side redirect() are both unavailable.
+ */
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/beta");
+  }, [router]);
+
   return (
-    <div className="page">
-      <div className="bento">
-        {TILES.map(({ id, kind, size, caption, href, arrow, ...props }) => {
-          const Content = TILE_KINDS[kind] ?? TILE_KINDS.placeholder;
-          return (
-            <Tile
-              key={id}
-              size={size}
-              caption={caption}
-              href={href}
-              arrow={arrow !== false}
-              label={props.title}
-              interactive={kind !== "hero"}
-            >
-              <Content {...props} href={href} />
-            </Tile>
-          );
-        })}
+    <noscript>
+      <div className="page">
+        <div className="prose">
+          <p>
+            <Link href="/beta">Continue to Beta →</Link>
+          </p>
+        </div>
       </div>
-    </div>
+    </noscript>
   );
 }

@@ -167,6 +167,55 @@ a { color: inherit; text-decoration: none; }
 .nav-item:hover { color: var(--ink-2); }
 .nav-item[data-active="true"] { color: var(--ink); font-weight: 600; }
 
+/* locked items: a real <button>, reset to look like the links beside it */
+button.nav-item {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: default;
+}
+.nav-item[data-locked="true"] { color: color-mix(in srgb, var(--ink-3) 62%, transparent); }
+.nav-item[data-locked="true"]:hover { color: var(--ink-3); }
+
+/* the bubble that pops when you knock on a door that isn't open */
+.nav-bubble {
+  position: absolute;
+  top: calc(100% + 11px);
+  translate: -50% 0;
+  z-index: 2;
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px -12px rgba(19, 19, 22, 0.6);
+  pointer-events: none;
+  animation: bubble-in 0.32s var(--ease) both;
+}
+.nav-bubble::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  translate: -50% 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--ink);
+  rotate: 45deg;
+}
+
+@keyframes bubble-in {
+  from { opacity: 0; translate: -50% -5px; scale: 0.94; }
+  to   { opacity: 1; translate: -50% 0; scale: 1; }
+}
+
 .nav-dot {
   width: 6px;
   height: 6px;
@@ -563,6 +612,12 @@ a.xp-item:hover { background: var(--surface-hover); transform: translateX(3px); 
 
   /* nav drops to the bottom so it never collides with the wordmark */
   .nav-fixed { top: auto; bottom: 18px; }
+  .nav-bubble { top: auto; bottom: calc(100% + 11px); }
+  .nav-bubble::before { top: auto; bottom: -4px; }
+  @keyframes bubble-in {
+    from { opacity: 0; translate: -50% 5px; scale: 0.94; }
+    to   { opacity: 1; translate: -50% 0; scale: 1; }
+  }
   .nav-item { padding: 9px 15px; font-size: 14px; }
   .page { padding: 92px 18px 120px; }
 }
