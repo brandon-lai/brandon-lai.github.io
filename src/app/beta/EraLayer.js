@@ -8,7 +8,7 @@ import { ERA_RENDERERS } from "./eras";
  * stage height; two layers are alive at once so scrolling crossfades between
  * them rather than snapping.
  */
-export default function EraLayer({ era, jobs, opacity, offset, blur }) {
+export default function EraLayer({ era, jobs, opacity, depth, blur, progress }) {
   const layerRef = useRef(null);
   const sceneRef = useRef(null);
   const [scale, setScale] = useState(1);
@@ -71,9 +71,10 @@ export default function EraLayer({ era, jobs, opacity, offset, blur }) {
       <div
         className="lab-scene"
         ref={sceneRef}
-        style={{ transform: `translateY(${offset}px) scale(${scale})` }}
+        // the fit scale and the fly-past depth multiply into one transform
+        style={{ transform: `scale(${scale * depth})` }}
       >
-        <Era jobs={jobs} />
+        <Era jobs={jobs} progress={progress} />
       </div>
     </div>
   );

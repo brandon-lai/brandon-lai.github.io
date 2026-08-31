@@ -8,7 +8,13 @@ import EraLayer from "./EraLayer";
 const LAST = ERAS.length - 1;
 /** how much wheel travel moves you one whole era */
 const SCROLL_PER_ERA = 850;
+/** quiet time after the last scroll event before settling on the nearest era */
+const SNAP_AFTER = 160;
 const clamp = (n) => Math.min(LAST, Math.max(0, n));
+const smooth = (t) => {
+  const x = Math.min(1, Math.max(0, t));
+  return x * x * (3 - 2 * x);
+};
 
 export default function Lab() {
   /** continuous position on the scale, e.g. 4.37 is most of the way to era 5 */
@@ -19,6 +25,7 @@ export default function Lab() {
   const target = useRef(5);
   const current = useRef(5);
   const raf = useRef(null);
+  const snap = useRef(null);
   const touchY = useRef(null);
 
   /* ease the rendered position toward the target so a coarse mouse wheel
@@ -40,13 +47,25 @@ export default function Lab() {
     raf.current = requestAnimationFrame(step);
   }, []);
 
+  /* Scrolling stays continuous; once it stops, ease to the nearest era so you
+     never come to rest half-way through a crossfade. The existing lerp does the
+     travelling, so the settle reads as a glide rather than a jump. */
+  const settle = useCallback(() => {
+    clearTimeout(snap.current);
+    snap.current = setTimeout(() => {
+      target.current = clamp(Math.round(target.current));
+      run();
+    }, SNAP_AFTER);
+  }, [run]);
+
   const nudge = useCallback(
     (px) => {
       target.current = clamp(target.current + px / SCROLL_PER_ERA);
       setMoved(true);
       run();
+      settle();
     },
-    [run]
+    [run, settle]
   );
 
   /* the page does not scroll — the wheel moves you through time instead */
@@ -84,7 +103,13 @@ export default function Lab() {
     };
   }, [nudge]);
 
-  useEffect(() => () => raf.current && cancelAnimationFrame(raf.current), []);
+  useEffect(
+    () => () => {
+      if (raf.current) cancelAnimationFrame(raf.current);
+      clearTimeout(snap.current);
+    },
+    []
+  );
 
   const lower = Math.floor(pos);
   const upper = Math.min(LAST, lower + 1);
@@ -93,20 +118,25 @@ export default function Lab() {
   return (
     <div className="lab">
       <div className="lab-stage" ref={stageRef}>
+        {/* The older era rushes past the camera while the newer one arrives from
+            the distance. Scrolling back plays the same thing in reverse, so no
+            direction tracking is needed. */}
         <EraLayer
           era={ERAS[lower]}
           jobs={EXPERIENCE}
-          opacity={1}
-          offset={-f * 34}
-          blur={f * 3.2}
+          opacity={1 - smooth(f)}
+          depth={1 + f * 0.42}
+          blur={f * 3}
+          progress={1 - f}
         />
         {upper !== lower && (
           <EraLayer
             era={ERAS[upper]}
             jobs={EXPERIENCE}
-            opacity={f}
-            offset={(1 - f) * 34}
-            blur={(1 - f) * 3.2}
+            opacity={smooth(f)}
+            depth={0.66 + f * 0.34}
+            blur={(1 - f) * 3}
+            progress={f}
           />
         )}
 

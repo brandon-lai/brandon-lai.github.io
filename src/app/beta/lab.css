@@ -416,7 +416,17 @@
 }
 
 /* ---- 5. laptop (MacBook) ---------------------------------- */
-.mb { width: min(100%, 640px); margin: 0 auto; }
+.mb {
+  width: min(100%, 640px);
+  margin: 0 auto;
+  perspective: 1600px;
+}
+
+/* the lid hinges open as the era arrives (--open runs 0 → 1) */
+.mb-lid {
+  transform-origin: bottom center;
+  transform: rotateX(calc((1 - var(--open, 1)) * -84deg));
+}
 
 .mb-lid {
   padding: 9px;

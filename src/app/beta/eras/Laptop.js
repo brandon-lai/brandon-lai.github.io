@@ -2,9 +2,12 @@ import AboutBlock from "./AboutBlock";
 import OrgMark from "../../components/OrgMark";
 
 /** A MacBook: thin silver lid, black bezel, notch, tapered base. */
-export default function Laptop({ jobs }) {
+export default function Laptop({ jobs, progress = 1 }) {
   return (
-    <div className="mb">
+    // The lid tracks this era's arrival: shut on approach, open once you land.
+    // Squared so most of the swing happens late, when the laptop is close and
+    // opaque enough for the motion to actually read.
+    <div className="mb" style={{ "--open": progress * progress }}>
       <div className="mb-lid">
         <div className="mb-bezel">
           <div className="mb-notch" aria-hidden="true">
