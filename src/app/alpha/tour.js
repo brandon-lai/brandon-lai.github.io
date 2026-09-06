@@ -81,7 +81,7 @@ export const STOPS = [
   {
     x: 0.44,
     subject: null,
-    title: "Reach out to me",
+    title: "Reach out to me!",
     // clear of the column the button used to reach down into
     ax: 0.67,
     ay: 0.22,

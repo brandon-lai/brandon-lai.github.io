@@ -81,13 +81,25 @@
   z-index: 3;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(22px + env(safe-area-inset-bottom));
-  font-size: 13px;
-  letter-spacing: 0.14em;
-  text-transform: lowercase;
+  bottom: calc(24px + env(safe-area-inset-bottom));
   color: var(--ink-dim);
   pointer-events: none;
   transition: opacity 500ms ease;
+}
+
+/* a slow breath rather than a blink — it should read as an invitation */
+.alpha-hint svg {
+  display: block;
+  animation: alpha-nudge 2.8s ease-in-out infinite;
+}
+
+@keyframes alpha-nudge {
+  0%, 100% { opacity: 0.3; transform: translateY(-4px); }
+  50%      { opacity: 1;   transform: translateY(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alpha-hint svg { animation: none; opacity: 0.75; }
 }
 
 /* the scroll hint has nothing to say while the page is scrolling itself.
@@ -162,6 +174,10 @@
 
 .alpha-enter {
   animation: alpha-gate-in 1.2s var(--ease, ease);
+}
+
+.alpha-enter,
+.alpha-link {
   font: inherit;
   font-size: 15px;
   letter-spacing: 0.24em;
@@ -185,7 +201,8 @@
 /* Warm rather than white: this is the colour the engine lights windows with,
    so the button glows like the one you are about to fly into. Hover only —
    on :focus-visible it would be lit before anyone had pointed at it. */
-.alpha-enter:hover {
+.alpha-enter:hover,
+.alpha-link:hover {
   background: rgba(239, 230, 214, 0.1);
   border-color: rgba(255, 214, 150, 0.62);
   transform: translateY(-1px);
@@ -215,10 +232,14 @@
   border: 0;
 }
 
-/* the engine moves this onto whatever line it drew the link on */
+/* the engine only positions it; the shape and the glow come from the rule it
+   shares with the gate's button above */
 .alpha-link {
   position: fixed;
   z-index: 5;
   display: none;
-  cursor: pointer;
+  font-size: 14px;
+  padding: 13px 30px;
+  text-decoration: none;
+  white-space: nowrap;
 }

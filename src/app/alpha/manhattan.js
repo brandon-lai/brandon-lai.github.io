@@ -952,32 +952,44 @@ export function createSkyline({
 
   /** the hand-drawn line both the greeting and the contact button point with */
   function scribble(fromX, fromY, toX, toY, t, arc) {
-    ctx.beginPath();
     const steps = 30;
-    const drawTo = Math.floor(steps * clamp(t * 1.3, 0, 1));
     const span = Math.hypot(toX - fromX, toY - fromY);
+    const at = (f) => [
+      lerp(fromX, toX, f) + Math.sin(f * 7.3) * 3,
+      lerp(fromY, toY, f) + Math.sin(f * 5.1 + 1.2) * 3.2
+        - Math.sin(f * Math.PI) * span * arc,
+    ];
+
+    ctx.beginPath();
+    const drawTo = Math.floor(steps * clamp(t * 1.3, 0, 1));
     for (let i = 0; i <= drawTo; i++) {
-      const f = i / steps;
-      const px = lerp(fromX, toX, f) + Math.sin(f * 7.3) * 3;
-      const py = lerp(fromY, toY, f) + Math.sin(f * 5.1 + 1.2) * 3.2
-        - Math.sin(f * Math.PI) * span * arc;
+      const [px, py] = at(i / steps);
       if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
     }
     ctx.stroke();
+
+    const [ex, ey] = at(1);
+    const [bx, by] = at(0.93);
+    return { x: ex, y: ey, angle: Math.atan2(ey - by, ex - bx) };
   }
 
-  /** a rounded outline, since canvas has no dependable roundRect here */
-  function pill(x, y, w, h) {
-    const r = h / 2;
+  /**
+   * An arrowhead aimed along however the line actually arrived, rather than at
+   * a fixed angle. The curve and the wobble mean the approach direction is not
+   * the direction between the endpoints — assuming it was is what left the
+   * contact arrow pointing off at nothing.
+   */
+  function arrowhead(tip, size, t) {
+    ctx.globalAlpha = t;
     ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
+    for (const spread of [2.5, -2.5]) {
+      ctx.moveTo(tip.x, tip.y);
+      ctx.lineTo(
+        tip.x + Math.cos(tip.angle + spread) * size,
+        tip.y + Math.sin(tip.angle + spread) * size
+      );
+    }
+    ctx.stroke();
   }
 
   /**
@@ -1009,15 +1021,10 @@ export function createSkyline({
     ctx.strokeStyle = 'rgba(255,240,220,0.92)';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    scribble(ax, ay, tx + side * wsz, ty - wsz * 0.4, t, 0.16);
+    const tip = scribble(ax, ay, tx + side * wsz, ty - wsz * 0.4, t, 0.16);
 
     if (t > 0.7) {
-      ctx.globalAlpha = (t - 0.7) / 0.3;
-      ctx.beginPath();
-      ctx.moveTo(tx + side * wsz * 2.4, ty - wsz * 2.6);
-      ctx.lineTo(tx + side * wsz, ty - wsz * 0.4);
-      ctx.lineTo(tx + side * wsz * 3.6, ty - wsz * 0.2);
-      ctx.stroke();
+      arrowhead(tip, Math.max(10, wsz * 2.4), (t - 0.7) / 0.3);
 
       const px = Math.max(19, Math.min(30, W * 0.05));
       ctx.font = `italic ${px}px ${HAND}`;
@@ -1134,42 +1141,20 @@ export function createSkyline({
       y += bpx * 1.62;
     }
 
-    /* The contact stop ends on something to press rather than something to
-       read, so it gets a drawn button and an arrow reaching down to it. The
-       real anchor is parked on the box this returns. */
-    if (stop.button && written > 0.92) {
-      const bt = clamp((written - 0.92) / 0.08, 0, 1);
-      const bpad = bpx * 1.15;
-      ctx.font = `${bpx}px ${SERIF}`;
-      const lw = ctx.measureText(stop.button.label).width;
-      const bw = lw + bpad * 2;
-      const bh = bpx * 2.6;
-      const bxp = x + 34;
-      const byp = y + bpx * 1.1;
-
-      ctx.globalAlpha = t * bt;
-      ctx.strokeStyle = 'rgba(255,240,220,0.9)';
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
-      scribble(x + 6, y - bpx * 0.3, bxp + bw * 0.28, byp - 7, bt, -0.22);
-
-      if (bt > 0.55) {
-        ctx.globalAlpha = t * ((bt - 0.55) / 0.45);
-        ctx.beginPath();
-        ctx.moveTo(bxp + bw * 0.28 - 9, byp - 17);
-        ctx.lineTo(bxp + bw * 0.28, byp - 6);
-        ctx.lineTo(bxp + bw * 0.28 + 10, byp - 15);
-        ctx.stroke();
-
-        ctx.globalAlpha = t * ((bt - 0.55) / 0.45);
-        ctx.strokeStyle = 'rgba(239,230,214,0.55)';
-        ctx.lineWidth = 1;
-        pill(bxp, byp, bw, bh);
-        ctx.stroke();
-        ctx.fillStyle = 'rgba(247,241,230,0.97)';
-        ctx.fillText(stop.button.label, bxp + bpad, byp + bh * 0.66);
-        box = { x: bxp, y: byp, w: bw, h: bh, href: stop.button.href };
-      }
+    /* The contact stop ends on something to press. The button itself is a real
+       element rather than paint, so it can carry the same styling and the same
+       hover as the one that opened the page — all this reports is where to put
+       it and where the arrow should start from. */
+    if (stop.button) {
+      box = {
+        href: stop.button.href,
+        label: stop.button.label,
+        x: x + 30,
+        y: y + bpx * 1.3,
+        fromX: x + 8,
+        fromY: y - bpx * 0.25,
+        t: clamp((written - 0.9) / 0.1, 0, 1),
+      };
     }
 
     ctx.restore();
@@ -1326,7 +1311,7 @@ export function createSkyline({
         if (a < 1 - tour.fall[i] || written < 1) writing = true;
 
         const box = drawBlurb(STOPS[i], a, written);
-        if (box && a > 0.6) linkBox = box;
+        if (box) linkBox = { box, a };
       }
     }
 
@@ -1342,23 +1327,38 @@ export function createSkyline({
       Math.max(1 - smoothstep(0.005, 0.05, p), handover)
     );
 
-    placeLink(linkBox);
+    placeLink(linkBox && linkBox.box, linkBox ? linkBox.a : 0);
   }
 
   /* Everything else here is paint, but a contact link has to be clickable, so
      one real anchor is parked on top of the drawn word. */
-  function placeLink(box) {
+  function placeLink(box, alpha) {
     if (!linkEl) return;
-    if (!box) {
+    if (!box || box.t <= 0.01) {
       linkEl.style.display = 'none';
       return;
     }
-    if (box.href) linkEl.href = box.href;
-    linkEl.style.display = 'block';
+    linkEl.href = box.href;
+    linkEl.textContent = box.label;
+    linkEl.style.display = 'inline-block';
     linkEl.style.left = Math.round(box.x) + 'px';
     linkEl.style.top = Math.round(box.y) + 'px';
-    linkEl.style.width = Math.round(box.w) + 'px';
-    linkEl.style.height = Math.round(box.h) + 'px';
+    linkEl.style.opacity = String(alpha * box.t);
+
+    /* Measured rather than assumed: the button is sized by its own styling, so
+       the arrow can only be aimed once it has been laid out. */
+    const bw = linkEl.offsetWidth || 120;
+    ctx.save();
+    ctx.globalAlpha = alpha * box.t;
+    ctx.strokeStyle = 'rgba(255,240,220,0.92)';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    /* Arced over the top, not under: a curve that dips below the button comes
+       back up into it and arrives pointing away from the thing it is meant to
+       be indicating. This one swings up and comes down onto it. */
+    const tip = scribble(box.fromX, box.fromY, box.x + bw * 0.3, box.y - 9, box.t, 0.38);
+    if (box.t > 0.6) arrowhead(tip, 12, (box.t - 0.6) / 0.4);
+    ctx.restore();
   }
 
   // ---------------------------------------------------------------------------

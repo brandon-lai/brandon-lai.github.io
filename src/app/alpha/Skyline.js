@@ -220,17 +220,11 @@ export default function Skyline({ children }) {
 
       <audio ref={audio} src="/audio/nyc.mp3" preload="auto" />
 
-      {/* parked exactly over the word the canvas drew, so contact still works */}
-      <a
-        className="alpha-link"
-        ref={link}
-        href={SOCIALS[0]?.href}
-        target="_blank"
-        rel="noreferrer"
-        aria-hidden="true"
-        tabIndex={-1}
-      >
-        <span className="alpha-sr">{SOCIALS[0]?.label}</span>
+      {/* A real button, so it carries the same styling and the same hover as
+          the one that opened the page. The engine only says where to put it —
+          the canvas draws the arrow to wherever it ends up. */}
+      <a className="alpha-link" ref={link} href={SOCIALS[0]?.href} target="_blank" rel="noreferrer">
+        {SOCIALS[0]?.label}
       </a>
 
       {entered && (
@@ -260,7 +254,15 @@ export default function Skyline({ children }) {
         </div>
       </div>
       <div className="alpha-hint" ref={hint} data-auto={auto ? "true" : "false"} aria-hidden="true">
-        scroll
+        <svg width="24" height="13" viewBox="0 0 24 13" fill="none">
+          <path
+            d="M1.6 1.6 12 11.4 22.4 1.6"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
 
       {!gateGone && (
