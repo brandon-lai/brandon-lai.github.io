@@ -19,12 +19,7 @@ import {
   profileFor,
   yearAt,
 } from "./city";
-import {
-  drawContent,
-  drawRoomLight,
-  layoutContent,
-  yearAtOffset,
-} from "./content";
+import { STOPS, sampleTour } from "./tour";
 
 /**
  * /alpha — four hundred years of Manhattan, drawn to a canvas as you scroll.
@@ -51,10 +46,10 @@ export function createSkyline({
 
   let W = 0, H = 0, DPR = 1, isMobile = false;
   let baselineY = 0, EXAG = 1, finalSpan = 1;
-  let WBOOST = 3, MIDSPAN = 0.68, HANDOVER = 20, FINAL_ZOOM = 1000;
+  let WBOOST = 3;
   let lastW = 0, lastH = 0;
   let FILL = [];
-  let contentLayout = null;
+  let tourScroll = 1;
 
   function layout() {
     const w = window.innerWidth;
@@ -81,20 +76,14 @@ export function createSkyline({
     EXAG = CFG.esbTargetFrac * H * CFG.islandFt * finalSpan / (1250 * W);
 
     WBOOST = clamp(CFG.widthBoostK * H * finalSpan / W, 2.0, 11);
-    MIDSPAN = isMobile ? CFG.midSpanMobile : CFG.midSpanDesktop;
-    // zoom at which the tower fills the frame, which is where the skyline layer
-    // stops being able to carry the shot
-    HANDOVER = MIDSPAN / (0.0105 * WBOOST * 1.15);
-    FINAL_ZOOM = HANDOVER * 50;
 
     FILL = buildFill(isMobile ? CFG.fillCountMobile : CFG.fillCount);
     starfield = null;
 
-    // Measured here and nowhere else: a scroll frame only draws. The second
-    // scroll region is as tall as the copy, so reading it moves 1:1 with the
-    // wheel while the intro above stays paced by the music.
-    contentLayout = layoutContent(ctx, W, H);
-    if (contentSpacer) contentSpacer.style.height = contentLayout.scroll + 'px';
+    /* The tour is the second scroll region: enough travel per stop to move the
+       camera and then hold still long enough to read what it points at. */
+    tourScroll = Math.round(STOPS.length * H * 0.62);
+    if (contentSpacer) contentSpacer.style.height = tourScroll + 'px';
   }
 
   // ---------------------------------------------------------------------------
@@ -910,26 +899,37 @@ export function createSkyline({
   // ---------------------------------------------------------------------------
   // the arrow moment
   // ---------------------------------------------------------------------------
-  const WINDOW_FT = 690;   // roughly a mid-height floor on the east face
-  const WINDOW_X = 0.4018;
-
-  function drawArrow(t) {
-    if (t <= 0) return;
-    const tx = sx(WINDOW_X), ty = sy(WINDOW_FT);
-
-    // the lit window itself
-    ctx.save();
+  /**
+   * One handwritten note pointing at a place on the island. The hand is the
+   * same one that introduces him, so everything the page says about him
+   * arrives in the same voice, written onto the city rather than beside it.
+   *
+   * Returns the rectangle the words landed in, which is how the one real
+   * link finds its way on top of the right ones.
+   */
+  function drawNote(note, t) {
+    if (t <= 0) return null;
+    const tx = sx(note.at.x), ty = sy(note.at.ft);
     const wsz = Math.max(5, 0.0009 * cam.ppwx);
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = 'rgba(255,214,150,1)';
-    ctx.shadowColor = 'rgba(255,190,120,0.9)';
-    ctx.shadowBlur = 26;
-    ctx.fillRect(tx - wsz / 2, ty - wsz * 0.7, wsz, wsz * 1.4);
-    ctx.restore();
 
-    // hand drawn arrow, wobbly on purpose
+    // the lit window he is actually in, on the one note that has one
+    if (note.lit) {
+      ctx.save();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = 'rgba(255,214,150,1)';
+      ctx.shadowColor = 'rgba(255,190,120,0.9)';
+      ctx.shadowBlur = 26;
+      ctx.fillRect(tx - wsz / 2, ty - wsz * 0.7, wsz, wsz * 1.4);
+      ctx.restore();
+    }
+
+    /* The arrow leaves from whichever side has room, so a note near the edge
+       of the frame reaches back into it instead of off the screen. */
     const len = Math.min(W * 0.3, 170);
-    const ax = tx + len * 0.9, ay = ty - len * 0.62;
+    const side = tx > W * 0.55 ? -1 : 1;
+    const lift = note.below ? -1 : 1;
+    const ax = tx + side * len * 0.9;
+    const ay = ty - lift * len * 0.62;
     ctx.save();
     ctx.globalAlpha = t;
     ctx.strokeStyle = 'rgba(255,240,220,0.92)';
@@ -940,155 +940,107 @@ export function createSkyline({
     const drawTo = Math.floor(steps * clamp(t * 1.35, 0, 1));
     for (let i = 0; i <= drawTo; i++) {
       const f = i / steps;
-      const px = lerp(ax, tx + wsz, f) + Math.sin(f * 7.3) * 3.2;
-      const py = lerp(ay, ty - wsz * 0.4, f) + Math.sin(f * 5.1 + 1.2) * 3.6 - Math.sin(f * Math.PI) * len * 0.16;
+      const px = lerp(ax, tx + side * wsz, f) + Math.sin(f * 7.3) * 3.2;
+      const py = lerp(ay, ty - lift * wsz * 0.4, f) + Math.sin(f * 5.1 + 1.2) * 3.6
+        - lift * Math.sin(f * Math.PI) * len * 0.16;
       if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
     }
     ctx.stroke();
 
-    if (t > 0.75) {
-      const ha = (t - 0.75) / 0.25;
+    let box = null;
+    if (t > 0.7) {
+      const ha = (t - 0.7) / 0.3;
       ctx.globalAlpha = ha;
       ctx.beginPath();
-      ctx.moveTo(tx + wsz * 2.4, ty - wsz * 2.6);
-      ctx.lineTo(tx + wsz, ty - wsz * 0.4);
-      ctx.lineTo(tx + wsz * 3.6, ty - wsz * 0.2);
+      ctx.moveTo(tx + side * wsz * 2.4, ty - lift * wsz * 2.6);
+      ctx.lineTo(tx + side * wsz, ty - lift * wsz * 0.4);
+      ctx.lineTo(tx + side * wsz * 3.6, ty - lift * wsz * 0.2);
       ctx.stroke();
 
-      ctx.font = 'italic ' + Math.max(17, Math.min(26, W * 0.05)) + 'px "Bradley Hand", "Segoe Script", "Snell Roundhand", cursive';
+      const px = Math.max(16, Math.min(25, W * 0.045));
+      ctx.font = `italic ${px}px "Bradley Hand", "Segoe Script", "Snell Roundhand", cursive`;
       ctx.fillStyle = 'rgba(255,240,220,0.95)';
       ctx.textAlign = 'left';
-      // kept on screen on a narrow viewport, where the arrow runs out of room
-      const label = 'Hi, I\u2019m Brandon';
-      const lw = ctx.measureText(label).width;
-      ctx.fillText(label, Math.min(ax + 6, W - lw - 12), ay - 4);
-    }
-    ctx.restore();
-  }
 
-  // ---------------------------------------------------------------------------
-  // LOD B and C: facade, then the window
-  // ---------------------------------------------------------------------------
-  // The east face of the tower. The panel is anchored on the target window
-  // rather than on its own centre, so the push-in stays locked on that one bay
-  // all the way through instead of drifting off it.
-  const FACADE_COLS = 15, FACADE_ROWS = 40;
-  const TARGET_COL = 7, TARGET_ROW = 16;
-
-  function facadeInset(r) {
-    if (r < 3) return 4;
-    if (r < 7) return 3;
-    if (r < 12) return 2;
-    if (r < 18) return 1;
-    return 0;
-  }
-
-  function drawFacade(fs, alpha) {
-    ctx.save();
-    ctx.globalAlpha = alpha;
-
-    const cwid = W * 0.5 * fs / FACADE_COLS;
-    const chgt = cwid * 1.35;
-    const ox = W / 2 - (TARGET_COL + 0.5) * cwid;
-    const oy = H / 2 - (TARGET_ROW + 0.5) * chgt;
-
-    const cFrom = Math.max(0, Math.floor((0 - ox) / cwid));
-    const cTo = Math.min(FACADE_COLS, Math.ceil((W - ox) / cwid) + 1);
-    const rFrom = Math.max(0, Math.floor((0 - oy) / chgt));
-    const rTo = Math.min(FACADE_ROWS, Math.ceil((H - oy) / chgt) + 1);
-
-    for (let r = rFrom; r < rTo; r++) {
-      const ins = facadeInset(r);
-      const y = oy + r * chgt;
-      for (let c = Math.max(cFrom, ins); c < Math.min(cTo, FACADE_COLS - ins); c++) {
-        const x = ox + c * cwid;
-
-        // limestone pier, alternating slightly so the bays read
-        ctx.fillStyle = (c % 2 === 0) ? '#1c1f31' : '#181b2a';
-        ctx.fillRect(x, y, cwid + 1, chgt + 1);
-
-        // the recessed channel that carries window and spandrel
-        const wx = x + cwid * 0.24, ww = cwid * 0.52;
-        ctx.fillStyle = '#2b2d3e';
-        ctx.fillRect(wx, y, ww, chgt + 1);
-
-        const wy = y + chgt * 0.19, wh = chgt * 0.55;
-        const isTarget = (c === TARGET_COL && r === TARGET_ROW);
-        const litv = hash(c * 17 + 3, r * 29);
-        if (isTarget) {
-          ctx.fillStyle = 'rgba(255,216,156,1)';
-        } else if (litv < 0.28) {
-          ctx.fillStyle = 'rgba(255,206,140,' + (0.08 + litv * 0.5) + ')';
+      /* Long notes wrap rather than run off the frame — a clamp alone cannot
+         help once a label is wider than the viewport, and a handwritten note
+         breaking over two lines is what one would do on paper anyway. */
+      const wrapAt = Math.min(W * 0.44, 380);
+      const lines = [];
+      let cur = '';
+      for (const word of note.text.split(' ')) {
+        const next = cur ? `${cur} ${word}` : word;
+        if (cur && ctx.measureText(next).width > wrapAt) {
+          lines.push(cur);
+          cur = word;
         } else {
-          ctx.fillStyle = 'rgba(10,13,24,0.97)';
+          cur = next;
         }
-        ctx.fillRect(wx, wy, ww, wh);
+      }
+      if (cur) lines.push(cur);
 
-        if (isTarget) {
-          ctx.save();
-          ctx.shadowColor = 'rgba(255,190,120,0.95)';
-          ctx.shadowBlur = Math.max(20, cwid * 1.4);
-          ctx.fillRect(wx, wy, ww, wh);
-          ctx.fillRect(wx, wy, ww, wh);
-          ctx.restore();
-        }
+      const lw = Math.max(...lines.map((l) => ctx.measureText(l).width));
+      // written on whichever side the arrow left from, and never off the frame
+      const lx = clamp(side > 0 ? ax + 6 : ax - lw - 6, 12, Math.max(12, W - lw - 12));
+      let ly = ay - lift * 4 - (lines.length - 1) * px * 1.15;
+      const top = ly;
+      for (const line of lines) {
+        ctx.fillText(line, lx, ly);
+        ly += px * 1.15;
+      }
+      box = { x: lx, y: top - px, w: lw, h: px * (0.4 + 1.15 * lines.length) };
+
+      if (note.sub) {
+        const sp = px * 0.62;
+        ctx.font = `italic ${sp}px "Bradley Hand", "Segoe Script", "Snell Roundhand", cursive`;
+        ctx.fillStyle = 'rgba(255,240,220,0.68)';
+        ctx.fillText(note.sub, lx, ly - px * 1.15 + sp * 1.5);
       }
     }
     ctx.restore();
+    return box;
   }
 
-  function drawWindowInterior(zoom, alpha) {
+  /** the opening and closing statements, set in the page's own serif */
+  function drawLines(lines, t) {
+    if (t <= 0) return null;
+    const px = Math.max(19, Math.min(30, W * 0.028));
+    const maxW = Math.min(W - 56, 720);
     ctx.save();
-    ctx.globalAlpha = alpha;
+    ctx.globalAlpha = t;
+    ctx.font = `${px}px "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif`;
+    ctx.fillStyle = 'rgba(245,238,226,0.96)';
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur = 18;
 
-    const s = W * 0.55 * zoom;
-    const x = W / 2 - s / 2, y = H / 2 - s * 0.62;
-    const h = s * 1.24;
+    const wrapped = [];
+    for (const line of lines) {
+      let cur = '';
+      for (const word of line.split(' ')) {
+        const next = cur ? `${cur} ${word}` : word;
+        if (cur && ctx.measureText(next).width > maxW) {
+          wrapped.push(cur);
+          cur = word;
+        } else {
+          cur = next;
+        }
+      }
+      wrapped.push(cur);
+    }
 
-    // warm room light, brightest around the lamp rather than the middle
-    const g = ctx.createRadialGradient(
-      W / 2 - s * 0.18, H / 2 + s * 0.10, s * 0.02,
-      W / 2, H / 2, s * 1.05
-    );
-    g.addColorStop(0, '#ffe4b8');
-    g.addColorStop(0.35, '#e0a865');
-    g.addColorStop(0.75, '#8a5c2c');
-    g.addColorStop(1, '#2a1a0a');
-    ctx.fillStyle = g;
-    ctx.fillRect(x, y, s, h);
-
-    // ceiling falls off, so the top of the glass is darker
-    const cg = ctx.createLinearGradient(0, y, 0, y + h * 0.5);
-    cg.addColorStop(0, 'rgba(26,18,8,0.55)');
-    cg.addColorStop(1, 'rgba(26,18,8,0)');
-    ctx.fillStyle = cg;
-    ctx.fillRect(x, y, s, h * 0.5);
-
-    // desk against the glass, and the lamp throwing the light
-    ctx.fillStyle = 'rgba(48,30,12,0.75)';
-    ctx.fillRect(x + s * 0.06, y + h * 0.70, s * 0.62, h * 0.06);
-    ctx.fillRect(x + s * 0.10, y + h * 0.76, s * 0.05, h * 0.20);
-    ctx.fillRect(x + s * 0.60, y + h * 0.76, s * 0.05, h * 0.20);
-    ctx.fillStyle = 'rgba(255,226,176,0.85)';
-    ctx.beginPath();
-    ctx.moveTo(W / 2 - s * 0.24, H / 2 + s * 0.12);
-    ctx.lineTo(W / 2 - s * 0.12, H / 2 + s * 0.12);
-    ctx.lineTo(W / 2 - s * 0.15, H / 2 + s * 0.04);
-    ctx.lineTo(W / 2 - s * 0.21, H / 2 + s * 0.04);
-    ctx.closePath();
-    ctx.fill();
-
-    // steel frame and mullions
-    ctx.strokeStyle = '#14161f';
-    ctx.lineWidth = Math.max(2, s * 0.038);
-    ctx.strokeRect(x, y, s, h);
-    ctx.lineWidth = Math.max(1.5, s * 0.022);
-    ctx.beginPath();
-    ctx.moveTo(x + s / 2, y); ctx.lineTo(x + s / 2, y + h);
-    ctx.moveTo(x, y + h * 0.44); ctx.lineTo(x + s, y + h * 0.44);
-    ctx.stroke();
-
+    const lh = px * 1.5;
+    let y = H * 0.34 - ((wrapped.length - 1) * lh) / 2;
+    let box = null;
+    for (const line of wrapped) {
+      ctx.fillText(line, W / 2, y);
+      const lw = ctx.measureText(line).width;
+      box = { x: W / 2 - lw / 2, y: y - px, w: lw, h: px * 1.4 };
+      y += lh;
+    }
     ctx.restore();
+    ctx.textAlign = 'left';
+    return box;
   }
 
   // ---------------------------------------------------------------------------
@@ -1166,87 +1118,79 @@ export function createSkyline({
     let wideCx = fr.x0 + wideSpan / 2;
     if (fr.x1 - fr.x0 > finalSpan) wideCx = finalSpan / 2;
 
-    // one easing, not two: `glide` already carries its own ease at each end,
-    // and wrapping it in another would put the lunge straight back
-    const midT = glide(norm(0.752, 0.828, p));
-    const span = lerp(wideSpan, MIDSPAN, midT);
-    const cx = lerp(wideCx, WINDOW_X, midT);
+    /* The film settles onto the whole finished island and stops there. The
+       tour takes over from that exact framing, so handing over costs no
+       movement at all — the reader simply starts steering. */
+    const settle = glide(norm(0.86, 1.0, p));
+    const restCx = lerp(wideCx, STOPS[0].cx, settle);
+    const restSpan = lerp(wideSpan, Math.min(finalSpan, STOPS[0].span), settle);
+    const groundCy = (baselineY - H / 2) / (W / restSpan * EXAG / CFG.islandFt);
 
-    // stage 3: the zoom chain
-    // The exponent is what to ease, not the magnification: a lens moving at a
-    // steady rate doubles in the same time whether it is at 2x or at 200x, so
-    // a flat middle here is a flat-feeling push rather than a flat number.
-    const zp = glide(norm(0.884, 1.0, p));
-    const zoom = Math.pow(FINAL_ZOOM, zp);
+    // q is the tour, and it only starts once the film has run out
+    const q = tourScroll > 0 ? clamp(offset / tourScroll, 0, 1) : 0;
+    const touring = offset > 0;
+    const tour = sampleTour(q);
 
-    const groundCy = (baselineY - H / 2) / (W / span * EXAG / CFG.islandFt);
-    const cyFt = lerp(groundCy, WINDOW_FT, smoothstep(0, 0.35, zp));
-    setCamera(cx, span / zoom, cyFt);
-
-    const aScene = 1 - smoothstep(HANDOVER * 0.55, HANDOVER, zoom);
-    const aFacade = smoothstep(HANDOVER * 0.55, HANDOVER, zoom) *
-                  (1 - smoothstep(HANDOVER * 13, HANDOVER * 26, zoom));
-    const aWindow = smoothstep(HANDOVER * 13, HANDOVER * 26, zoom);
+    const cx = touring ? tour.cam.cx : restCx;
+    const span = touring ? Math.min(finalSpan, tour.cam.span) : restSpan;
+    const cyFt = touring ? tour.cam.cyFt : lerp(groundCy, STOPS[0].cyFt, settle);
+    setCamera(cx, span, cyFt);
 
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    const bg = smoothstep(HANDOVER * 0.7, HANDOVER * 2, zoom);
-    ctx.fillStyle = rgbCss(mixRgb([6, 9, 26], [22, 25, 38], bg));
+    ctx.fillStyle = rgbCss([6, 9, 26]);
     ctx.fillRect(0, 0, W, H);
 
-    // A long plateau between the two ends: the arrow draws itself, the words
-    // land, and then everything holds still for a beat before the push-in.
-    // Widening it costs the fly-in half a second, which is the only slack
-    // there is — the end of the scroll is pinned to the end of the music.
-    const arrowT = smoothstep(0.822, 0.852, p) * (1 - smoothstep(0.902, 0.92, p));
-    arrowDim = arrowT;
-    if (aScene > 0.01) {
-      drawScene(p, year, aScene);
-      if (arrowT > 0) drawArrow(arrowT * aScene);
-    }
-    if (aFacade > 0.01) drawFacade(zoom / HANDOVER, aFacade);
-    if (aWindow > 0.01) drawWindowInterior(zoom / (HANDOVER * 20), aWindow);
+    /* Notes dim the city's own lit windows while they are up, so the writing
+       is never competing with the thing it is written on. */
+    let brightest = 0;
+    if (touring) for (const a of tour.alphas) brightest = Math.max(brightest, a);
+    // softened: the arrow moment could afford to drop the city to a third of
+    // its brightness for a second, but a whole tour spent that dark reads flat
+    arrowDim = brightest * 0.7;
 
-    /* The room does not get painted over any more — it becomes the page. The
-       lamp light stays lit under the copy and recedes as the reader moves off
-       the window, so there is no seam to cross. */
-    const roomIn = smoothstep(HANDOVER * 24, HANDOVER * 44, zoom);
-    if (roomIn > 0.002 && contentLayout) {
-      drawRoomLight(ctx, W, H, roomIn, offset / (H * 0.9));
-      drawContent(ctx, contentLayout, offset, W, H, roomIn);
+    drawScene(p, year, 1);
+
+    let linkBox = null;
+    if (touring) {
+      for (let i = 0; i < STOPS.length; i++) {
+        const a = tour.alphas[i];
+        if (a <= 0.01) continue;
+        const stop = STOPS[i];
+        let box = null;
+        if (stop.lines) box = drawLines(stop.lines, a);
+        if (stop.notes) for (const n of stop.notes) box = drawNote(n, a) || box;
+        if (stop.link && a > 0.6) linkBox = box;
+      }
     }
 
     // chrome
-    const reading = roomIn > 0.5 && contentLayout;
-    // one clock the whole way: forward through the city, then back through him
-    yearEl.textContent = String(
-      reading ? yearAtOffset(contentLayout, offset, H) : Math.round(year)
+    // one clock the whole way: forward through the city, then across his own
+    yearEl.textContent = String(touring ? tour.year : Math.round(year));
+    updateCaption(touring ? null : year);
+    hudEl.style.opacity = '1';
+    // the hint comes back when the music stops, because the film ending is not
+    // the page ending and nothing else says so
+    const handover = p > 0.99 && offset < 40 ? 1 : 0;
+    hintEl.style.opacity = String(
+      Math.max(1 - smoothstep(0.005, 0.05, p), handover)
     );
-    updateCaption(reading ? null : year);
-    // dips while the arrow has the frame, then returns for the reading
-    hudEl.style.opacity = String(
-      Math.max(1 - smoothstep(0.845, 0.9, p), roomIn)
-    );
-    hintEl.style.opacity = String(1 - smoothstep(0.005, 0.05, p));
 
-    placeLink(reading ? offset : null);
+    placeLink(linkBox);
   }
 
   /* Everything else here is paint, but a contact link has to be clickable, so
      one real anchor is parked on top of the drawn word. */
-  function placeLink(offset) {
+  function placeLink(box) {
     if (!linkEl) return;
-    const L = offset === null ? null : contentLayout && contentLayout.link;
-    const y = L ? L.y - offset : 0;
-    if (!L || y < -40 || y > H + 40) {
+    if (!box) {
       linkEl.style.display = 'none';
       return;
     }
-    linkEl.href = L.href;
     linkEl.style.display = 'block';
-    linkEl.style.left = L.x + 'px';
-    linkEl.style.top = y + 'px';
-    linkEl.style.width = L.w + 'px';
-    linkEl.style.height = L.h + 'px';
+    linkEl.style.left = Math.round(box.x) + 'px';
+    linkEl.style.top = Math.round(box.y) + 'px';
+    linkEl.style.width = Math.round(box.w) + 'px';
+    linkEl.style.height = Math.round(box.h) + 'px';
   }
 
   // ---------------------------------------------------------------------------

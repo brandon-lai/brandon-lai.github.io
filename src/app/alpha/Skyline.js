@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SOCIALS } from "../data/site";
 import { Sound, SoundOff } from "../components/Icons";
 import { createSkyline } from "./manhattan";
 
@@ -20,10 +21,13 @@ const SCROLL_KEYS = new Set([
  *
  * The page is two scroll regions stacked in one document. The first is the
  * film: pinned until you press Enter, then driven by the soundtrack's own
- * clock so the camera lands in the window as the music fades. The second is
- * the copy, which the canvas typesets into that same room — so `children`
- * here is not what anyone sees, it is the same words in markup, for screen
- * readers, search engines and anything else that cannot look at a canvas.
+ * clock so the city finishes building as the music fades. The second is the
+ * tour, which the reader steers — the camera moves around the finished
+ * skyline and the copy is written onto it in the same hand throughout.
+ *
+ * `children` is therefore not what anyone sees. It is the same words in
+ * markup, for screen readers, search engines and anything else that cannot
+ * look at a canvas.
  */
 export default function Skyline({ children }) {
   const canvas = useRef(null);
@@ -117,8 +121,8 @@ export default function Skyline({ children }) {
   }, [entered]);
 
   /* Start the track and let it pull the page through four hundred years, so
-     the camera reaches the window as the music runs out. The drive stops at
-     the foot of the film; the copy below that is yours to scroll. */
+     the city tops out as the music runs out. The drive stops at the foot of
+     the film; the tour below that is yours to steer. */
   const runIntro = useCallback(() => {
     cancelAnimationFrame(drive.current);
     cancelAnimationFrame(fade.current);
@@ -189,8 +193,16 @@ export default function Skyline({ children }) {
       <audio ref={audio} src="/audio/nyc.mp3" preload="auto" />
 
       {/* parked exactly over the word the canvas drew, so contact still works */}
-      <a className="alpha-link" ref={link} target="_blank" rel="noreferrer" aria-hidden="true" tabIndex={-1}>
-        <span className="alpha-sr">LinkedIn</span>
+      <a
+        className="alpha-link"
+        ref={link}
+        href={SOCIALS[0]?.href}
+        target="_blank"
+        rel="noreferrer"
+        aria-hidden="true"
+        tabIndex={-1}
+      >
+        <span className="alpha-sr">{SOCIALS[0]?.label}</span>
       </a>
 
       {entered && (

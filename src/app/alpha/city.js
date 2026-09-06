@@ -33,8 +33,6 @@ export const CFG = {
   fillCount: 620,
   fillCountMobile: 330,
   windowMinPx: 13,       // below this on-screen width, buildings get a tint instead of windows
-  midSpanDesktop: 0.68,
-  midSpanMobile: 0.60
 };
 
 // ---------------------------------------------------------------------------
