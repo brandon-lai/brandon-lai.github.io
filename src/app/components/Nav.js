@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { NAV, NAV_LOCKED_LINES } from "../data/site";
+import { NAV, NAV_HIDDEN_ON, NAV_LOCKED_LINES } from "../data/site";
 
 const normalize = (p) => {
   if (!p) return "/";
@@ -59,6 +59,9 @@ export default function Nav() {
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setBubble(null), BUBBLE_MS);
   };
+
+  // after the hooks, so the rule of hooks holds on every route
+  if (NAV_HIDDEN_ON.some((href) => normalize(href) === pathname)) return null;
 
   return (
     <div className="nav-fixed">

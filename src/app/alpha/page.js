@@ -1,22 +1,28 @@
 import { EXPERIENCE } from "../data/experience";
-import { ABOUT, SITE, SOCIALS } from "../data/site";
+import { ABOUT, SOCIALS } from "../data/site";
 import Skyline from "./Skyline";
 import "./alpha.css";
 
 export const metadata = { title: "Alpha — Brandon Lai" };
 
-const [current] = EXPERIENCE;
-
 export default function Alpha() {
   return (
     <div className="page-alpha">
       <Skyline>
-        <h1>{SITE.name}</h1>
-        <p className="alpha-sub">
-          {current.role} at {current.org}.
+        <h1>Hi, I&rsquo;m Brandon</h1>
+
+        <p>
+          Cities aren&rsquo;t built in a day. The one you just scrolled through
+          took four hundred years, and almost nobody who broke ground on it
+          lived to see the shape it would make.
         </p>
 
-        <p>I build things — mostly software, occasionally hardware.</p>
+        <p>
+          What makes a city great rather than merely large is what makes a
+          product great rather than merely shipped — vision, ambition, energy,
+          focus, and a lot of people willing to add one floor at a time. It is
+          why I build.
+        </p>
 
         <h2>Now</h2>
         <ul>

@@ -207,7 +207,7 @@ export default function Skyline({ children }) {
 
       {!gateGone && (
         <div className="alpha-gate" data-open={entered ? "false" : "true"}>
-          <button type="button" className="alpha-enter" onClick={enter} autoFocus>
+          <button type="button" className="alpha-enter" onClick={enter}>
             Enter
           </button>
         </div>

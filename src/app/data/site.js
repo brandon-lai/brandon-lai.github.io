@@ -23,6 +23,12 @@ export const NAV = [
   { label: "Beta", href: "/beta" },
 ];
 
+/**
+ * Routes that hide the pill nav entirely — for pages that want the whole
+ * viewport to themselves. Empty the list to switch it back on everywhere.
+ */
+export const NAV_HIDDEN_ON = ["/alpha"];
+
 /** Shown, in order, when someone knocks on a door that isn't open yet. */
 export const NAV_LOCKED_LINES = [
   "Not ready yet.",
