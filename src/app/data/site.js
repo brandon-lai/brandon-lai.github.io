@@ -19,6 +19,7 @@ export const NAV = [
   { label: "About", href: "/about", disabled: true },
   { label: "Work", href: "/work", dot: true, disabled: true },
   { label: "Contact", href: "/contact", disabled: true },
+  { label: "Alpha", href: "/alpha" },
   { label: "Beta", href: "/beta" },
 ];
 

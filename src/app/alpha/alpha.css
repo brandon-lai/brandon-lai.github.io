@@ -1,0 +1,206 @@
+/* ============================================================
+   /alpha — the skyline builds itself as you scroll, then the
+   camera flies into one lit window and the page starts.
+   ============================================================ */
+
+.page-alpha {
+  --room: #1a1208;
+  --ink: #efe6d6;
+  --ink-dim: #a99d89;
+  --rule: rgba(239, 230, 214, 0.16);
+
+  color: var(--ink);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+
+/* A fixed canvas avoids the mobile 100vh / URL-bar jump that sticky suffers from. */
+.alpha-sky {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+  touch-action: pan-y;
+}
+
+/* empty on purpose — its height *is* the length of the intro */
+.alpha-spacer {
+  position: relative;
+  z-index: 0;
+}
+
+/* ---- overlay chrome --------------------------------------- */
+.alpha-hud {
+  position: fixed;
+  z-index: 3;
+  left: max(18px, env(safe-area-inset-left));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+.alpha-year {
+  font-size: clamp(28px, 7vw, 44px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.55);
+}
+
+.alpha-caption {
+  margin-top: 6px;
+  font-size: clamp(13px, 3.4vw, 15px);
+  font-style: italic;
+  max-width: min(70vw, 380px);
+  opacity: 0;
+  transition: opacity 420ms ease;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+}
+
+.alpha-hint {
+  position: fixed;
+  z-index: 3;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(22px + env(safe-area-inset-bottom));
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: lowercase;
+  color: var(--ink-dim);
+  pointer-events: none;
+  transition: opacity 500ms ease;
+}
+
+.alpha-skip {
+  position: fixed;
+  z-index: 4;
+  right: max(14px, env(safe-area-inset-right));
+  top: calc(14px + env(safe-area-inset-top));
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink-dim);
+  background: rgba(8, 10, 22, 0.42);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 9px 15px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  min-height: 40px;
+}
+.alpha-skip:hover,
+.alpha-skip:focus-visible { color: var(--ink); }
+
+.page-alpha :focus-visible { outline: 2px solid #ffd9a0; outline-offset: 3px; }
+
+/* ---- content ---------------------------------------------- */
+.alpha-content {
+  position: relative;
+  z-index: 2;
+  background: var(--room);
+  min-height: 100vh;
+  padding: clamp(56px, 14vw, 120px) max(22px, env(safe-area-inset-left)) 120px;
+}
+
+.alpha-inner {
+  max-width: 62ch;
+  margin: 0 auto;
+}
+
+.alpha-content h1 {
+  font-size: clamp(34px, 9vw, 56px);
+  font-weight: 400;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.alpha-sub {
+  color: var(--ink-dim);
+  margin: 0 0 48px;
+  font-size: 15px;
+}
+
+.alpha-content h2 {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ink-dim);
+  letter-spacing: 0.02em;
+  margin: 44px 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.alpha-content p,
+.alpha-content li {
+  font-size: 17px;
+  line-height: 1.65;
+  margin: 0 0 14px;
+}
+
+.alpha-content ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+.alpha-content a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: rgba(239, 230, 214, 0.35);
+  text-underline-offset: 3px;
+}
+
+/* the emoji column in the about list, so the labels stay aligned */
+.alpha-bullet {
+  display: inline-block;
+  width: 1.6em;
+}
+
+/* one job per row: title on the left, dates on the right */
+.alpha-job {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 10px;
+}
+.alpha-job-dates {
+  margin-left: auto;
+  color: var(--ink-dim);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.alpha-job-note {
+  display: block;
+  width: 100%;
+  color: var(--ink-dim);
+  font-size: 15px;
+}
+
+.alpha-replay {
+  display: inline-block;
+  margin-top: 40px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink-dim);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 10px 18px;
+  cursor: pointer;
+}
+.alpha-replay:hover { color: var(--ink); }
+
+.alpha-note {
+  margin-top: 64px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-dim);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Below 900px the site nav drops to the bottom of the viewport, so the
+   year and the scroll hint move up out of its way. */
+@media (max-width: 900px) {
+  .alpha-hud { bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .alpha-hint { bottom: calc(84px + env(safe-area-inset-bottom)); }
+}
