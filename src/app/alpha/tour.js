@@ -77,10 +77,12 @@ export const STOPS = [
   {
     x: 0.44,
     subject: null,
-    title: "Say hello",
-    ax: 0.65,
+    title: "Reach out to me",
+    // clear of the column the button used to reach down into
+    ax: 0.67,
     ay: 0.22,
-    lines: [{ text: SOCIALS[0].label, link: true, href: SOCIALS[0].href }],
+    lines: [],
+    button: { label: SOCIALS[0].label, href: SOCIALS[0].href },
   },
 ];
 
@@ -100,19 +102,19 @@ export function sampleTour(q) {
   const i = Math.min(n - 1, Math.floor(x));
   const u = clamp(x - i, 0, 1);
 
-  const alphas = [];
+  const rise = [];
+  const fall = [];
   const written = [];
   for (let k = 0; k < n; k++) {
     /* Both start once the previous blurb has cleared, and the writing finishes
        exactly as the camera arrives. That last part matters: the reveal is
-       driven by scroll position, so anywhere the reader can come to rest has
-       to be somewhere the writing is already finished. Running it into the
-       dwell instead left a half-written blurb on screen whenever someone
-       stopped mid-stop. */
+       driven by scroll, and the engine raises both on a clock as well, so
+       that stopping anywhere still ends with the blurb up and finished.
+       Rise and fall are handed over separately for exactly that: only the
+       rise may be hurried along, the fall belongs to the camera. */
     const from = k + TRAVEL * 0.36;
-    const rise = clamp((x - from) / (TRAVEL * 0.3), 0, 1);
-    const fall = k === n - 1 ? 0 : clamp((x - (k + 1)) / (TRAVEL * 0.34), 0, 1);
-    alphas.push(ease(rise) * (1 - ease(fall)));
+    rise.push(ease(clamp((x - from) / (TRAVEL * 0.3), 0, 1)));
+    fall.push(k === n - 1 ? 0 : ease(clamp((x - (k + 1)) / (TRAVEL * 0.34), 0, 1)));
     written.push(clamp((x - from) / (TRAVEL * 0.64), 0, 1));
   }
 
@@ -120,7 +122,8 @@ export function sampleTour(q) {
     index: i,
     from: Math.max(0, i - 1),
     move: i === 0 ? 1 : glide(clamp(u / TRAVEL, 0, 1)),
-    alphas,
+    rise,
+    fall,
     written,
     // the greeting holds through the first stop and leaves with the camera
     greet: 1 - ease(clamp((x - 1) / (TRAVEL * 0.7), 0, 1)),

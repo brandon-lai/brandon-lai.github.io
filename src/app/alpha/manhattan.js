@@ -54,6 +54,19 @@ export function createSkyline({
   let lastW = 0, lastH = 0;
   let FILL = [];
   let tourScroll = 1;
+  /**
+   * When each blurb started writing, and whether any is still going.
+   *
+   * Scroll position alone cannot drive this. The reveal used to finish exactly
+   * as the camera arrived, which sounds sufficient but leaves ~157px of scroll
+   * where the text is fully opaque and still unfinished — and a reader can
+   * simply stop there, leaving a blurb cut mid-word for good. Time is what
+   * guarantees it finishes; scroll still drives it when scrolling is faster.
+   */
+  const writeAt = [];
+  let writing = false;
+  const WRITE_MS = 1100;
+  const FADE_MS = 420;
 
   function layout() {
     const w = window.innerWidth;
@@ -933,6 +946,36 @@ export function createSkyline({
   const HAND = '"Bradley Hand", "Segoe Script", "Snell Roundhand", cursive';
   const SERIF = '"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif';
 
+  /** the hand-drawn line both the greeting and the contact button point with */
+  function scribble(fromX, fromY, toX, toY, t, arc) {
+    ctx.beginPath();
+    const steps = 30;
+    const drawTo = Math.floor(steps * clamp(t * 1.3, 0, 1));
+    const span = Math.hypot(toX - fromX, toY - fromY);
+    for (let i = 0; i <= drawTo; i++) {
+      const f = i / steps;
+      const px = lerp(fromX, toX, f) + Math.sin(f * 7.3) * 3;
+      const py = lerp(fromY, toY, f) + Math.sin(f * 5.1 + 1.2) * 3.2
+        - Math.sin(f * Math.PI) * span * arc;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+
+  /** a rounded outline, since canvas has no dependable roundRect here */
+  function pill(x, y, w, h) {
+    const r = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
   /**
    * The last frame of the timelapse: one lit window on the east face of the
    * Empire State, an arrow drawn to it by hand, and his name. This is the
@@ -962,17 +1005,7 @@ export function createSkyline({
     ctx.strokeStyle = 'rgba(255,240,220,0.92)';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    ctx.beginPath();
-    const steps = 34;
-    const drawTo = Math.floor(steps * clamp(t * 1.35, 0, 1));
-    for (let i = 0; i <= drawTo; i++) {
-      const f = i / steps;
-      const px = lerp(ax, tx + side * wsz, f) + Math.sin(f * 7.3) * 3.2;
-      const py = lerp(ay, ty - wsz * 0.4, f) + Math.sin(f * 5.1 + 1.2) * 3.6
-        - Math.sin(f * Math.PI) * len * 0.16;
-      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
+    scribble(ax, ay, tx + side * wsz, ty - wsz * 0.4, t, 0.16);
 
     if (t > 0.7) {
       ctx.globalAlpha = (t - 0.7) / 0.3;
@@ -1094,6 +1127,44 @@ export function createSkyline({
       y += bpx * 1.62;
     }
 
+    /* The contact stop ends on something to press rather than something to
+       read, so it gets a drawn button and an arrow reaching down to it. The
+       real anchor is parked on the box this returns. */
+    if (stop.button && written > 0.92) {
+      const bt = clamp((written - 0.92) / 0.08, 0, 1);
+      const bpad = bpx * 1.15;
+      ctx.font = `${bpx}px ${SERIF}`;
+      const lw = ctx.measureText(stop.button.label).width;
+      const bw = lw + bpad * 2;
+      const bh = bpx * 2.6;
+      const bxp = x + 34;
+      const byp = y + bpx * 1.1;
+
+      ctx.globalAlpha = t * bt;
+      ctx.strokeStyle = 'rgba(255,240,220,0.9)';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      scribble(x + 6, y - bpx * 0.3, bxp + bw * 0.28, byp - 7, bt, -0.22);
+
+      if (bt > 0.55) {
+        ctx.globalAlpha = t * ((bt - 0.55) / 0.45);
+        ctx.beginPath();
+        ctx.moveTo(bxp + bw * 0.28 - 9, byp - 17);
+        ctx.lineTo(bxp + bw * 0.28, byp - 6);
+        ctx.lineTo(bxp + bw * 0.28 + 10, byp - 15);
+        ctx.stroke();
+
+        ctx.globalAlpha = t * ((bt - 0.55) / 0.45);
+        ctx.strokeStyle = 'rgba(239,230,214,0.55)';
+        ctx.lineWidth = 1;
+        pill(bxp, byp, bw, bh);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(247,241,230,0.97)';
+        ctx.fillText(stop.button.label, bxp + bpad, byp + bh * 0.66);
+        box = { x: bxp, y: byp, w: bw, h: bh, href: stop.button.href };
+      }
+    }
+
     ctx.restore();
     return box;
   }
@@ -1163,7 +1234,8 @@ export function createSkyline({
     }
     // either clock moving is reason to redraw: past the fly-in the film is
     // parked at 1 and only the reading position changes
-    if (current !== lastRendered || contentOffset !== lastContent) {
+    // a blurb still being written is reason to redraw even when nothing moved
+    if (current !== lastRendered || contentOffset !== lastContent || writing) {
       render(current, contentOffset);
       lastRendered = current;
       lastContent = contentOffset;
@@ -1226,11 +1298,26 @@ export function createSkyline({
     if (greet > 0.01) drawGreeting(greet);
 
     let linkBox = null;
+    writing = false;
     if (touring) {
+      const now = performance.now();
       for (let i = 0; i < STOPS.length; i++) {
-        const a = tour.alphas[i];
-        if (a <= 0.01) continue;
-        const box = drawBlurb(STOPS[i], a, tour.written[i]);
+        if (tour.rise[i] <= 0.001 || tour.fall[i] >= 1) {
+          writeAt[i] = null; // reset, so replaying writes it out again
+          continue;
+        }
+        if (writeAt[i] == null) writeAt[i] = now;
+        const held = now - writeAt[i];
+
+        /* Both the fade and the writing are pulled along by scroll or by the
+           clock, whichever is further on. Scroll alone left the reader able
+           to stop on a blurb that was faint, half-written, or both, and stay
+           there. Only the fade *in* is hurried: leaving is the camera's. */
+        const a = Math.max(tour.rise[i], clamp(held / FADE_MS, 0, 1)) * (1 - tour.fall[i]);
+        const written = Math.max(tour.written[i], held / WRITE_MS);
+        if (a < 1 - tour.fall[i] || written < 1) writing = true;
+
+        const box = drawBlurb(STOPS[i], a, written);
         if (box && a > 0.6) linkBox = box;
       }
     }
