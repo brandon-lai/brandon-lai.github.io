@@ -17,11 +17,8 @@ export default function Alpha() {
         </p>
 
         <p>
-          So do great products. The skyline you just scrolled through took four
-          hundred years, and almost nobody who broke ground on it lived to see
-          the shape it would make — they simply kept adding, one floor at a
-          time, to something they trusted would outlast them. It&rsquo;s why I
-          build.
+          So do great products. I build software, and the parts worth the most
+          time are usually the ones you only notice when they&rsquo;re wrong.
         </p>
 
         <h2>Now</h2>
