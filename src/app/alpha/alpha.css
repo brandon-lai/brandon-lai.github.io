@@ -75,30 +75,30 @@
    The engine writes opacity inline every frame, so this hides it another way. */
 .alpha-hint[data-auto="true"] { visibility: hidden; }
 
-.alpha-controls {
+.alpha-sound {
   position: fixed;
   z-index: 7;
   right: max(14px, env(safe-area-inset-right));
   top: calc(14px + env(safe-area-inset-top));
-  display: flex;
-  gap: 8px;
-}
-
-.alpha-chip {
-  font: inherit;
-  font-size: 13px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
   color: var(--ink-dim);
   background: rgba(8, 10, 22, 0.42);
   border: 1px solid var(--rule);
   border-radius: 999px;
-  padding: 9px 15px;
   cursor: pointer;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  min-height: 40px;
+  transition: color 220ms ease, border-color 220ms ease;
 }
-.alpha-chip:hover,
-.alpha-chip:focus-visible { color: var(--ink); }
+.alpha-sound:hover,
+.alpha-sound:focus-visible {
+  color: var(--ink);
+  border-color: rgba(239, 230, 214, 0.34);
+}
 
 /* ---- the gate --------------------------------------------- */
 /* Sits over the 1609 shoreline rather than over black, so pressing Enter
@@ -142,13 +142,27 @@
   border-radius: 999px;
   padding: 17px 42px;
   cursor: pointer;
-  transition: background 300ms ease, border-color 300ms ease, transform 300ms ease;
+  box-shadow: 0 0 0 rgba(255, 214, 150, 0);
+  transition:
+    background 300ms ease,
+    border-color 300ms ease,
+    transform 300ms ease,
+    box-shadow 300ms ease,
+    text-shadow 300ms ease;
 }
+
+/* Warm rather than white: this is the colour the engine lights windows with,
+   so the button glows like the one you are about to fly into. */
 .alpha-enter:hover,
 .alpha-enter:focus-visible {
   background: rgba(239, 230, 214, 0.1);
-  border-color: rgba(239, 230, 214, 0.6);
+  border-color: rgba(255, 214, 150, 0.62);
   transform: translateY(-1px);
+  text-shadow: 0 0 12px rgba(255, 214, 150, 0.45);
+  box-shadow:
+    0 0 22px rgba(255, 214, 150, 0.22),
+    0 0 46px rgba(255, 214, 150, 0.11),
+    inset 0 0 18px rgba(255, 214, 150, 0.07);
 }
 
 .page-alpha :focus-visible { outline: 2px solid #ffd9a0; outline-offset: 3px; }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Sound, SoundOff } from "../components/Icons";
 import { createSkyline } from "./manhattan";
 
 /** how long the intro runs, and so how long the soundtrack plays */
@@ -183,11 +184,15 @@ export default function Skyline({ children }) {
       <audio ref={audio} src="/audio/nyc.mp3" preload="auto" />
 
       {entered && (
-        <div className="alpha-controls">
-          <button type="button" className="alpha-chip" onClick={toggleSound}>
-            {muted ? "Unmute" : "Mute"}
-          </button>
-        </div>
+        <button
+          type="button"
+          className="alpha-sound"
+          onClick={toggleSound}
+          aria-label={muted ? "Unmute" : "Mute"}
+          title={muted ? "Unmute" : "Mute"}
+        >
+          {muted ? <SoundOff /> : <Sound />}
+        </button>
       )}
 
       <div className="alpha-hud" ref={hud} aria-hidden="true">

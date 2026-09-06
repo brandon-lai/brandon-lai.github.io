@@ -64,6 +64,26 @@ export function List(props) {
   );
 }
 
+export function Sound(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M11 5 6.5 9H3v6h3.5L11 19V5Z" />
+      <path d="M14.8 9.6a3.4 3.4 0 0 1 0 4.8" />
+      <path d="M17.6 6.8a7.4 7.4 0 0 1 0 10.4" />
+    </svg>
+  );
+}
+
+export function SoundOff(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M11 5 6.5 9H3v6h3.5L11 19V5Z" />
+      <path d="m15.5 10 5 4" />
+      <path d="m20.5 10-5 4" />
+    </svg>
+  );
+}
+
 export function Cursor(props) {
   return (
     <svg {...base} {...props} strokeWidth="0" fill="currentColor">
