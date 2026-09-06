@@ -2,7 +2,6 @@ import {
   clamp,
   easeInOut,
   hash,
-  keyframe,
   lerp,
   mixRgb,
   rgbCss,
@@ -12,7 +11,7 @@ import {
   BRIDGES,
   CFG,
   EVENTS,
-  FRAME,
+  frameAt,
   HEROES,
   buildFill,
   paletteAt,
@@ -1138,9 +1137,7 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
     const year = yearAt(p);
 
     // stage 1 and 2: framing follows development, then eases into midtown
-    const fr = keyframe(FRAME, year, function (a, b, t) {
-      return { x0: lerp(a.x0, b.x0, t), x1: lerp(a.x1, b.x1, t) };
-    });
+    const fr = frameAt(year);
     const wideSpan = Math.min(finalSpan, fr.x1 - fr.x0);
     let wideCx = fr.x0 + wideSpan / 2;
     if (fr.x1 - fr.x0 > finalSpan) wideCx = finalSpan / 2;

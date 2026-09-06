@@ -3,7 +3,16 @@
  * which landmarks exist, and how each district fills in over time. Pure data
  * and pure functions — the drawing lives in manhattan.js.
  */
-import { hash, hexToRgb, keyframe, lerp, mixRgb, mulberry } from "./util";
+import {
+  hash,
+  hexToRgb,
+  keyframe,
+  lerp,
+  mixRgb,
+  monotoneSpline,
+  mulberry,
+  smoothstep,
+} from "./util";
 
 // ---------------------------------------------------------------------------
 // config
@@ -31,24 +40,59 @@ export const CFG = {
 // ---------------------------------------------------------------------------
 // time: scroll progress to year
 // ---------------------------------------------------------------------------
-const TIME = [
-  { at: 0.00, year: 1609 },
-  { at: 0.05, year: 1625 },
-  { at: 0.11, year: 1776 },
-  { at: 0.18, year: 1850 },
-  { at: 0.28, year: 1900 },
-  { at: 0.46, year: 1935 },
-  { at: 0.58, year: 1970 },
-  { at: 0.70, year: 2000 },
-  { at: 0.80, year: 2026 },
-  { at: 1.00, year: 2026 }
-];
+/**
+ * This used to interpolate a table of hand-placed waypoints, which meant the
+ * clock changed speed abruptly at every one of them — 1625–1776 ran eight
+ * times faster than the stretch before it, landing as a lurch a second and a
+ * half in, and no amount of smoothing between the same waypoints removes a
+ * seventeenfold swing in speed.
+ *
+ * Consistency is a property of the rate, so the rate is what is written down
+ * here and the curve is its integral. Time runs quickest at the start and
+ * eases continuously from there, which passes the empty centuries briskly and
+ * still leaves the modern skyline room, then tapers to a halt as the present
+ * arrives so the clock coasts to a stop rather than hitting one.
+ */
+const FIRST_YEAR = 1609;
+const LAST_YEAR = 2026;
+/** progress at which the clock reaches the present and the push-in takes over */
+const ARRIVAL = 0.8;
+/** how much quicker the opening runs than the final approach */
+const PACE_CONTRAST = 6;
+/** the span of progress over which the clock eases to a halt */
+const TAPER = 0.16;
+/** samples of the integrated curve — dense enough that reading it is smooth */
+const STEPS = 1024;
+
+const YEARS = (function () {
+  const decay = Math.log(PACE_CONTRAST) / ARRIVAL;
+  const rate = (p) =>
+    Math.exp(-decay * p) * (1 - smoothstep(ARRIVAL - TAPER, ARRIVAL, p));
+
+  // cumulative trapezoid, then normalised so the curve always lands on 2026
+  const cum = new Float64Array(STEPS + 1);
+  for (let i = 1; i <= STEPS; i++) {
+    const a = ((i - 1) / STEPS) * ARRIVAL;
+    const b = (i / STEPS) * ARRIVAL;
+    cum[i] = cum[i - 1] + ((rate(a) + rate(b)) / 2) * (b - a);
+  }
+  const total = cum[STEPS];
+  for (let i = 0; i <= STEPS; i++) {
+    cum[i] = FIRST_YEAR + ((LAST_YEAR - FIRST_YEAR) * cum[i]) / total;
+  }
+  return cum;
+})();
+
 export function yearAt(p) {
-  return keyframe(TIME, p, function (a, b, t) { return lerp(a.year, b.year, t); });
+  if (p <= 0) return FIRST_YEAR;
+  if (p >= ARRIVAL) return LAST_YEAR;
+  const x = (p / ARRIVAL) * STEPS;
+  const i = Math.floor(x);
+  return lerp(YEARS[i], YEARS[i + 1], x - i);
 }
 
 // camera framing follows the extent of development
-export const FRAME = [
+const FRAME = [
   { at: 1609, x0: 0.000, x1: 0.20 },
   { at: 1750, x0: 0.000, x1: 0.24 },
   { at: 1850, x0: 0.000, x1: 0.46 },
@@ -56,6 +100,15 @@ export const FRAME = [
   { at: 1930, x0: 0.000, x1: 1.00 },
   { at: 2026, x0: 0.000, x1: 1.00 }
 ];
+
+/* Smoothed for the same reason: the camera widens to follow the city up the
+   island, and a corner in that curve reads as the zoom snagging. */
+const frameX0 = monotoneSpline(FRAME.map((s) => s.at), FRAME.map((s) => s.x0));
+const frameX1 = monotoneSpline(FRAME.map((s) => s.at), FRAME.map((s) => s.x1));
+
+export function frameAt(year) {
+  return { x0: frameX0(year), x1: frameX1(year) };
+}
 
 // sky and light
 const PAL = [

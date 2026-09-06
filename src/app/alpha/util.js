@@ -37,6 +37,64 @@ export function rgbCss(c, alpha) {
     : 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + alpha + ')';
 }
 
+/**
+ * Monotone cubic interpolation (Fritsch–Carlson) through (xs, ys).
+ *
+ * Linear interpolation between keyframes is continuous in value but not in
+ * slope, so anything it drives changes speed abruptly at every knot — which
+ * reads as a stutter when the thing being driven is motion. This keeps the
+ * first derivative continuous while guaranteeing the curve never overshoots a
+ * knot or doubles back, so a timeline built on it can still only run forwards.
+ */
+export function monotoneSpline(xs, ys) {
+  const n = xs.length;
+  const slope = [];
+  for (let i = 0; i < n - 1; i++) {
+    slope.push((ys[i + 1] - ys[i]) / (xs[i + 1] - xs[i]));
+  }
+
+  // start with a plain average of the neighbouring slopes at each interior knot
+  const m = [slope[0]];
+  for (let i = 1; i < n - 1; i++) m.push((slope[i - 1] + slope[i]) / 2);
+  m.push(slope[n - 2]);
+
+  // then pull the tangents back inside the circle of radius 3 that guarantees
+  // monotonicity, and flatten them either side of any level segment
+  for (let i = 0; i < n - 1; i++) {
+    if (slope[i] === 0) {
+      m[i] = 0;
+      m[i + 1] = 0;
+      continue;
+    }
+    const a = m[i] / slope[i];
+    const b = m[i + 1] / slope[i];
+    const s = a * a + b * b;
+    if (s > 9) {
+      const t = 3 / Math.sqrt(s);
+      m[i] = t * a * slope[i];
+      m[i + 1] = t * b * slope[i];
+    }
+  }
+
+  return function (x) {
+    if (x <= xs[0]) return ys[0];
+    if (x >= xs[n - 1]) return ys[n - 1];
+    let i = 0;
+    while (i < n - 2 && x > xs[i + 1]) i++;
+    const h = xs[i + 1] - xs[i];
+    const t = (x - xs[i]) / h;
+    const t2 = t * t;
+    const t3 = t2 * t;
+    // Hermite basis
+    return (
+      (2 * t3 - 3 * t2 + 1) * ys[i] +
+      (t3 - 2 * t2 + t) * h * m[i] +
+      (-2 * t3 + 3 * t2) * ys[i + 1] +
+      (t3 - t2) * h * m[i + 1]
+    );
+  };
+}
+
 // piecewise interpolation over an array of {at: number, ...} keyframes
 export function keyframe(stops, at, apply) {
   if (at <= stops[0].at) return apply(stops[0], stops[0], 0);

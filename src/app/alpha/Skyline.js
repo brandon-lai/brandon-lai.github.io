@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createSkyline } from "./manhattan";
 
-/** used only if the browser cannot tell us the real length of the track */
-const TRACK_SECONDS = 31.6;
+/** how long the intro runs, and so how long the soundtrack plays */
+const INTRO_SECONDS = 25;
+/** the track is longer than the intro, so it is faded rather than cut */
+const FADE_SECONDS = 2.2;
 /** has to outlast the gate's opacity transition in alpha.css */
 const GATE_FADE_MS = 900;
 /** keys that mean "I want to scroll this myself" */
@@ -20,7 +22,7 @@ const SCROLL_KEYS = new Set([
  * The intro is a gate: nothing scrolls until you press Enter. That click is
  * also the gesture browsers require before audio may play, so the soundtrack
  * and the scroll can start together and finish together — the page drives
- * itself off the audio clock, landing on the copy as the last note ends.
+ * itself off the audio clock, landing on the copy as the music fades out.
  */
 export default function Skyline({ children }) {
   const canvas = useRef(null);
@@ -29,9 +31,9 @@ export default function Skyline({ children }) {
   const year = useRef(null);
   const caption = useRef(null);
   const hint = useRef(null);
-  const content = useRef(null);
   const audio = useRef(null);
   const drive = useRef(0);
+  const fade = useRef(0);
 
   const [entered, setEntered] = useState(false);
   const [gateGone, setGateGone] = useState(false);
@@ -75,11 +77,17 @@ export default function Skyline({ children }) {
     setAuto(false);
   }, []);
 
-  useEffect(() => () => cancelAnimationFrame(drive.current), []);
+  useEffect(
+    () => () => {
+      cancelAnimationFrame(drive.current);
+      cancelAnimationFrame(fade.current);
+    },
+    []
+  );
 
-  /* Reaching for the scroll hands it back — the music keeps going, but from
-     here on you are the one moving through the years. Tabbing around the
-     chrome is not reaching for the scroll, so only scroll keys count. */
+  /* Reaching for the scroll hands it back — the music plays out, but from here
+     on you are the one moving through the years. Tabbing around the chrome is
+     not reaching for the scroll, so only scroll keys count. */
   useEffect(() => {
     if (!auto) return undefined;
     const take = () => stopAuto();
@@ -107,12 +115,31 @@ export default function Skyline({ children }) {
      the copy arrives exactly as the music runs out. */
   const runIntro = useCallback(() => {
     cancelAnimationFrame(drive.current);
+    cancelAnimationFrame(fade.current);
     window.scrollTo(0, 0);
 
     const track = audio.current;
     if (track) {
       track.currentTime = 0;
-      track.play().catch(() => {});
+      track.volume = 1;
+      track
+        .play()
+        .then(() => {
+          // the recording outlasts the intro, so bring it down and stop it on
+          // the same beat the copy arrives rather than letting it run on
+          const step = () => {
+            if (track.paused) return;
+            const left = INTRO_SECONDS - track.currentTime;
+            if (left <= 0) {
+              track.pause();
+              return;
+            }
+            track.volume = Math.min(1, left / FADE_SECONDS);
+            fade.current = requestAnimationFrame(step);
+          };
+          fade.current = requestAnimationFrame(step);
+        })
+        .catch(() => {});
     }
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -122,16 +149,12 @@ export default function Skyline({ children }) {
     setAuto(true);
     const began = performance.now();
     const step = () => {
-      const total =
-        track && Number.isFinite(track.duration) && track.duration > 0
-          ? track.duration
-          : TRACK_SECONDS;
       // the audio clock is the source of truth, but it stands still if playback
       // was blocked or is buffering, so fall back to the wall clock
       const elapsed =
         track && !track.paused ? track.currentTime : (performance.now() - began) / 1000;
 
-      const t = Math.min(1, elapsed / total);
+      const t = Math.min(1, elapsed / INTRO_SECONDS);
       window.scrollTo(0, spacer.current.offsetHeight * t);
 
       if (t < 1) drive.current = requestAnimationFrame(step);
@@ -144,20 +167,6 @@ export default function Skyline({ children }) {
     setEntered(true);
     document.body.style.overflow = "";
     runIntro();
-  };
-
-  const skip = () => {
-    stopAuto();
-    audio.current?.pause();
-    document.body.style.overflow = "";
-    const wasIn = entered;
-    setEntered(true);
-    requestAnimationFrame(() =>
-      content.current?.scrollIntoView({
-        behavior: wasIn ? "smooth" : "auto",
-        block: "start",
-      })
-    );
   };
 
   const toggleSound = () => {
@@ -173,16 +182,13 @@ export default function Skyline({ children }) {
 
       <audio ref={audio} src="/audio/nyc.mp3" preload="auto" />
 
-      <div className="alpha-controls">
-        {entered && (
+      {entered && (
+        <div className="alpha-controls">
           <button type="button" className="alpha-chip" onClick={toggleSound}>
             {muted ? "Unmute" : "Mute"}
           </button>
-        )}
-        <button type="button" className="alpha-chip" onClick={skip}>
-          Skip to content
-        </button>
-      </div>
+        </div>
+      )}
 
       <div className="alpha-hud" ref={hud} aria-hidden="true">
         <div className="alpha-year" ref={year}>
@@ -196,31 +202,22 @@ export default function Skyline({ children }) {
 
       {!gateGone && (
         <div className="alpha-gate" data-open={entered ? "false" : "true"}>
-          <div className="alpha-gate-inner">
-            <button type="button" className="alpha-enter" onClick={enter} autoFocus>
-              Enter
-            </button>
-            <p className="alpha-gate-note">Thirty seconds, with sound.</p>
-          </div>
+          <button type="button" className="alpha-enter" onClick={enter} autoFocus>
+            Enter
+          </button>
         </div>
       )}
 
       {/* empty on purpose — its height is the length of the intro */}
       <div className="alpha-spacer" ref={spacer} aria-hidden="true" />
 
-      <section className="alpha-content" ref={content}>
+      <section className="alpha-content">
         <div className="alpha-inner">
           {children}
 
           <button type="button" className="alpha-replay" onClick={runIntro}>
             Replay the intro
           </button>
-
-          <p className="alpha-note">
-            The skyline above is stylized, not surveyed. Positions are
-            compressed along the island and heights are exaggerated so the
-            massing still reads at this scale.
-          </p>
         </div>
       </section>
     </>

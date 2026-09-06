@@ -16,10 +16,7 @@ export default function Alpha() {
           {current.role} at {current.org}.
         </p>
 
-        <p>
-          I build things — mostly software, occasionally hardware. What follows
-          is the short version. The skyline above was the long one.
-        </p>
+        <p>I build things — mostly software, occasionally hardware.</p>
 
         <h2>Now</h2>
         <ul>
