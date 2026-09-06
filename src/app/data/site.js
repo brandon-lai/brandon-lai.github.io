@@ -74,7 +74,8 @@ export const ABOUT = {
     { emoji: "\u{1F4BB}", label: "Software engineer" },
     { emoji: "\u{1F3BE}", label: "Tennis player" },
     { emoji: "\u{1F3C3}", label: "Marathoner, ex-rower" },
-    { emoji: "\u{1F3B8}", label: "Beginner guitarist" },
+    { emoji: "\u{1F370}", label: "Tiramisu World Cup competitor, Canada semi-finalist" },
+    { emoji: "\u{1F3B8}", label: "Beginner guitarist, scuba diver, snowboarder" },
   ],
   watches: {
     before:
