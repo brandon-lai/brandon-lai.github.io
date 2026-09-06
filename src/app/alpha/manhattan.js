@@ -65,7 +65,7 @@ export function createSkyline({
    */
   const writeAt = [];
   let writing = false;
-  const WRITE_MS = 1100;
+  const MS_PER_CHAR = 26;
   const FADE_MS = 420;
 
   function layout() {
@@ -100,7 +100,11 @@ export function createSkyline({
     /* The tour is the second scroll region: enough travel per stop to move the
        camera and then hold still long enough to read what it points at. */
     tourScroll = Math.round(STOPS.length * H * 0.62);
-    if (contentSpacer) contentSpacer.style.height = tourScroll + 'px';
+    /* One viewport taller than the travel it represents. The furthest a page
+       will scroll is its height minus the window, so a spacer of exactly
+       tourScroll leaves the last screenful unreachable — the tour stopped
+       dead two thirds of the way through, on the fourth stop. */
+    if (contentSpacer) contentSpacer.style.height = tourScroll + H + 'px';
   }
 
   // ---------------------------------------------------------------------------
@@ -1080,7 +1084,10 @@ export function createSkyline({
        the reveal reads as one hand moving rather than several. */
     const total = (stop.title ? stop.title.length : 0)
       + body.reduce((n, l) => n + l.text.length, 0);
-    let budget = Math.ceil(clamp(written, 0, 1) * total);
+    /* Eased, not linear: the hand starts gently, runs steadily, and comes to
+       a stop instead of stopping. Straight time made the last words land as
+       abruptly as the first. */
+    let budget = Math.ceil(glide(clamp(written, 0, 1), 0.3) * total);
 
     /* Every bullet opens with an emoji, which is two UTF-16 units. Cutting
        between them mid-write would paint half a surrogate pair, so the cut
@@ -1314,7 +1321,8 @@ export function createSkyline({
            to stop on a blurb that was faint, half-written, or both, and stay
            there. Only the fade *in* is hurried: leaving is the camera's. */
         const a = Math.max(tour.rise[i], clamp(held / FADE_MS, 0, 1)) * (1 - tour.fall[i]);
-        const written = Math.max(tour.written[i], held / WRITE_MS);
+        const ms = clamp(STOPS[i].chars * MS_PER_CHAR, 900, 3400);
+        const written = Math.max(tour.written[i], held / ms);
         if (a < 1 - tour.fall[i] || written < 1) writing = true;
 
         const box = drawBlurb(STOPS[i], a, written);

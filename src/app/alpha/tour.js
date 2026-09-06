@@ -32,6 +32,10 @@ export const STOPS = [
     // lined up under where the arrow writes his name
     ax: 0.6,
     ay: 0.5,
+    /* Written across the whole stretch the soundtrack carries, rather than
+       the 157px a camera move would take: these are the first words anyone
+       reads and they were going by in half a second. */
+    writeSpan: 0.64,
     lines: ABOUT.lead.map((text) => ({ text })),
   },
   {
@@ -86,6 +90,13 @@ export const STOPS = [
   },
 ];
 
+/* How many characters each stop has to write, which is what sets how long it
+   should take. Counted once here rather than every frame. */
+for (const stop of STOPS) {
+  stop.chars = (stop.title ? stop.title.length : 0)
+    + stop.lines.reduce((n, l) => n + l.text.length, 0);
+}
+
 /** of each stop's slice, the share spent travelling; the rest is dwell */
 const TRAVEL = 0.44;
 const ease = (t) => t * t * (3 - 2 * t);
@@ -115,7 +126,7 @@ export function sampleTour(q) {
     const from = k + TRAVEL * 0.36;
     rise.push(ease(clamp((x - from) / (TRAVEL * 0.3), 0, 1)));
     fall.push(k === n - 1 ? 0 : ease(clamp((x - (k + 1)) / (TRAVEL * 0.34), 0, 1)));
-    written.push(clamp((x - from) / (TRAVEL * 0.64), 0, 1));
+    written.push(clamp((x - from) / (STOPS[k].writeSpan || TRAVEL * 0.64), 0, 1));
   }
 
   return {

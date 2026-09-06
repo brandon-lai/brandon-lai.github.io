@@ -67,7 +67,7 @@
 }
 
 .alpha-caption {
-  margin-top: 6px;
+  margin-bottom: 7px;
   font-size: clamp(13px, 3.4vw, 15px);
   font-style: italic;
   max-width: min(70vw, 380px);

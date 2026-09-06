@@ -12,11 +12,20 @@ const FADE_SECONDS = 2.2;
 /** has to outlast the gate's opacity transition in alpha.css */
 const GATE_FADE_MS = 900;
 /**
- * How far into the tour the soundtrack carries you: past the end of the film
- * and into the first stop, so the music lands on his name with the opening
- * lines written out under it rather than on the bare skyline.
+ * How far into the tour the drive carries you: past the end of the film and
+ * into the first stop, so it comes to rest on his name with the opening lines
+ * written out under it rather than on a bare skyline.
  */
 const GREETING_HOLD = 0.16;
+/**
+ * Seconds the drive keeps going after the music has finished.
+ *
+ * The film owns the whole soundtrack, as it always has. Writing the opening
+ * lines inside that window as well left them a second to appear, which is a
+ * blur rather than a hand. They get their own quiet stretch at the end
+ * instead: the music resolves, and then the words finish.
+ */
+const WRITE_TAIL = 2.6;
 /** keys that mean "I want to scroll this myself" */
 const SCROLL_KEYS = new Set([
   " ", "PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown",
@@ -170,12 +179,23 @@ export default function Skyline({ children }) {
       const elapsed =
         track && !track.paused ? track.currentTime : (performance.now() - began) / 1000;
 
-      const t = Math.min(1, elapsed / INTRO_SECONDS);
       const film = spacer.current.offsetHeight;
-      const hold = (contentSpacer.current?.offsetHeight || 0) * GREETING_HOLD;
-      window.scrollTo(0, (film + hold) * t);
+      // the tour's own travel, which is a viewport shorter than its spacer
+      const travel = Math.max(
+        0,
+        film + (contentSpacer.current?.offsetHeight || 0) - window.innerHeight - film
+      );
+      const hold = travel * GREETING_HOLD;
 
-      if (t < 1) drive.current = requestAnimationFrame(step);
+      /* Two stretches, not one: the film gets the whole of the soundtrack at
+         the pace it was tuned to, and the writing gets the quiet afterwards. */
+      const y =
+        elapsed <= INTRO_SECONDS
+          ? film * (elapsed / INTRO_SECONDS)
+          : film + hold * Math.min(1, (elapsed - INTRO_SECONDS) / WRITE_TAIL);
+      window.scrollTo(0, y);
+
+      if (elapsed < INTRO_SECONDS + WRITE_TAIL) drive.current = requestAnimationFrame(step);
       else stopAuto();
     };
     drive.current = requestAnimationFrame(step);
@@ -230,11 +250,14 @@ export default function Skyline({ children }) {
         </div>
       )}
 
+      {/* the caption sits above the year, not below it: the block is anchored
+          by its bottom edge, so anything underneath shoves the year upward
+          every time a subject is named */}
       <div className="alpha-hud" ref={hud} aria-hidden="true">
+        <div className="alpha-caption" ref={caption} />
         <div className="alpha-year" ref={year}>
           1609
         </div>
-        <div className="alpha-caption" ref={caption} />
       </div>
       <div className="alpha-hint" ref={hint} data-auto={auto ? "true" : "false"} aria-hidden="true">
         scroll
