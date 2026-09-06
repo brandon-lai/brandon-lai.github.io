@@ -40,9 +40,7 @@ export const NAV_LOCKED_LINES = [
 
 /** Top-right icon links. `icon` maps to a key in components/Icons.js */
 export const SOCIALS = [
-  { icon: "mail", label: "Email", href: "mailto:brandon.lai35@gmail.com" },
-  { icon: "github", label: "GitHub", href: "https://github.com/brandon-lai" },
-  { icon: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/" },
+  { icon: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/in/brandon-lai" },
 ];
 
 /**

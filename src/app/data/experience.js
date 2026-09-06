@@ -40,7 +40,7 @@ export const EXPERIENCE = [
     start: "May 2022",
     end: "Aug 2022",
     duration: "4 mos",
-    note: "A different kind of VC firm.",
+    note: "Met some world-class founders and engineers.",
     href: "https://www.8vc.com/fellowships",
   },
   {
