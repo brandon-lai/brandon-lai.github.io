@@ -71,11 +71,20 @@
   transition: opacity 500ms ease;
 }
 
-.alpha-skip {
+/* the scroll hint has nothing to say while the page is scrolling itself.
+   The engine writes opacity inline every frame, so this hides it another way. */
+.alpha-hint[data-auto="true"] { visibility: hidden; }
+
+.alpha-controls {
   position: fixed;
-  z-index: 4;
+  z-index: 7;
   right: max(14px, env(safe-area-inset-right));
   top: calc(14px + env(safe-area-inset-top));
+  display: flex;
+  gap: 8px;
+}
+
+.alpha-chip {
   font: inherit;
   font-size: 13px;
   color: var(--ink-dim);
@@ -88,8 +97,70 @@
   -webkit-backdrop-filter: blur(6px);
   min-height: 40px;
 }
-.alpha-skip:hover,
-.alpha-skip:focus-visible { color: var(--ink); }
+.alpha-chip:hover,
+.alpha-chip:focus-visible { color: var(--ink); }
+
+/* ---- the gate --------------------------------------------- */
+/* Sits over the 1609 shoreline rather than over black, so pressing Enter
+   lifts a veil off a scene that is already there. */
+.alpha-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 90% at 50% 55%, rgba(6, 9, 26, 0.55), rgba(6, 9, 26, 0.93));
+  backdrop-filter: blur(7px) saturate(0.7);
+  -webkit-backdrop-filter: blur(7px) saturate(0.7);
+  opacity: 1;
+  transition: opacity 900ms ease, backdrop-filter 900ms ease;
+}
+
+.alpha-gate[data-open="false"] {
+  opacity: 0;
+  pointer-events: none;
+  backdrop-filter: blur(0) saturate(1);
+  -webkit-backdrop-filter: blur(0) saturate(1);
+}
+
+.alpha-gate-inner {
+  text-align: center;
+  animation: alpha-gate-in 1.2s var(--ease, ease) both;
+}
+
+@keyframes alpha-gate-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.alpha-enter {
+  font: inherit;
+  font-size: 15px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-indent: 0.24em; /* balances the trailing letter-space */
+  color: var(--ink);
+  background: rgba(8, 10, 22, 0.35);
+  border: 1px solid rgba(239, 230, 214, 0.34);
+  border-radius: 999px;
+  padding: 17px 42px;
+  cursor: pointer;
+  transition: background 300ms ease, border-color 300ms ease, transform 300ms ease;
+}
+.alpha-enter:hover,
+.alpha-enter:focus-visible {
+  background: rgba(239, 230, 214, 0.1);
+  border-color: rgba(239, 230, 214, 0.6);
+  transform: translateY(-1px);
+}
+
+.alpha-gate-note {
+  margin: 18px 0 0;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-dim);
+}
 
 .page-alpha :focus-visible { outline: 2px solid #ffd9a0; outline-offset: 3px; }
 
