@@ -1114,10 +1114,13 @@ export function createSkyline({
 
     let y = clamp(stop.ay * H, tpx * 1.4, H - 40);
 
+    let titleY = y;
+    let titleW = 0;
     if (stop.title) {
       ctx.font = `italic ${tpx}px ${HAND}`;
       ctx.fillStyle = 'rgba(255, 240, 220, 0.96)';
       ctx.fillText(upto(stop.title, budget), x, y);
+      titleW = ctx.measureText(stop.title).width;
       budget -= stop.title.length;
       y += tpx * 1.55;
     }
@@ -1146,13 +1149,17 @@ export function createSkyline({
        hover as the one that opened the page — all this reports is where to put
        it and where the arrow should start from. */
     if (stop.button) {
+      /* Both ends are measured off the title rather than set at a fixed
+         offset: the arrow leaves from just under the writing, as though the
+         same hand carried on, and the button sits where it lands. Started
+         further down it read as a separate mark floating below the words. */
       box = {
         href: stop.button.href,
         label: stop.button.label,
-        x: x + 30,
-        y: y + bpx * 1.3,
-        fromX: x + 8,
-        fromY: y - bpx * 0.25,
+        x: x + titleW * 0.3,
+        y: titleY + tpx * 2.1,
+        fromX: x + titleW * 0.16,
+        fromY: titleY + tpx * 0.34,
         t: clamp((written - 0.9) / 0.1, 0, 1),
       };
     }
