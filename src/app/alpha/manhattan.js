@@ -1139,12 +1139,12 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
     let wideCx = fr.x0 + wideSpan / 2;
     if (fr.x1 - fr.x0 > finalSpan) wideCx = finalSpan / 2;
 
-    const midT = smoothstep(0.795, 0.86, p);
-      const span = lerp(wideSpan, MIDSPAN, easeInOut(midT));
+    const midT = smoothstep(0.775, 0.838, p);
+    const span = lerp(wideSpan, MIDSPAN, easeInOut(midT));
     const cx = lerp(wideCx, WINDOW_X, easeInOut(midT));
 
     // stage 3: the zoom chain
-    const zp = smoothstep(0.875, 1.0, p);
+    const zp = smoothstep(0.896, 1.0, p);
     const zoom = Math.pow(FINAL_ZOOM, easeInOut(zp));
 
     const groundCy = (baselineY - H / 2) / (W / span * EXAG / CFG.islandFt);
@@ -1161,7 +1161,11 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
     ctx.fillStyle = rgbCss(mixRgb([6, 9, 26], [22, 25, 38], bg));
     ctx.fillRect(0, 0, W, H);
 
-    const arrowT = smoothstep(0.842, 0.874, p) * (1 - smoothstep(0.884, 0.906, p));
+    // A long plateau between the two ends: the arrow draws itself, the words
+    // land, and then everything holds still for a beat before the push-in.
+    // Widening it costs the fly-in half a second, which is the only slack
+    // there is — the end of the scroll is pinned to the end of the music.
+    const arrowT = smoothstep(0.822, 0.852, p) * (1 - smoothstep(0.902, 0.92, p));
     arrowDim = arrowT;
     if (aScene > 0.01) {
       drawScene(p, year, aScene);
@@ -1181,7 +1185,7 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
     // chrome
     yearEl.textContent = String(Math.round(year));
     updateCaption(year);
-    const hudFade = 1 - smoothstep(0.86, 0.92, p);
+    const hudFade = 1 - smoothstep(0.845, 0.9, p);
     hudEl.style.opacity = String(hudFade);
     hintEl.style.opacity = String(1 - smoothstep(0.005, 0.05, p));
 
