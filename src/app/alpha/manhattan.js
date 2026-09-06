@@ -46,6 +46,10 @@ export function createSkyline({
 
   let W = 0, H = 0, DPR = 1, isMobile = false;
   let baselineY = 0, EXAG = 1, finalSpan = 1;
+  /* Where sea level actually lands on screen this frame. baselineY is only
+     the layout constant the framing is derived from; everything drawn has to
+     use this instead, or the city slides against a horizon that never moves. */
+  let hz = 0;
   let WBOOST = 3;
   let lastW = 0, lastH = 0;
   let FILL = [];
@@ -100,6 +104,31 @@ export function createSkyline({
       ? (baselineY - H / 2) / cam.ppf
       : cyFtOverride;
   }
+  /**
+   * Turn a stop into a shot. A stop names how tall its subject is and how much
+   * of the frame it should fill; the span that achieves that depends on the
+   * viewport, so it is worked out here rather than written down.
+   *
+   * Putting the subject's midpoint a little above centre is also what carries
+   * sea level off the bottom of the frame — looking up at a tower you should
+   * be seeing the tower, not the harbour behind it.
+   */
+  function framing(stop) {
+    const wide = (W / finalSpan) * EXAG / CFG.islandFt;
+    if (!stop.ft) {
+      return { cx: stop.cx, span: finalSpan, cyFt: (baselineY - H / 2) / wide };
+    }
+    const fill = stop.fill || 0.82;
+    const ppf = (fill * H) / stop.ft;
+    const span = clamp((W * EXAG) / (CFG.islandFt * ppf), 0.05, finalSpan);
+    /* Solved rather than guessed: this is the camera height that puts sea
+       level at 1.02 of the viewport — just past the bottom edge — whatever
+       the subject's height and share of the frame. It leaves the top of the
+       subject at (1.02 - fill) of the way down, so a taller fill also climbs
+       higher up the frame instead of running off it. */
+    return { cx: stop.cx, span, cyFt: (0.52 * stop.ft) / fill };
+  }
+
   function sx(wx) { return W / 2 + (wx - cam.cx) * cam.ppwx; }
   function sy(ft) { return H / 2 - (ft - cam.cyFt) * cam.ppf; }
 
@@ -228,7 +257,7 @@ export function createSkyline({
     if (!starfield) {
       starfield = [];
       for (let i = 0; i < 150; i++) {
-        starfield.push([hash(i, 7) * W, hash(i, 13) * baselineY * 0.85, 0.4 + hash(i, 19) * 1.1]);
+        starfield.push([hash(i, 7) * W, hash(i, 13) * H * 0.7, 0.4 + hash(i, 19) * 1.1]);
       }
     }
     ctx.save();
@@ -243,22 +272,22 @@ export function createSkyline({
   }
 
   function drawSky(p, pal) {
-    const g = ctx.createLinearGradient(0, 0, 0, baselineY);
+    const g = ctx.createLinearGradient(0, 0, 0, hz);
     g.addColorStop(0, rgbCss(pal.top));
     g.addColorStop(0.55, rgbCss(pal.mid));
     g.addColorStop(1, rgbCss(pal.hor));
     ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, baselineY + 2);
+    ctx.fillRect(0, 0, W, hz + 2);
 
     // soft cloud bands, thickest around midday and sunset
     const cloud = smoothstep(0.10, 0.30, p) * (1 - smoothstep(0.80, 0.95, p));
     if (cloud > 0.02) {
       ctx.save();
       for (let c = 0; c < 7; c++) {
-        const cy = baselineY * (0.14 + hash(c, 3) * 0.62);
+        const cy = hz * (0.14 + hash(c, 3) * 0.62);
         const cw = W * (0.16 + hash(c, 5) * 0.30);
         const cx2 = W * (hash(c, 7) * 1.2 - 0.1) + Math.sin(p * 2 + c) * W * 0.02;
-        const ch = baselineY * (0.012 + hash(c, 11) * 0.022);
+        const ch = hz * (0.012 + hash(c, 11) * 0.022);
         ctx.globalAlpha = cloud * (0.10 + hash(c, 13) * 0.16);
         ctx.fillStyle = rgbCss(mixRgb(pal.mid, pal.hor, 0.6));
         ctx.beginPath();
@@ -278,13 +307,13 @@ export function createSkyline({
     const sunT = smoothstep(0.44, 0.76, p);
     if (sunT > 0 && sunT < 1) {
       const sxp = lerp(W * 0.64, W * 0.36, sunT);
-      const syp = lerp(H * 0.10, baselineY - 2, Math.pow(sunT, 1.5));
+      const syp = lerp(H * 0.10, hz - 2, Math.pow(sunT, 1.5));
       const r = Math.max(9, W * 0.014);
       const glow = ctx.createRadialGradient(sxp, syp, 0, sxp, syp, r * 7);
       glow.addColorStop(0, 'rgba(255,214,150,0.55)');
       glow.addColorStop(1, 'rgba(255,190,120,0)');
       ctx.fillStyle = glow;
-      ctx.fillRect(0, 0, W, baselineY);
+      ctx.fillRect(0, 0, W, hz);
       ctx.beginPath();
       ctx.arc(sxp, syp, r, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(255,240,206,0.8)';
@@ -307,14 +336,14 @@ export function createSkyline({
     // organic terrain that flattens as the grid is imposed
     const flat = smoothstep(1811, 1900, year);
     ctx.beginPath();
-    ctx.moveTo(sx(-0.02), baselineY + 4);
+    ctx.moveTo(sx(-0.02), hz + 4);
     for (let i = 0; i <= 90; i++) {
       const wx = -0.02 + (1.04) * (i / 90);
       const hills = (Math.sin(wx * 41) * 0.5 + Math.sin(wx * 17 + 1.3) * 0.35 + Math.sin(wx * 73 + 2.1) * 0.15);
       const ft = lerp(78 + hills * 52, 46, flat);
       ctx.lineTo(sx(wx), sy(Math.max(4, ft)));
     }
-    ctx.lineTo(sx(1.02), baselineY + 4);
+    ctx.lineTo(sx(1.02), hz + 4);
     ctx.closePath();
     ctx.fillStyle = rgbCss(mixRgb(pal.bd, pal.bl, 0.28));
     ctx.fill();
@@ -351,7 +380,7 @@ export function createSkyline({
         const gx = sx(0.06 + (g / 90) * 0.94);
         if (gx < 0 || gx > W) continue;
         ctx.beginPath();
-        ctx.moveTo(gx, baselineY);
+        ctx.moveTo(gx, hz);
         ctx.lineTo(gx, sy(30));
         ctx.stroke();
       }
@@ -366,13 +395,13 @@ export function createSkyline({
       ctx.fillStyle = rgbCss(mixRgb(pal.bd, [46, 74, 48], lerp(0.7, 0.35, smoothstep(0.7, 0.9, curP))));
       const px0 = sx(0.575), px1 = sx(0.728);
       ctx.beginPath();
-      ctx.moveTo(px0, baselineY);
+      ctx.moveTo(px0, hz);
       for (let k = 0; k <= 22; k++) {
         const f = k / 22;
         const bump = Math.sin(f * 9) * 0.3 + Math.sin(f * 21 + 1) * 0.2;
         ctx.lineTo(lerp(px0, px1, f), sy(34 + bump * 16));
       }
-      ctx.lineTo(px1, baselineY);
+      ctx.lineTo(px1, hz);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
@@ -658,15 +687,16 @@ export function createSkyline({
   }
 
   function drawWater(p, pal, year, nightness) {
-    const g = ctx.createLinearGradient(0, baselineY, 0, H);
+    if (hz >= H) return; // looking up: the water is off the bottom of the frame
+    const g = ctx.createLinearGradient(0, hz, 0, H);
     g.addColorStop(0, rgbCss(pal.wat));
     g.addColorStop(1, rgbCss(mixRgb(pal.wat, [0, 0, 0], 0.45)));
     ctx.fillStyle = g;
-    ctx.fillRect(0, baselineY, W, H - baselineY);
+    ctx.fillRect(0, hz, W, H - hz);
 
     // Reflection: only the waterfront rank reflects, and it breaks up fast.
     // A full mirrored redraw is not worth the frame budget here.
-    const depth = H - baselineY;
+    const depth = H - hz;
     ctx.save();
     ctx.globalAlpha = 0.20;
     ctx.fillStyle = rgbCss(mixRgb(pal.bd, pal.wat, 0.45));
@@ -678,7 +708,7 @@ export function createSkyline({
       const xpx = sx(b.x), wpx = b.w * WBOOST * cam.ppwx;
       if (xpx < -20 || xpx > W + 20 || wpx < 1) continue;
       const hpx = Math.min(b.ft * st.rise * cam.ppf * 0.14, depth * 0.42);
-      ctx.fillRect(xpx - wpx / 2, baselineY, Math.max(1, wpx), hpx);
+      ctx.fillRect(xpx - wpx / 2, hz, Math.max(1, wpx), hpx);
     }
     ctx.restore();
 
@@ -688,7 +718,7 @@ export function createSkyline({
     ctx.lineWidth = 1;
     for (let r = 0; r < 46; r++) {
       const f = Math.pow(r / 46, 1.9);
-      const y = baselineY + 2 + f * depth;
+      const y = hz + 2 + f * depth;
       ctx.globalAlpha = (0.17 + nightness * 0.08) * (1 - f * 0.5);
       const len = W * (0.03 + hash(r, 11) * 0.14) * (0.5 + f);
       const x0 = W * hash(r, 9);
@@ -720,7 +750,7 @@ export function createSkyline({
   function drawPiers(year, pal) {
     const life = smoothstep(1820, 1870, year) * (1 - smoothstep(1965, 2005, year) * 0.8);
     if (life < 0.03) return;
-    const depth = (H - baselineY) * 0.045;
+    const depth = (H - hz) * 0.045;
     ctx.save();
     ctx.globalAlpha = life;
     ctx.fillStyle = rgbCss(mixRgb(pal.bd, pal.wat, 0.3));
@@ -730,10 +760,10 @@ export function createSkyline({
       const pw = Math.max(1.5, 0.0034 * cam.ppwx);
       if (px < -20 || px > W + 20) continue;
       const d = depth * (0.6 + hash(i, 29) * 0.8);
-      ctx.fillRect(px - pw / 2, baselineY - 1, pw, d);
+      ctx.fillRect(px - pw / 2, hz - 1, pw, d);
       // the shed that sat on most of them
       if (pw > 3 && hash(i, 31) < 0.7) {
-        ctx.fillRect(px - pw * 0.8, baselineY - Math.min(d * 0.5, 8) - 1, pw * 1.6, Math.min(d * 0.5, 8));
+        ctx.fillRect(px - pw * 0.8, hz - Math.min(d * 0.5, 8) - 1, pw * 1.6, Math.min(d * 0.5, 8));
       }
     }
     ctx.restore();
@@ -750,8 +780,8 @@ export function createSkyline({
       const dir = seedR < 0.5 ? 1 : -1;
       const t = (((year * 0.0035) + i * 0.37) % 1);
       const bx = W * (dir > 0 ? t : 1 - t);
-      const by = baselineY + (H - baselineY) * (0.14 + i * 0.17);
-      const s = (H - baselineY) * (0.036 + i * 0.015);
+      const by = hz + (H - hz) * (0.14 + i * 0.17);
+      const s = (H - hz) * (0.036 + i * 0.015);
       if (s < 2) continue;
       ctx.lineWidth = Math.max(0.5, s * 0.055);
 
@@ -884,13 +914,13 @@ export function createSkyline({
     ctx.globalAlpha = 0.38;
     ctx.fillStyle = rgbCss(mixRgb(pal.hor, pal.bd, 0.30));
     ctx.beginPath();
-    ctx.moveTo(0, baselineY);
+    ctx.moveTo(0, hz);
     for (let i = 0; i <= 40; i++) {
       const x = (i / 40) * W;
       const y = sy(70 + Math.sin(i * 0.7) * 22 + Math.sin(i * 1.9) * 12) - H * 0.03;
       ctx.lineTo(x, y);
     }
-    ctx.lineTo(W, baselineY);
+    ctx.lineTo(W, hz);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
@@ -900,146 +930,84 @@ export function createSkyline({
   // the arrow moment
   // ---------------------------------------------------------------------------
   /**
-   * One handwritten note pointing at a place on the island. The hand is the
-   * same one that introduces him, so everything the page says about him
-   * arrives in the same voice, written onto the city rather than beside it.
+   * A stop's blurb: the title in the hand that introduces him, the body in the
+   * page's serif. Set against the left edge under a soft scrim, because a lit
+   * skyline is a bad thing to read plain text over and the right of the frame
+   * should stay clear for the city.
    *
-   * Returns the rectangle the words landed in, which is how the one real
-   * link finds its way on top of the right ones.
+   * Returns the box around the last link line, which is how the one real
+   * anchor finds its way on top of the right words.
    */
-  function drawNote(note, t) {
+  function drawBlurb(stop, t) {
     if (t <= 0) return null;
-    const tx = sx(note.at.x), ty = sy(note.at.ft);
-    const wsz = Math.max(5, 0.0009 * cam.ppwx);
 
-    // the lit window he is actually in, on the one note that has one
-    if (note.lit) {
-      ctx.save();
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = 'rgba(255,214,150,1)';
-      ctx.shadowColor = 'rgba(255,190,120,0.9)';
-      ctx.shadowBlur = 26;
-      ctx.fillRect(tx - wsz / 2, ty - wsz * 0.7, wsz, wsz * 1.4);
-      ctx.restore();
-    }
+    const x = Math.max(26, Math.min(W * 0.075, 110));
+    const maxW = Math.min(W - x * 2, 560);
+    const tpx = Math.max(21, Math.min(34, W * 0.031));
+    const bpx = Math.max(15, Math.min(20, W * 0.0168));
+    const HAND = '"Bradley Hand", "Segoe Script", "Snell Roundhand", cursive';
+    const SERIF = '"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif';
 
-    /* The arrow leaves from whichever side has room, so a note near the edge
-       of the frame reaches back into it instead of off the screen. */
-    const len = Math.min(W * 0.3, 170);
-    const side = tx > W * 0.55 ? -1 : 1;
-    const lift = note.below ? -1 : 1;
-    const ax = tx + side * len * 0.9;
-    const ay = ty - lift * len * 0.62;
-    ctx.save();
-    ctx.globalAlpha = t;
-    ctx.strokeStyle = 'rgba(255,240,220,0.92)';
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    const steps = 34;
-    const drawTo = Math.floor(steps * clamp(t * 1.35, 0, 1));
-    for (let i = 0; i <= drawTo; i++) {
-      const f = i / steps;
-      const px = lerp(ax, tx + side * wsz, f) + Math.sin(f * 7.3) * 3.2;
-      const py = lerp(ay, ty - lift * wsz * 0.4, f) + Math.sin(f * 5.1 + 1.2) * 3.6
-        - lift * Math.sin(f * Math.PI) * len * 0.16;
-      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-    }
-    ctx.stroke();
-
-    let box = null;
-    if (t > 0.7) {
-      const ha = (t - 0.7) / 0.3;
-      ctx.globalAlpha = ha;
-      ctx.beginPath();
-      ctx.moveTo(tx + side * wsz * 2.4, ty - lift * wsz * 2.6);
-      ctx.lineTo(tx + side * wsz, ty - lift * wsz * 0.4);
-      ctx.lineTo(tx + side * wsz * 3.6, ty - lift * wsz * 0.2);
-      ctx.stroke();
-
-      const px = Math.max(16, Math.min(25, W * 0.045));
-      ctx.font = `italic ${px}px "Bradley Hand", "Segoe Script", "Snell Roundhand", cursive`;
-      ctx.fillStyle = 'rgba(255,240,220,0.95)';
-      ctx.textAlign = 'left';
-
-      /* Long notes wrap rather than run off the frame — a clamp alone cannot
-         help once a label is wider than the viewport, and a handwritten note
-         breaking over two lines is what one would do on paper anyway. */
-      const wrapAt = Math.min(W * 0.44, 380);
-      const lines = [];
+    const wrap = (text, font) => {
+      ctx.font = font;
+      const out = [];
       let cur = '';
-      for (const word of note.text.split(' ')) {
-        const next = cur ? `${cur} ${word}` : word;
-        if (cur && ctx.measureText(next).width > wrapAt) {
-          lines.push(cur);
-          cur = word;
-        } else {
-          cur = next;
-        }
-      }
-      if (cur) lines.push(cur);
-
-      const lw = Math.max(...lines.map((l) => ctx.measureText(l).width));
-      // written on whichever side the arrow left from, and never off the frame
-      const lx = clamp(side > 0 ? ax + 6 : ax - lw - 6, 12, Math.max(12, W - lw - 12));
-      let ly = ay - lift * 4 - (lines.length - 1) * px * 1.15;
-      const top = ly;
-      for (const line of lines) {
-        ctx.fillText(line, lx, ly);
-        ly += px * 1.15;
-      }
-      box = { x: lx, y: top - px, w: lw, h: px * (0.4 + 1.15 * lines.length) };
-
-      if (note.sub) {
-        const sp = px * 0.62;
-        ctx.font = `italic ${sp}px "Bradley Hand", "Segoe Script", "Snell Roundhand", cursive`;
-        ctx.fillStyle = 'rgba(255,240,220,0.68)';
-        ctx.fillText(note.sub, lx, ly - px * 1.15 + sp * 1.5);
-      }
-    }
-    ctx.restore();
-    return box;
-  }
-
-  /** the opening and closing statements, set in the page's own serif */
-  function drawLines(lines, t) {
-    if (t <= 0) return null;
-    const px = Math.max(19, Math.min(30, W * 0.028));
-    const maxW = Math.min(W - 56, 720);
-    ctx.save();
-    ctx.globalAlpha = t;
-    ctx.font = `${px}px "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif`;
-    ctx.fillStyle = 'rgba(245,238,226,0.96)';
-    ctx.textAlign = 'center';
-    ctx.shadowColor = 'rgba(0,0,0,0.55)';
-    ctx.shadowBlur = 18;
-
-    const wrapped = [];
-    for (const line of lines) {
-      let cur = '';
-      for (const word of line.split(' ')) {
+      for (const word of text.split(' ')) {
         const next = cur ? `${cur} ${word}` : word;
         if (cur && ctx.measureText(next).width > maxW) {
-          wrapped.push(cur);
+          out.push(cur);
           cur = word;
         } else {
           cur = next;
         }
       }
-      wrapped.push(cur);
+      if (cur) out.push(cur);
+      return out;
+    };
+
+    // measure first, so the block can be centred vertically as one piece
+    const body = [];
+    for (const line of stop.lines) {
+      const font = `${bpx}px ${SERIF}`;
+      for (const piece of wrap(line.text, font)) body.push({ ...line, text: piece });
+    }
+    const titleH = tpx * 1.5;
+    const blockH = titleH + body.length * bpx * 1.62;
+    let y = clamp(H * 0.5 - blockH / 2, H * 0.12, H * 0.62);
+
+    ctx.save();
+    ctx.globalAlpha = t;
+
+    // scrim: dark at the left edge, gone by the time the city has the frame
+    const scrim = ctx.createLinearGradient(0, 0, Math.min(W, x * 2 + maxW * 1.25), 0);
+    scrim.addColorStop(0, 'rgba(5, 8, 20, 0.82)');
+    scrim.addColorStop(0.55, 'rgba(5, 8, 20, 0.45)');
+    scrim.addColorStop(1, 'rgba(5, 8, 20, 0)');
+    ctx.fillStyle = scrim;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.textAlign = 'left';
+    ctx.font = `italic ${tpx}px ${HAND}`;
+    ctx.fillStyle = 'rgba(255, 240, 220, 0.96)';
+    ctx.fillText(stop.title, x, y);
+    y += titleH;
+
+    let box = null;
+    for (const line of body) {
+      ctx.font = `${bpx}px ${SERIF}`;
+      ctx.fillStyle = line.dim ? 'rgba(220, 210, 194, 0.6)' : 'rgba(245, 238, 226, 0.95)';
+      ctx.fillText(line.text, x, y);
+
+      if (line.link) {
+        const w = ctx.measureText(line.text).width;
+        ctx.fillStyle = 'rgba(239, 230, 214, 0.42)';
+        ctx.fillRect(x, Math.round(y + bpx * 0.3), w, 1);
+        box = { x, y: y - bpx, w, h: bpx * 1.5, href: line.href };
+      }
+      y += bpx * 1.62;
     }
 
-    const lh = px * 1.5;
-    let y = H * 0.34 - ((wrapped.length - 1) * lh) / 2;
-    let box = null;
-    for (const line of wrapped) {
-      ctx.fillText(line, W / 2, y);
-      const lw = ctx.measureText(line).width;
-      box = { x: W / 2 - lw / 2, y: y - px, w: lw, h: px * 1.4 };
-      y += lh;
-    }
     ctx.restore();
-    ctx.textAlign = 'left';
     return box;
   }
 
@@ -1057,8 +1025,16 @@ export function createSkyline({
   })();
 
   let shownCaption = '';
-  function updateCaption(year) {
-    // null once the reading starts — the city has nothing left to annotate
+  function updateCaption(year, override) {
+    if (override !== undefined && override !== null) {
+      if (override !== shownCaption) {
+        shownCaption = override;
+        capEl.textContent = override;
+      }
+      capEl.style.opacity = '1';
+      return;
+    }
+    // null once the tour starts — the city has nothing left to annotate
     let best = null;
     for (let i = 0; year !== null && i < allCaptions.length; i++) {
       const c = allCaptions[i];
@@ -1121,20 +1097,28 @@ export function createSkyline({
     /* The film settles onto the whole finished island and stops there. The
        tour takes over from that exact framing, so handing over costs no
        movement at all — the reader simply starts steering. */
+    const rest = framing(STOPS[0]);
     const settle = glide(norm(0.86, 1.0, p));
-    const restCx = lerp(wideCx, STOPS[0].cx, settle);
-    const restSpan = lerp(wideSpan, Math.min(finalSpan, STOPS[0].span), settle);
-    const groundCy = (baselineY - H / 2) / (W / restSpan * EXAG / CFG.islandFt);
 
     // q is the tour, and it only starts once the film has run out
     const q = tourScroll > 0 ? clamp(offset / tourScroll, 0, 1) : 0;
     const touring = offset > 0;
     const tour = sampleTour(q);
 
-    const cx = touring ? tour.cam.cx : restCx;
-    const span = touring ? Math.min(finalSpan, tour.cam.span) : restSpan;
-    const cyFt = touring ? tour.cam.cyFt : lerp(groundCy, STOPS[0].cyFt, settle);
+    let cx, span, cyFt;
+    if (touring) {
+      const a = framing(STOPS[tour.from]);
+      const b = framing(STOPS[tour.index]);
+      cx = lerp(a.cx, b.cx, tour.move);
+      span = lerp(a.span, b.span, tour.move);
+      cyFt = lerp(a.cyFt, b.cyFt, tour.move);
+    } else {
+      cx = lerp(wideCx, rest.cx, settle);
+      span = lerp(wideSpan, rest.span, settle);
+      cyFt = lerp((baselineY - H / 2) / (W / wideSpan * EXAG / CFG.islandFt), rest.cyFt, settle);
+    }
     setCamera(cx, span, cyFt);
+    hz = sy(0);
 
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     ctx.fillStyle = rgbCss([6, 9, 26]);
@@ -1155,18 +1139,15 @@ export function createSkyline({
       for (let i = 0; i < STOPS.length; i++) {
         const a = tour.alphas[i];
         if (a <= 0.01) continue;
-        const stop = STOPS[i];
-        let box = null;
-        if (stop.lines) box = drawLines(stop.lines, a);
-        if (stop.notes) for (const n of stop.notes) box = drawNote(n, a) || box;
-        if (stop.link && a > 0.6) linkBox = box;
+        const box = drawBlurb(STOPS[i], a);
+        if (box && a > 0.6) linkBox = box;
       }
     }
 
     // chrome
-    // one clock the whole way: forward through the city, then across his own
-    yearEl.textContent = String(touring ? tour.year : Math.round(year));
-    updateCaption(touring ? null : year);
+    yearEl.textContent = String(touring ? 2026 : Math.round(year));
+    // the caption slot keeps its job, naming whatever the camera is looking at
+    updateCaption(touring ? null : year, touring ? tour.subject : null);
     hudEl.style.opacity = '1';
     // the hint comes back when the music stops, because the film ending is not
     // the page ending and nothing else says so
@@ -1186,6 +1167,7 @@ export function createSkyline({
       linkEl.style.display = 'none';
       return;
     }
+    if (box.href) linkEl.href = box.href;
     linkEl.style.display = 'block';
     linkEl.style.left = Math.round(box.x) + 'px';
     linkEl.style.top = Math.round(box.y) + 'px';
