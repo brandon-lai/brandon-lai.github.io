@@ -221,7 +221,7 @@ export default function Skyline({ children }) {
           {children}
 
           <button type="button" className="alpha-replay" onClick={runIntro}>
-            Replay the intro
+            Replay
           </button>
         </div>
       </section>
