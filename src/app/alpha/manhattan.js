@@ -19,7 +19,7 @@ import {
   profileFor,
   yearAt,
 } from "./city";
-import { STOPS, sampleTour } from "./tour";
+import { GREETING, STOPS, sampleTour } from "./tour";
 
 /**
  * /alpha — four hundred years of Manhattan, drawn to a canvas as you scroll.
@@ -116,17 +116,18 @@ export function createSkyline({
   function framing(stop) {
     const wide = (W / finalSpan) * EXAG / CFG.islandFt;
     if (!stop.ft) {
-      return { cx: stop.cx, span: finalSpan, cyFt: (baselineY - H / 2) / wide };
+      return { cx: stop.x, span: finalSpan, cyFt: (baselineY - H / 2) / wide };
     }
     const fill = stop.fill || 0.82;
     const ppf = (fill * H) / stop.ft;
     const span = clamp((W * EXAG) / (CFG.islandFt * ppf), 0.05, finalSpan);
+    const cx = stop.x + (stop.bias || 0) * span;
     /* Solved rather than guessed: this is the camera height that puts sea
        level at 1.02 of the viewport — just past the bottom edge — whatever
        the subject's height and share of the frame. It leaves the top of the
        subject at (1.02 - fill) of the way down, so a taller fill also climbs
        higher up the frame instead of running off it. */
-    return { cx: stop.cx, span, cyFt: (0.52 * stop.ft) / fill };
+    return { cx, span, cyFt: (0.52 * stop.ft) / fill };
   }
 
   function sx(wx) { return W / 2 + (wx - cam.cx) * cam.ppwx; }
@@ -929,24 +930,94 @@ export function createSkyline({
   // ---------------------------------------------------------------------------
   // the arrow moment
   // ---------------------------------------------------------------------------
+  const HAND = '"Bradley Hand", "Segoe Script", "Snell Roundhand", cursive';
+  const SERIF = '"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif';
+
   /**
-   * A stop's blurb: the title in the hand that introduces him, the body in the
-   * page's serif. Set against the left edge under a soft scrim, because a lit
-   * skyline is a bad thing to read plain text over and the right of the frame
-   * should stay clear for the city.
-   *
-   * Returns the box around the last link line, which is how the one real
-   * anchor finds its way on top of the right words.
+   * The last frame of the timelapse: one lit window on the east face of the
+   * Empire State, an arrow drawn to it by hand, and his name. This is the
+   * only annotation on the page still tied to a particular window — the rest
+   * of the copy sits in the frame rather than pointing into it.
    */
-  function drawBlurb(stop, t) {
+  function drawGreeting(t) {
+    if (t <= 0) return;
+    const tx = sx(GREETING.x), ty = sy(GREETING.ft);
+    const wsz = Math.max(5, 0.0009 * cam.ppwx);
+
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = 'rgba(255,214,150,1)';
+    ctx.shadowColor = 'rgba(255,190,120,0.9)';
+    ctx.shadowBlur = 26;
+    ctx.fillRect(tx - wsz / 2, ty - wsz * 0.7, wsz, wsz * 1.4);
+    ctx.restore();
+
+    const len = Math.min(W * 0.3, 170);
+    const side = tx > W * 0.55 ? -1 : 1;
+    const ax = tx + side * len * 0.9;
+    const ay = ty - len * 0.62;
+
+    ctx.save();
+    ctx.globalAlpha = t;
+    ctx.strokeStyle = 'rgba(255,240,220,0.92)';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    const steps = 34;
+    const drawTo = Math.floor(steps * clamp(t * 1.35, 0, 1));
+    for (let i = 0; i <= drawTo; i++) {
+      const f = i / steps;
+      const px = lerp(ax, tx + side * wsz, f) + Math.sin(f * 7.3) * 3.2;
+      const py = lerp(ay, ty - wsz * 0.4, f) + Math.sin(f * 5.1 + 1.2) * 3.6
+        - Math.sin(f * Math.PI) * len * 0.16;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+
+    if (t > 0.7) {
+      ctx.globalAlpha = (t - 0.7) / 0.3;
+      ctx.beginPath();
+      ctx.moveTo(tx + side * wsz * 2.4, ty - wsz * 2.6);
+      ctx.lineTo(tx + side * wsz, ty - wsz * 0.4);
+      ctx.lineTo(tx + side * wsz * 3.6, ty - wsz * 0.2);
+      ctx.stroke();
+
+      const px = Math.max(19, Math.min(30, W * 0.05));
+      ctx.font = `italic ${px}px ${HAND}`;
+      ctx.fillStyle = 'rgba(255,240,220,0.96)';
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 12;
+      ctx.textAlign = 'left';
+      const label = 'Hi, I\u2019m Brandon';
+      const lw = ctx.measureText(label).width;
+      ctx.fillText(label, clamp(side > 0 ? ax + 6 : ax - lw - 6, 12, Math.max(12, W - lw - 12)), ay - 4);
+    }
+    ctx.restore();
+  }
+
+  /**
+   * A stop's blurb. The title is in the hand that introduced him, the body in
+   * the page's serif, and both are written out a character at a time as the
+   * camera arrives — so the words look like they are being put down rather
+   * than switched on.
+   *
+   * Where they sit is the stop's business, not this function's: every stop
+   * names its own corner, so the copy never settles into one caption slot.
+   * There is no panel behind them, only a shadow, which is what the year in
+   * the corner has always used to stay legible over a lit skyline.
+   *
+   * Returns the box around the link line, so the one real anchor can find it.
+   */
+  function drawBlurb(stop, t, written) {
     if (t <= 0) return null;
 
-    const x = Math.max(26, Math.min(W * 0.075, 110));
-    const maxW = Math.min(W - x * 2, 560);
-    const tpx = Math.max(21, Math.min(34, W * 0.031));
+    const tpx = Math.max(20, Math.min(32, W * 0.029));
     const bpx = Math.max(15, Math.min(20, W * 0.0168));
-    const HAND = '"Bradley Hand", "Segoe Script", "Snell Roundhand", cursive';
-    const SERIF = '"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif';
+    /* On a wide frame the words take a column beside the subject; on a phone
+       there is no beside, so they take the width and the clamp below pins
+       them to the left margin on its own. */
+    const maxW = W < 700 ? Math.min(W - 44, 420) : Math.min(W * 0.42, 460);
+    const x = clamp(stop.ax * W, 22, Math.max(22, W - maxW - 22));
 
     const wrap = (text, font) => {
       ctx.font = font;
@@ -965,42 +1036,58 @@ export function createSkyline({
       return out;
     };
 
-    // measure first, so the block can be centred vertically as one piece
     const body = [];
     for (const line of stop.lines) {
-      const font = `${bpx}px ${SERIF}`;
-      for (const piece of wrap(line.text, font)) body.push({ ...line, text: piece });
+      for (const piece of wrap(line.text, `${bpx}px ${SERIF}`)) {
+        body.push({ ...line, text: piece });
+      }
     }
-    const titleH = tpx * 1.5;
-    const blockH = titleH + body.length * bpx * 1.62;
-    let y = clamp(H * 0.5 - blockH / 2, H * 0.12, H * 0.62);
+
+    /* One budget of characters spent across the whole blurb, title first, so
+       the reveal reads as one hand moving rather than several. */
+    const total = (stop.title ? stop.title.length : 0)
+      + body.reduce((n, l) => n + l.text.length, 0);
+    let budget = Math.ceil(clamp(written, 0, 1) * total);
+
+    /* Every bullet opens with an emoji, which is two UTF-16 units. Cutting
+       between them mid-write would paint half a surrogate pair, so the cut
+       steps over the pair rather than through it. */
+    const upto = (text, n) => {
+      if (n >= text.length) return text;
+      if (n <= 0) return '';
+      const c = text.charCodeAt(n - 1);
+      return text.slice(0, c >= 0xd800 && c <= 0xdbff ? n + 1 : n);
+    };
 
     ctx.save();
     ctx.globalAlpha = t;
-
-    // scrim: dark at the left edge, gone by the time the city has the frame
-    const scrim = ctx.createLinearGradient(0, 0, Math.min(W, x * 2 + maxW * 1.25), 0);
-    scrim.addColorStop(0, 'rgba(5, 8, 20, 0.82)');
-    scrim.addColorStop(0.55, 'rgba(5, 8, 20, 0.45)');
-    scrim.addColorStop(1, 'rgba(5, 8, 20, 0)');
-    ctx.fillStyle = scrim;
-    ctx.fillRect(0, 0, W, H);
-
     ctx.textAlign = 'left';
-    ctx.font = `italic ${tpx}px ${HAND}`;
-    ctx.fillStyle = 'rgba(255, 240, 220, 0.96)';
-    ctx.fillText(stop.title, x, y);
-    y += titleH;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.72)';
+    ctx.shadowBlur = 14;
+
+    let y = clamp(stop.ay * H, tpx * 1.4, H - 40);
+
+    if (stop.title) {
+      ctx.font = `italic ${tpx}px ${HAND}`;
+      ctx.fillStyle = 'rgba(255, 240, 220, 0.96)';
+      ctx.fillText(upto(stop.title, budget), x, y);
+      budget -= stop.title.length;
+      y += tpx * 1.55;
+    }
 
     let box = null;
     for (const line of body) {
-      ctx.font = `${bpx}px ${SERIF}`;
-      ctx.fillStyle = line.dim ? 'rgba(220, 210, 194, 0.6)' : 'rgba(245, 238, 226, 0.95)';
-      ctx.fillText(line.text, x, y);
+      if (budget <= 0) break;
+      const shown = upto(line.text, budget);
+      budget -= line.text.length;
 
-      if (line.link) {
+      ctx.font = `${bpx}px ${SERIF}`;
+      ctx.fillStyle = line.dim ? 'rgba(226, 216, 200, 0.66)' : 'rgba(247, 241, 230, 0.97)';
+      ctx.fillText(shown, x, y);
+
+      if (line.link && shown.length === line.text.length) {
         const w = ctx.measureText(line.text).width;
-        ctx.fillStyle = 'rgba(239, 230, 214, 0.42)';
+        ctx.fillStyle = 'rgba(239, 230, 214, 0.45)';
         ctx.fillRect(x, Math.round(y + bpx * 0.3), w, 1);
         box = { x, y: y - bpx, w, h: bpx * 1.5, href: line.href };
       }
@@ -1126,20 +1213,24 @@ export function createSkyline({
 
     /* Notes dim the city's own lit windows while they are up, so the writing
        is never competing with the thing it is written on. */
-    let brightest = 0;
-    if (touring) for (const a of tour.alphas) brightest = Math.max(brightest, a);
-    // softened: the arrow moment could afford to drop the city to a third of
-    // its brightness for a second, but a whole tour spent that dark reads flat
-    arrowDim = brightest * 0.7;
+    /* Only the arrow dims the city's own windows, so the one lit window it
+       points at stands out. The blurbs sit in open sky and need no help. */
+    arrowDim = smoothstep(0.86, 0.985, p) * (touring ? tour.greet : 1) * 0.62;
 
     drawScene(p, year, 1);
+
+    /* The arrow is the film's last frame and the tour's first. It is drawn by
+       the timelapse's own progress and then held while the opening lines are
+       written beneath it, leaving only when the camera does. */
+    const greet = smoothstep(0.86, 0.985, p) * (touring ? tour.greet : 1);
+    if (greet > 0.01) drawGreeting(greet);
 
     let linkBox = null;
     if (touring) {
       for (let i = 0; i < STOPS.length; i++) {
         const a = tour.alphas[i];
         if (a <= 0.01) continue;
-        const box = drawBlurb(STOPS[i], a);
+        const box = drawBlurb(STOPS[i], a, tour.written[i]);
         if (box && a > 0.6) linkBox = box;
       }
     }
