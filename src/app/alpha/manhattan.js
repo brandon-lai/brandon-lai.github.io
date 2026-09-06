@@ -19,6 +19,12 @@ import {
   profileFor,
   yearAt,
 } from "./city";
+import {
+  drawContent,
+  drawRoomLight,
+  layoutContent,
+  yearAtOffset,
+} from "./content";
 
 /**
  * /alpha — four hundred years of Manhattan, drawn to a canvas as you scroll.
@@ -32,7 +38,9 @@ import {
  * `spacer` is an empty element whose height *is* the length of the intro; the
  * canvas is fixed behind it, so the page scroll doubles as a timeline.
  */
-export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) {
+export function createSkyline({
+  canvas, spacer, contentSpacer, yearEl, capEl, hintEl, hudEl, linkEl,
+}) {
   const reduceMotion = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -46,6 +54,7 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
   let WBOOST = 3, MIDSPAN = 0.68, HANDOVER = 20, FINAL_ZOOM = 1000;
   let lastW = 0, lastH = 0;
   let FILL = [];
+  let contentLayout = null;
 
   function layout() {
     const w = window.innerWidth;
@@ -80,6 +89,12 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
 
     FILL = buildFill(isMobile ? CFG.fillCountMobile : CFG.fillCount);
     starfield = null;
+
+    // Measured here and nowhere else: a scroll frame only draws. The second
+    // scroll region is as tall as the copy, so reading it moves 1:1 with the
+    // wheel while the intro above stays paced by the music.
+    contentLayout = layoutContent(ctx, W, H);
+    if (contentSpacer) contentSpacer.style.height = contentLayout.scroll + 'px';
   }
 
   // ---------------------------------------------------------------------------
@@ -943,7 +958,10 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
       ctx.font = 'italic ' + Math.max(17, Math.min(26, W * 0.05)) + 'px "Bradley Hand", "Segoe Script", "Snell Roundhand", cursive';
       ctx.fillStyle = 'rgba(255,240,220,0.95)';
       ctx.textAlign = 'left';
-      ctx.fillText('this is me', ax + 6, ay - 4);
+      // kept on screen on a narrow viewport, where the arrow runs out of room
+      const label = 'Hi, I\u2019m Brandon';
+      const lw = ctx.measureText(label).width;
+      ctx.fillText(label, Math.min(ax + 6, W - lw - 12), ay - 4);
     }
     ctx.restore();
   }
@@ -1088,8 +1106,9 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
 
   let shownCaption = '';
   function updateCaption(year) {
+    // null once the reading starts — the city has nothing left to annotate
     let best = null;
-    for (let i = 0; i < allCaptions.length; i++) {
+    for (let i = 0; year !== null && i < allCaptions.length; i++) {
       const c = allCaptions[i];
       if (year >= c.year && year - c.year < 6) best = c;
     }
@@ -1105,14 +1124,18 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
   // main loop
   // ---------------------------------------------------------------------------
   let target = 0, current = 0, ticking = false;
+  let contentOffset = 0;
   let rafId = 0, stopped = false;
 
   function readScroll() {
     const max = spacer.offsetHeight;
     target = max > 0 ? clamp(window.pageYOffset / max, 0, 1) : 0;
+    // Reading is not smoothed the way the film is — a lag between the wheel
+    // and the words would feel like a fault rather than like camerawork.
+    contentOffset = Math.max(0, window.pageYOffset - max);
   }
 
-  let lastRendered = -1;
+  let lastRendered = -1, lastContent = -1;
   function frame() {
     if (stopped) return;
     if (reduceMotion) {
@@ -1123,14 +1146,17 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
       current += step;
       if (Math.abs(target - current) < 0.0003) current = target;
     }
-    if (current !== lastRendered) {
-      render(current);
+    // either clock moving is reason to redraw: past the fly-in the film is
+    // parked at 1 and only the reading position changes
+    if (current !== lastRendered || contentOffset !== lastContent) {
+      render(current, contentOffset);
       lastRendered = current;
+      lastContent = contentOffset;
     }
     rafId = requestAnimationFrame(frame);
   }
 
-  function render(p) {
+  function render(p, offset) {
     curP = p;
     const year = yearAt(p);
 
@@ -1180,24 +1206,47 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
     if (aFacade > 0.01) drawFacade(zoom / HANDOVER, aFacade);
     if (aWindow > 0.01) drawWindowInterior(zoom / (HANDOVER * 20), aWindow);
 
-    // hand off to the content colour at the very end
-    if (zoom > HANDOVER * 34) {
-      ctx.globalAlpha = smoothstep(HANDOVER * 36, HANDOVER * 50, zoom);
-      ctx.fillStyle = '#1a1208';
-      ctx.fillRect(0, 0, W, H);
-      ctx.globalAlpha = 1;
+    /* The room does not get painted over any more — it becomes the page. The
+       lamp light stays lit under the copy and recedes as the reader moves off
+       the window, so there is no seam to cross. */
+    const roomIn = smoothstep(HANDOVER * 24, HANDOVER * 44, zoom);
+    if (roomIn > 0.002 && contentLayout) {
+      drawRoomLight(ctx, W, H, roomIn, offset / (H * 0.9));
+      drawContent(ctx, contentLayout, offset, W, H, roomIn);
     }
 
     // chrome
-    yearEl.textContent = String(Math.round(year));
-    updateCaption(year);
-    const hudFade = 1 - smoothstep(0.845, 0.9, p);
-    hudEl.style.opacity = String(hudFade);
+    const reading = roomIn > 0.5 && contentLayout;
+    // one clock the whole way: forward through the city, then back through him
+    yearEl.textContent = String(
+      reading ? yearAtOffset(contentLayout, offset, H) : Math.round(year)
+    );
+    updateCaption(reading ? null : year);
+    // dips while the arrow has the frame, then returns for the reading
+    hudEl.style.opacity = String(
+      Math.max(1 - smoothstep(0.845, 0.9, p), roomIn)
+    );
     hintEl.style.opacity = String(1 - smoothstep(0.005, 0.05, p));
 
-    const done = p > 0.995;
-    canvas.style.opacity = done ? '0' : '1';
-    canvas.style.visibility = p > 0.999 ? 'hidden' : 'visible';
+    placeLink(reading ? offset : null);
+  }
+
+  /* Everything else here is paint, but a contact link has to be clickable, so
+     one real anchor is parked on top of the drawn word. */
+  function placeLink(offset) {
+    if (!linkEl) return;
+    const L = offset === null ? null : contentLayout && contentLayout.link;
+    const y = L ? L.y - offset : 0;
+    if (!L || y < -40 || y > H + 40) {
+      linkEl.style.display = 'none';
+      return;
+    }
+    linkEl.href = L.href;
+    linkEl.style.display = 'block';
+    linkEl.style.left = L.x + 'px';
+    linkEl.style.top = y + 'px';
+    linkEl.style.width = L.w + 'px';
+    linkEl.style.height = L.h + 'px';
   }
 
   // ---------------------------------------------------------------------------

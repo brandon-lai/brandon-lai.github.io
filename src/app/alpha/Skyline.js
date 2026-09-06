@@ -16,23 +16,25 @@ const SCROLL_KEYS = new Set([
 ]);
 
 /**
- * Owns the DOM the canvas engine draws into. The copy is passed in as
- * `children` so the page itself stays a server component — only the
- * scroll-driven chrome below runs on the client.
+ * Owns the DOM the canvas draws into.
  *
- * The intro is a gate: nothing scrolls until you press Enter. That click is
- * also the gesture browsers require before audio may play, so the soundtrack
- * and the scroll can start together and finish together — the page drives
- * itself off the audio clock, landing on the copy as the music fades out.
+ * The page is two scroll regions stacked in one document. The first is the
+ * film: pinned until you press Enter, then driven by the soundtrack's own
+ * clock so the camera lands in the window as the music fades. The second is
+ * the copy, which the canvas typesets into that same room — so `children`
+ * here is not what anyone sees, it is the same words in markup, for screen
+ * readers, search engines and anything else that cannot look at a canvas.
  */
 export default function Skyline({ children }) {
   const canvas = useRef(null);
   const spacer = useRef(null);
+  const contentSpacer = useRef(null);
   const hud = useRef(null);
   const year = useRef(null);
   const caption = useRef(null);
   const hint = useRef(null);
   const audio = useRef(null);
+  const link = useRef(null);
   const drive = useRef(0);
   const fade = useRef(0);
 
@@ -45,10 +47,12 @@ export default function Skyline({ children }) {
     const skyline = createSkyline({
       canvas: canvas.current,
       spacer: spacer.current,
+      contentSpacer: contentSpacer.current,
       hudEl: hud.current,
       yearEl: year.current,
       capEl: caption.current,
       hintEl: hint.current,
+      linkEl: link.current,
     });
     return () => skyline.destroy();
   }, []);
@@ -113,7 +117,8 @@ export default function Skyline({ children }) {
   }, [entered]);
 
   /* Start the track and let it pull the page through four hundred years, so
-     the copy arrives exactly as the music runs out. */
+     the camera reaches the window as the music runs out. The drive stops at
+     the foot of the film; the copy below that is yours to scroll. */
   const runIntro = useCallback(() => {
     cancelAnimationFrame(drive.current);
     cancelAnimationFrame(fade.current);
@@ -127,7 +132,7 @@ export default function Skyline({ children }) {
         .play()
         .then(() => {
           // the recording outlasts the intro, so bring it down and stop it on
-          // the same beat the copy arrives rather than letting it run on
+          // the same beat the camera arrives rather than letting it run on
           const step = () => {
             if (track.paused) return;
             const left = INTRO_SECONDS - track.currentTime;
@@ -183,16 +188,26 @@ export default function Skyline({ children }) {
 
       <audio ref={audio} src="/audio/nyc.mp3" preload="auto" />
 
+      {/* parked exactly over the word the canvas drew, so contact still works */}
+      <a className="alpha-link" ref={link} target="_blank" rel="noreferrer" aria-hidden="true" tabIndex={-1}>
+        <span className="alpha-sr">LinkedIn</span>
+      </a>
+
       {entered && (
-        <button
-          type="button"
-          className="alpha-sound"
-          onClick={toggleSound}
-          aria-label={muted ? "Unmute" : "Mute"}
-          title={muted ? "Unmute" : "Mute"}
-        >
-          {muted ? <SoundOff /> : <Sound />}
-        </button>
+        <div className="alpha-controls">
+          <button type="button" className="alpha-chip" onClick={runIntro}>
+            Replay
+          </button>
+          <button
+            type="button"
+            className="alpha-chip alpha-chip-icon"
+            onClick={toggleSound}
+            aria-label={muted ? "Unmute" : "Mute"}
+            title={muted ? "Unmute" : "Mute"}
+          >
+            {muted ? <SoundOff /> : <Sound />}
+          </button>
+        </div>
       )}
 
       <div className="alpha-hud" ref={hud} aria-hidden="true">
@@ -213,18 +228,12 @@ export default function Skyline({ children }) {
         </div>
       )}
 
-      {/* empty on purpose — its height is the length of the intro */}
+      {/* both empty on purpose: the length of the film, then of the copy */}
       <div className="alpha-spacer" ref={spacer} aria-hidden="true" />
+      <div ref={contentSpacer} aria-hidden="true" />
 
-      <section className="alpha-content">
-        <div className="alpha-inner">
-          {children}
-
-          <button type="button" className="alpha-replay" onClick={runIntro}>
-            Replay
-          </button>
-        </div>
-      </section>
+      {/* the same words the canvas draws, for readers that cannot see it */}
+      <div className="alpha-sr">{children}</div>
     </>
   );
 }

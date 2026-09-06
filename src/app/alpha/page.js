@@ -5,27 +5,27 @@ import "./alpha.css";
 
 export const metadata = { title: "Alpha — Brandon Lai" };
 
+/**
+ * What follows is not what the page looks like — the canvas typesets all of it
+ * from these same data files. This is the markup underneath: real headings and
+ * links for screen readers, search engines, and anyone who arrives with
+ * JavaScript off. Keep the two saying the same thing.
+ */
 export default function Alpha() {
   return (
     <div className="page-alpha">
       <Skyline>
         <h1>Hi, I&rsquo;m Brandon</h1>
 
-        <p>
-          Cities aren&rsquo;t built in a day, but truly great cities take
-          vision, ambition, energy, and focus.
-        </p>
-
-        <p>So does everything worthwhile in life.</p>
+        {ABOUT.lead.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
 
         <h2>Now</h2>
         <ul>
           {ABOUT.bullets.map(({ emoji, label }) => (
             <li key={label}>
-              <span className="alpha-bullet" aria-hidden="true">
-                {emoji}
-              </span>
-              {label}
+              <span aria-hidden="true">{emoji}</span> {label}
             </li>
           ))}
         </ul>
@@ -42,35 +42,22 @@ export default function Alpha() {
         <h2>Where I have worked</h2>
         <ul>
           {EXPERIENCE.map((job) => (
-            <li className="alpha-job" key={`${job.org}-${job.start}`}>
-              <span>
-                {job.role}, {job.org}
-              </span>
-              <span className="alpha-job-dates">
-                {job.start} — {job.end}
-              </span>
-              <span className="alpha-job-note">{job.note}</span>
+            <li key={`${job.org}-${job.start}`}>
+              {job.role}, {job.org} ({job.start} — {job.end}). {job.note}
             </li>
           ))}
         </ul>
 
         <h2>Contact</h2>
-        <p>
-          {SOCIALS.map((s, i) => (
-            <span key={s.label}>
-              {i > 0 && ", "}
-              <a
-                href={s.href}
-                {...(/^https?:/.test(s.href)
-                  ? { target: "_blank", rel: "noreferrer" }
-                  : {})}
-              >
+        <ul>
+          {SOCIALS.map((s) => (
+            <li key={s.label}>
+              <a href={s.href} target="_blank" rel="noreferrer">
                 {s.label}
               </a>
-            </span>
+            </li>
           ))}
-          .
-        </p>
+        </ul>
       </Skyline>
     </div>
   );

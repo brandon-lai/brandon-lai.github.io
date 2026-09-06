@@ -94,16 +94,20 @@
    The engine writes opacity inline every frame, so this hides it another way. */
 .alpha-hint[data-auto="true"] { visibility: hidden; }
 
-.alpha-sound {
+.alpha-controls {
   position: fixed;
   z-index: 7;
   right: max(14px, env(safe-area-inset-right));
   top: calc(14px + env(safe-area-inset-top));
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
+  display: flex;
+  gap: 8px;
+}
+
+.alpha-chip {
+  font: inherit;
+  font-size: 13px;
+  min-height: 40px;
+  padding: 0 16px;
   color: var(--ink-dim);
   background: rgba(8, 10, 22, 0.42);
   border: 1px solid var(--rule);
@@ -113,8 +117,16 @@
   -webkit-backdrop-filter: blur(6px);
   transition: color 220ms ease, border-color 220ms ease;
 }
-.alpha-sound:hover,
-.alpha-sound:focus-visible {
+
+.alpha-chip-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  padding: 0;
+}
+
+.alpha-chip:hover,
+.alpha-chip:focus-visible {
   color: var(--ink);
   border-color: rgba(239, 230, 214, 0.34);
 }
@@ -187,91 +199,26 @@
 .page-alpha :focus-visible { outline: 2px solid #ffd9a0; outline-offset: 3px; }
 
 /* ---- content ---------------------------------------------- */
-.alpha-content {
-  position: relative;
-  z-index: 2;
-  background: var(--room);
-  min-height: 100vh;
-  padding: clamp(56px, 14vw, 120px) max(22px, env(safe-area-inset-left)) 120px;
+/* The copy is typeset into the canvas by content.js, so there is nothing to
+   style here. What remains is the hidden mirror of it and the one real link. */
+
+/* Off-screen rather than display:none, so it is still read aloud and indexed. */
+.alpha-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
-.alpha-inner {
-  max-width: 62ch;
-  margin: 0 auto;
-}
-
-.alpha-content h1 {
-  font-size: clamp(34px, 9vw, 56px);
-  font-weight: 400;
-  margin: 0 0 28px;
-  letter-spacing: -0.01em;
-}
-
-.alpha-content h2 {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--ink-dim);
-  letter-spacing: 0.02em;
-  margin: 44px 0 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--rule);
-}
-
-.alpha-content p,
-.alpha-content li {
-  font-size: 17px;
-  line-height: 1.65;
-  margin: 0 0 14px;
-}
-
-.alpha-content ul {
-  padding-left: 0;
-  list-style: none;
-}
-
-.alpha-content a {
-  color: var(--ink);
-  text-decoration: underline;
-  text-decoration-color: rgba(239, 230, 214, 0.35);
-  text-underline-offset: 3px;
-}
-
-/* the emoji column in the about list, so the labels stay aligned */
-.alpha-bullet {
-  display: inline-block;
-  width: 1.6em;
-}
-
-/* one job per row: title on the left, dates on the right */
-.alpha-job {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 10px;
-}
-.alpha-job-dates {
-  margin-left: auto;
-  color: var(--ink-dim);
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-}
-.alpha-job-note {
-  display: block;
-  width: 100%;
-  color: var(--ink-dim);
-  font-size: 15px;
-}
-
-.alpha-replay {
-  display: block;
-  margin: 72px auto 0;
-  font: inherit;
-  font-size: 14px;
-  color: var(--ink-dim);
-  background: none;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  padding: 10px 18px;
+/* the engine moves this onto whatever line it drew the link on */
+.alpha-link {
+  position: fixed;
+  z-index: 5;
+  display: none;
   cursor: pointer;
 }
-.alpha-replay:hover { color: var(--ink); }

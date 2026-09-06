@@ -68,6 +68,11 @@ export const HERO = {
 
 /** About-page content, also mirrored onto the laptop screen in /beta. */
 export const ABOUT = {
+  /** the opening lines on /alpha, before anything else */
+  lead: [
+    "Cities aren\u2019t built in a day, but truly great cities take vision, ambition, energy, and focus.",
+    "So does everything worthwhile in life.",
+  ],
   bullets: [
     { emoji: "\u{1F4BB}", label: "Software engineer" },
     { emoji: "\u{1F3BE}", label: "Tennis player" },
