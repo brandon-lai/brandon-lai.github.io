@@ -77,9 +77,6 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
     HANDOVER = MIDSPAN / (0.0105 * WBOOST * 1.15);
     FINAL_ZOOM = HANDOVER * 50;
 
-    const vh = (reduceMotion ? 150 : (isMobile ? CFG.introVhMobile : CFG.introVh));
-    spacer.style.height = vh + 'vh';
-
     FILL = buildFill(isMobile ? CFG.fillCountMobile : CFG.fillCount);
     starfield = null;
   }

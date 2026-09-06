@@ -18,9 +18,9 @@ import {
 // config
 // ---------------------------------------------------------------------------
 export const CFG = {
-  introVh: 780,          // desktop scroll length for the intro
-  introVhMobile: 620,
-  mobileMaxW: 760,
+  // The scroll length of the intro lives in alpha.css, so the page is laid
+  // out correctly before any of this runs.
+  mobileMaxW: 760,       // keep in step with the breakpoint in alpha.css
   smoothing: 0.14,       // lerp toward target scroll progress
   esbTargetFrac: 0.42,   // Empire State height as a fraction of viewport at final framing
   baselineFrac: 0.80,    // where the waterline sits

@@ -12,16 +12,16 @@ export default function Alpha() {
         <h1>Hi, I&rsquo;m Brandon</h1>
 
         <p>
-          Cities aren&rsquo;t built in a day. The one you just scrolled through
-          took four hundred years, and almost nobody who broke ground on it
-          lived to see the shape it would make.
+          Cities aren&rsquo;t built in a day, but truly great cities take
+          vision, ambition, energy, and focus.
         </p>
 
         <p>
-          What makes a city great rather than merely large is what makes a
-          product great rather than merely shipped — vision, ambition, energy,
-          focus, and a lot of people willing to add one floor at a time. It is
-          why I build.
+          So do great products. The skyline you just scrolled through took four
+          hundred years, and almost nobody who broke ground on it lived to see
+          the shape it would make — they simply kept adding, one floor at a
+          time, to something they trusted would outlast them. It&rsquo;s why I
+          build.
         </p>
 
         <h2>Now</h2>

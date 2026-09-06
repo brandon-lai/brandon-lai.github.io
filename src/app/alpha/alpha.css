@@ -24,10 +24,29 @@
   touch-action: pan-y;
 }
 
-/* empty on purpose — its height *is* the length of the intro */
+/**
+ * Empty on purpose — its height *is* the length of the intro.
+ *
+ * This has to be stated here rather than measured and applied by the engine.
+ * The engine runs in an effect, after the first paint, so until it did the
+ * spacer was 0px tall and the copy below it rendered at the top of the page,
+ * showing through the gate for a frame or two before being pushed down. On a
+ * cold cache that is long enough to read.
+ */
 .alpha-spacer {
   position: relative;
   z-index: 0;
+  height: 780vh;
+}
+
+/* the phone layout — matches CFG.mobileMaxW, which the canvas reads too */
+@media (max-width: 759.98px) {
+  .alpha-spacer { height: 620vh; }
+}
+
+/* no auto-scroll to pace, so there is no reason to make anyone travel far */
+@media (prefers-reduced-motion: reduce) {
+  .alpha-spacer { height: 150vh; }
 }
 
 /* ---- overlay chrome --------------------------------------- */
