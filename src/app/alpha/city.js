@@ -55,8 +55,12 @@ export const CFG = {
  */
 const FIRST_YEAR = 1609;
 const LAST_YEAR = 2026;
-/** progress at which the clock reaches the present and the push-in takes over */
-const ARRIVAL = 0.8;
+/**
+ * Progress at which the clock reaches the present and the push-in takes over.
+ * Settling a little earlier hands the camera moves more room without anyone
+ * noticing the years going by 3% quicker to pay for it.
+ */
+const ARRIVAL = 0.78;
 /** how much quicker the opening runs than the final approach */
 const PACE_CONTRAST = 6;
 /** the span of progress over which the clock eases to a halt */

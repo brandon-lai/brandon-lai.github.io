@@ -1,8 +1,9 @@
 import {
   clamp,
-  easeInOut,
+  glide,
   hash,
   lerp,
+  norm,
   mixRgb,
   rgbCss,
   smoothstep,
@@ -1139,13 +1140,18 @@ export function createSkyline({ canvas, spacer, yearEl, capEl, hintEl, hudEl }) 
     let wideCx = fr.x0 + wideSpan / 2;
     if (fr.x1 - fr.x0 > finalSpan) wideCx = finalSpan / 2;
 
-    const midT = smoothstep(0.775, 0.838, p);
-    const span = lerp(wideSpan, MIDSPAN, easeInOut(midT));
-    const cx = lerp(wideCx, WINDOW_X, easeInOut(midT));
+    // one easing, not two: `glide` already carries its own ease at each end,
+    // and wrapping it in another would put the lunge straight back
+    const midT = glide(norm(0.752, 0.828, p));
+    const span = lerp(wideSpan, MIDSPAN, midT);
+    const cx = lerp(wideCx, WINDOW_X, midT);
 
     // stage 3: the zoom chain
-    const zp = smoothstep(0.896, 1.0, p);
-    const zoom = Math.pow(FINAL_ZOOM, easeInOut(zp));
+    // The exponent is what to ease, not the magnification: a lens moving at a
+    // steady rate doubles in the same time whether it is at 2x or at 200x, so
+    // a flat middle here is a flat-feeling push rather than a flat number.
+    const zp = glide(norm(0.884, 1.0, p));
+    const zoom = Math.pow(FINAL_ZOOM, zp);
 
     const groundCy = (baselineY - H / 2) / (W / span * EXAG / CFG.islandFt);
     const cyFt = lerp(groundCy, WINDOW_FT, smoothstep(0, 0.35, zp));

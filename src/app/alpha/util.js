@@ -6,7 +6,6 @@
 export function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 export function lerp(a, b, t) { return a + (b - a) * t; }
 export function smoothstep(a, b, x) { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
-export function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
 
 // deterministic hash based PRNG, keyed on integers so nothing shimmers on scroll
 export function hash(a, b) {
@@ -35,6 +34,40 @@ export function rgbCss(c, alpha) {
   return alpha === undefined
     ? 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'
     : 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + alpha + ')';
+}
+
+/** linear 0→1 across [a, b], clamped — the raw ramp an easing then shapes */
+export function norm(a, b, x) {
+  return clamp((x - a) / (b - a), 0, 1);
+}
+
+/**
+ * Eases in, holds a constant rate through the middle, eases out.
+ *
+ * The obvious way to soften a move is to nest easings, but they multiply:
+ * an ease-in-out wrapped around a smoothstep peaks at three times its own
+ * average speed in the middle, so the camera lunges through the centre of
+ * every move and crawls at both ends. That is what reads as rushed even when
+ * the move itself is long.
+ *
+ * Here acceleration is confined to a `ramp` at each end and the middle runs
+ * flat, so the peak is only 1/(1 - ramp) times the average — a third above it
+ * at the default, rather than triple. The ramps are smoothstepped, so the
+ * acceleration itself is continuous and there is no visible kick where the
+ * move starts or stops.
+ */
+export function glide(t, ramp = 0.3) {
+  const x = clamp(t, 0, 1);
+  const r = clamp(ramp, 0, 0.5);
+  if (r === 0) return x;
+
+  const v = 1 / (1 - r); // speed of the constant middle
+  // ∫ smoothstep = u³ - u⁴/2, which is what turns a velocity ramp into distance
+  const swept = (u) => v * r * (u * u * u - (u * u * u * u) / 2);
+
+  if (x < r) return swept(x / r);
+  if (x > 1 - r) return 1 - swept((1 - x) / r);
+  return v * (r / 2 + (x - r));
 }
 
 /**
