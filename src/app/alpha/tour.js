@@ -41,8 +41,9 @@ export const STOPS = [
     bias: 0.2,
     subject: "Chrysler Building, 1930",
     title: "About me",
-    ax: 0.52,
-    ay: 0.17,
+    // clear of the supertalls, and low enough to miss the moon
+    ax: 0.6,
+    ay: 0.22,
     lines: ABOUT.bullets.map((b) => ({ text: `${b.emoji}  ${b.label}` })),
   },
   {
@@ -77,8 +78,8 @@ export const STOPS = [
     x: 0.44,
     subject: null,
     title: "Say hello",
-    ax: 0.08,
-    ay: 0.6,
+    ax: 0.65,
+    ay: 0.22,
     lines: [{ text: SOCIALS[0].label, link: true, href: SOCIALS[0].href }],
   },
 ];
@@ -102,11 +103,17 @@ export function sampleTour(q) {
   const alphas = [];
   const written = [];
   for (let k = 0; k < n; k++) {
-    const rise = clamp((x - (k + TRAVEL * 0.62)) / (TRAVEL * 0.3), 0, 1);
+    /* Both start once the previous blurb has cleared, and the writing finishes
+       exactly as the camera arrives. That last part matters: the reveal is
+       driven by scroll position, so anywhere the reader can come to rest has
+       to be somewhere the writing is already finished. Running it into the
+       dwell instead left a half-written blurb on screen whenever someone
+       stopped mid-stop. */
+    const from = k + TRAVEL * 0.36;
+    const rise = clamp((x - from) / (TRAVEL * 0.3), 0, 1);
     const fall = k === n - 1 ? 0 : clamp((x - (k + 1)) / (TRAVEL * 0.34), 0, 1);
     alphas.push(ease(rise) * (1 - ease(fall)));
-    // the writing starts as the camera settles and runs on into the dwell
-    written.push(clamp((x - (k + TRAVEL * 0.6)) / 0.34, 0, 1));
+    written.push(clamp((x - from) / (TRAVEL * 0.64), 0, 1));
   }
 
   return {

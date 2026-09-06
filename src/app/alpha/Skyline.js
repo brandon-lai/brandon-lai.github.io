@@ -11,6 +11,12 @@ const INTRO_SECONDS = 25;
 const FADE_SECONDS = 2.2;
 /** has to outlast the gate's opacity transition in alpha.css */
 const GATE_FADE_MS = 900;
+/**
+ * How far into the tour the soundtrack carries you: past the end of the film
+ * and into the first stop, so the music lands on his name with the opening
+ * lines written out under it rather than on the bare skyline.
+ */
+const GREETING_HOLD = 0.16;
 /** keys that mean "I want to scroll this myself" */
 const SCROLL_KEYS = new Set([
   " ", "PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown",
@@ -165,7 +171,9 @@ export default function Skyline({ children }) {
         track && !track.paused ? track.currentTime : (performance.now() - began) / 1000;
 
       const t = Math.min(1, elapsed / INTRO_SECONDS);
-      window.scrollTo(0, spacer.current.offsetHeight * t);
+      const film = spacer.current.offsetHeight;
+      const hold = (contentSpacer.current?.offsetHeight || 0) * GREETING_HOLD;
+      window.scrollTo(0, (film + hold) * t);
 
       if (t < 1) drive.current = requestAnimationFrame(step);
       else stopAuto();
