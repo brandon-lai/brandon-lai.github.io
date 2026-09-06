@@ -16,10 +16,7 @@ export default function Alpha() {
           vision, ambition, energy, and focus.
         </p>
 
-        <p>
-          So do great products. I build software, and the parts worth the most
-          time are usually the ones you only notice when they&rsquo;re wrong.
-        </p>
+        <p>So does everything worthwhile in life.</p>
 
         <h2>Now</h2>
         <ul>
