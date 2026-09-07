@@ -54,6 +54,7 @@ export default function Skyline({ children }) {
   const hint = useRef(null);
   const audio = useRef(null);
   const link = useRef(null);
+  const hit = useRef(null);
   const drive = useRef(0);
   const fade = useRef(0);
 
@@ -72,6 +73,7 @@ export default function Skyline({ children }) {
       capEl: caption.current,
       hintEl: hint.current,
       linkEl: link.current,
+      hitEl: hit.current,
     });
     return () => skyline.destroy();
   }, []);
@@ -219,6 +221,18 @@ export default function Skyline({ children }) {
       <canvas className="alpha-sky" ref={canvas} aria-hidden="true" />
 
       <audio ref={audio} src="/audio/nyc.mp3" preload="auto" />
+
+      {/* An invisible hit area, parked over a handle the canvas drew inside a
+          paragraph. Not the same thing as the button below, which is why it is
+          not the same element — sharing one gave the watches handle a pill. */}
+      <a
+        className="alpha-hit"
+        ref={hit}
+        target="_blank"
+        rel="noreferrer"
+        aria-hidden="true"
+        tabIndex={-1}
+      />
 
       {/* A real button, so it carries the same styling and the same hover as
           the one that opened the page. The engine only says where to put it —

@@ -34,7 +34,7 @@ import { GREETING, STOPS, sampleTour } from "./tour";
  * canvas is fixed behind it, so the page scroll doubles as a timeline.
  */
 export function createSkyline({
-  canvas, spacer, contentSpacer, yearEl, capEl, hintEl, hudEl, linkEl,
+  canvas, spacer, contentSpacer, yearEl, capEl, hintEl, hudEl, linkEl, hitEl,
 }) {
   const reduceMotion = window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1125,7 +1125,8 @@ export function createSkyline({
       y += tpx * 1.55;
     }
 
-    let box = null;
+    let hit = null;
+    let button = null;
     for (const line of body) {
       if (budget <= 0) break;
       const shown = upto(line.text, budget);
@@ -1139,7 +1140,9 @@ export function createSkyline({
         const w = ctx.measureText(line.text).width;
         ctx.fillStyle = 'rgba(239, 230, 214, 0.45)';
         ctx.fillRect(x, Math.round(y + bpx * 0.3), w, 1);
-        box = { x, y: y - bpx, w, h: bpx * 1.5, href: line.href };
+        // an underlined handle inside a paragraph, not a button: it wants an
+        // invisible hit area over the drawn text, nothing more
+        hit = { x, y: y - bpx, w, h: bpx * 1.5, href: line.href };
       }
       y += bpx * 1.62;
     }
@@ -1153,19 +1156,18 @@ export function createSkyline({
          offset: the arrow leaves from just under the writing, as though the
          same hand carried on, and the button sits where it lands. Started
          further down it read as a separate mark floating below the words. */
-      box = {
+      button = {
         href: stop.button.href,
-        label: stop.button.label,
-        x: x + titleW * 0.3,
-        y: titleY + tpx * 2.1,
+        x: x + titleW * 0.28,
+        y: titleY + tpx * 2.35,
         fromX: x + titleW * 0.16,
-        fromY: titleY + tpx * 0.34,
+        fromY: titleY + tpx * 0.42,
         t: clamp((written - 0.9) / 0.1, 0, 1),
       };
     }
 
     ctx.restore();
-    return box;
+    return { hit, button };
   }
 
   // ---------------------------------------------------------------------------
@@ -1317,8 +1319,8 @@ export function createSkyline({
         const written = Math.max(tour.written[i], held / ms);
         if (a < 1 - tour.fall[i] || written < 1) writing = true;
 
-        const box = drawBlurb(STOPS[i], a, written);
-        if (box) linkBox = { box, a };
+        const found = drawBlurb(STOPS[i], a, written);
+        if (found.hit || found.button) linkBox = { ...found, a };
       }
     }
 
@@ -1334,19 +1336,35 @@ export function createSkyline({
       Math.max(1 - smoothstep(0.005, 0.05, p), handover)
     );
 
-    placeLink(linkBox && linkBox.box, linkBox ? linkBox.a : 0);
+    placeHit(linkBox && linkBox.hit);
+    placeButton(linkBox && linkBox.button, linkBox ? linkBox.a : 0);
   }
 
   /* Everything else here is paint, but a contact link has to be clickable, so
      one real anchor is parked on top of the drawn word. */
-  function placeLink(box, alpha) {
+  /** an invisible hit area over a link the canvas drew into a paragraph */
+  function placeHit(box) {
+    if (!hitEl) return;
+    if (!box) {
+      hitEl.style.display = 'none';
+      return;
+    }
+    hitEl.href = box.href;
+    hitEl.style.display = 'block';
+    hitEl.style.left = Math.round(box.x) + 'px';
+    hitEl.style.top = Math.round(box.y) + 'px';
+    hitEl.style.width = Math.round(box.w) + 'px';
+    hitEl.style.height = Math.round(box.h) + 'px';
+  }
+
+  /** the contact button, and the arrow that reaches down to it */
+  function placeButton(box, alpha) {
     if (!linkEl) return;
     if (!box || box.t <= 0.01) {
       linkEl.style.display = 'none';
       return;
     }
     linkEl.href = box.href;
-    linkEl.textContent = box.label;
     linkEl.style.display = 'inline-block';
     linkEl.style.left = Math.round(box.x) + 'px';
     linkEl.style.top = Math.round(box.y) + 'px';
@@ -1360,10 +1378,12 @@ export function createSkyline({
     ctx.strokeStyle = 'rgba(255,240,220,0.92)';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    /* Arced over the top, not under: a curve that dips below the button comes
-       back up into it and arrives pointing away from the thing it is meant to
-       be indicating. This one swings up and comes down onto it. */
-    const tip = scribble(box.fromX, box.fromY, box.x + bw * 0.3, box.y - 9, box.t, 0.38);
+
+    /* Arced over the top so it arrives pointing down at the button — but only
+       gently. The bulge is a share of the whole span, so a curve steep enough
+       to look drawn by hand peaked back above the baseline and ran through the
+       title. This one stays under the writing the whole way. */
+    const tip = scribble(box.fromX, box.fromY, box.x + bw * 0.45, box.y - 8, box.t, 0.2);
     if (box.t > 0.6) arrowhead(tip, 12, (box.t - 0.6) / 0.4);
     ctx.restore();
   }

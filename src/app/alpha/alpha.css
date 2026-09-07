@@ -232,6 +232,14 @@
   border: 0;
 }
 
+/* nothing to look at: it only makes drawn text clickable */
+.alpha-hit {
+  position: fixed;
+  z-index: 5;
+  display: none;
+  cursor: pointer;
+}
+
 /* the engine only positions it; the shape and the glow come from the rule it
    shares with the gate's button above */
 .alpha-link {
