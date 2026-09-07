@@ -15,11 +15,10 @@ export const SITE = {
  * drop the flag to switch a page back on.
  */
 export const NAV = [
-  { label: "Home", href: "/", disabled: true },
+  { label: "Home", href: "/" },
   { label: "About", href: "/about", disabled: true },
   { label: "Work", href: "/work", dot: true, disabled: true },
   { label: "Contact", href: "/contact", disabled: true },
-  { label: "Alpha", href: "/alpha" },
   { label: "Beta", href: "/beta" },
 ];
 
@@ -27,7 +26,9 @@ export const NAV = [
  * Routes that hide the pill nav entirely — for pages that want the whole
  * viewport to themselves. Empty the list to switch it back on everywhere.
  */
-export const NAV_HIDDEN_ON = ["/alpha"];
+// "/" is the skyline, which wants the whole viewport; "/alpha" only
+// forwards to it, and would flash a nav on the way
+export const NAV_HIDDEN_ON = ["/", "/alpha"];
 
 /** Shown, in order, when someone knocks on a door that isn't open yet. */
 export const NAV_LOCKED_LINES = [

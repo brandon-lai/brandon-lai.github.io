@@ -1,33 +1,68 @@
-"use client";
-
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { EXPERIENCE } from "./data/experience";
+import { ABOUT, SOCIALS } from "./data/site";
+import Skyline from "./alpha/Skyline";
+import "./alpha/alpha.css";
 
 /**
- * `/` forwards to `/alpha` for now. The bento grid still exists untouched in
- * components/HomeGrid.js — to put it back, drop the redirect and return
- * <HomeGrid /> instead.
+ * The front page.
  *
- * This is a client-side replace because the site is a static export, where
- * Next's redirects() and the server-side redirect() are both unavailable.
+ * `alpha/` and `beta/` are the two designs this site has been through, not
+ * routes — this one won, so it is served from `/`. The `/alpha` route is kept
+ * alive as a redirect here for anyone holding the old link.
+ *
+ * What follows is not what the page looks like — the canvas typesets all of it
+ * from these same data files. This is the markup underneath: real headings and
+ * links for screen readers, search engines, and anyone who arrives with
+ * JavaScript off. Keep the two saying the same thing.
  */
 export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace("/alpha");
-  }, [router]);
-
   return (
-    <noscript>
-      <div className="page">
-        <div className="prose">
-          <p>
-            <Link href="/alpha">Continue to Alpha →</Link>
-          </p>
-        </div>
-      </div>
-    </noscript>
+    <div className="page-alpha">
+      <Skyline>
+        <h1>Hi, I&rsquo;m Brandon</h1>
+
+        {ABOUT.lead.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+
+        <h2>Now</h2>
+        <ul>
+          {ABOUT.bullets.map(({ emoji, label }) => (
+            <li key={label}>
+              <span aria-hidden="true">{emoji}</span> {label}
+            </li>
+          ))}
+        </ul>
+
+        <h2>Watches</h2>
+        <p>
+          {ABOUT.watches.before}
+          <a href={ABOUT.watches.href} target="_blank" rel="noreferrer">
+            {ABOUT.watches.handle}
+          </a>
+          {ABOUT.watches.after}
+        </p>
+
+        <h2>Where I have worked</h2>
+        <ul>
+          {EXPERIENCE.map((job) => (
+            <li key={`${job.org}-${job.start}`}>
+              {job.role}, {job.org} ({job.start} — {job.end}). {job.note}
+            </li>
+          ))}
+        </ul>
+
+        <h2>Contact</h2>
+        <ul>
+          {SOCIALS.map((s) => (
+            <li key={s.label}>
+              <a href={s.href} target="_blank" rel="noreferrer">
+                {s.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Skyline>
+    </div>
   );
 }
