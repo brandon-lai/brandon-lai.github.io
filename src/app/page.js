@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 /**
- * `/` forwards to `/beta` for now. The bento grid still exists untouched in
+ * `/` forwards to `/alpha` for now. The bento grid still exists untouched in
  * components/HomeGrid.js — to put it back, drop the redirect and return
  * <HomeGrid /> instead.
  *
@@ -16,7 +16,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/beta");
+    router.replace("/alpha");
   }, [router]);
 
   return (
@@ -24,7 +24,7 @@ export default function Home() {
       <div className="page">
         <div className="prose">
           <p>
-            <Link href="/beta">Continue to Beta →</Link>
+            <Link href="/alpha">Continue to Alpha →</Link>
           </p>
         </div>
       </div>
