@@ -1,0 +1,679 @@
+/* ============================================================
+   /beta — the bento page, built in front of you by a crew of
+   small helpers as you scroll. engine.js owns every transform;
+   this file owns how things look and the idle motion (CSS only).
+   ============================================================ */
+
+.asm {
+  --asm-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --asm-cube-line: rgba(19, 19, 22, 0.16);
+  --asm-green: #21473a;
+  --asm-gold: #c9a45c;
+  --asm-coral: #ff6a3d;
+  position: relative;
+}
+@media (prefers-color-scheme: dark) {
+  .asm { --asm-cube-line: rgba(255, 255, 255, 0.14); }
+  .asm-back .asm-depth:not(.asm-word) { opacity: 0.4 !important; }
+  .asm-front .asm-depth { opacity: 0.35 !important; }
+}
+
+.asm-track { position: relative; }
+
+.asm-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ---- parallax layers ------------------------------------------------ */
+.asm-back,
+.asm-front {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.asm-back { z-index: 0; }
+.asm-front { z-index: 6; }
+
+.asm-dots {
+  position: absolute;
+  inset: -24px 0;
+  background-image: radial-gradient(circle, var(--line-strong) 1px, transparent 1.5px);
+  background-size: 24px 24px;
+  opacity: 0.8;
+  will-change: transform;
+}
+
+.asm-depth {
+  position: absolute;
+  top: 0;
+  will-change: transform;
+}
+.asm-depth svg { display: block; width: 100%; height: auto; }
+.asm-back .asm-depth { opacity: 0.85; }
+/* the farthest layer: the name, huge and hollow, barely moving */
+.asm-back .asm-word {
+  left: 0;
+  right: 0;
+  font-size: 19vw;
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  text-align: center;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--line-strong);
+  opacity: 1;
+}
+.asm-front .asm-depth { filter: blur(5px); opacity: 0.7; }
+
+/* ---- the world the camera moves over ---------------------------------- */
+.asm-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  padding-top: 120px;
+  transform-origin: 0 0;
+  will-change: transform;
+  z-index: 2;
+}
+
+.asm-grid {
+  position: relative;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.asm .tile {
+  opacity: 0;
+  transition: background 0.35s var(--ease), box-shadow 0.45s var(--ease);
+  will-change: transform, opacity;
+}
+.asm .tile-wrap[data-done] .tile {
+  transition: background 0.35s var(--ease), box-shadow 0.45s var(--ease), transform 0.45s var(--ease);
+  will-change: auto;
+}
+/* hover lift only once a block is finished and nobody is holding it */
+.asm .tile-wrap:not([data-done]):hover .tile { box-shadow: none; }
+
+/* the empty slot: a blueprint outline with the block's name and footprint */
+.asm-slot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--radius-tile);
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 11px,
+    color-mix(in srgb, var(--ink) 3.5%, transparent) 11px 12px
+  );
+  font: 500 11px/1 var(--asm-mono);
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+  opacity: var(--slot, 1);
+  transition: opacity 0.3s linear;
+}
+
+/* the agent's skeleton: text exists, but only as grey bars, until typed */
+.asm [data-step] { transition: color 0.35s var(--ease), background-color 0.35s var(--ease); }
+.asm .is-skel [data-step]:not(.is-on) {
+  background-color: color-mix(in srgb, var(--ink) 9%, transparent);
+  border-radius: 6px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.asm .is-skel [data-step]:not(.is-on),
+.asm .is-skel [data-step]:not(.is-on) * {
+  color: transparent !important;
+  text-decoration-color: transparent;
+}
+
+/* painted blocks: a primer sketch underneath, the paint clipped on top */
+.asm-primer,
+.asm-paint { position: absolute; inset: 0; }
+.asm-primer { opacity: 0.5; }
+
+/* ---- block content ---------------------------------------------------- */
+.asm-pad {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 100%;
+  padding: 28px;
+}
+.asm-list {
+  display: grid;
+  gap: 10px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15.5px;
+  letter-spacing: -0.01em;
+  color: var(--ink-2);
+}
+.asm-list li { display: flex; align-items: center; gap: 11px; }
+.asm-chip {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--raised);
+  box-shadow: 0 0 0 1px var(--line);
+  font-size: 15px;
+}
+
+.asm-big {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+.asm-note { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); }
+.asm-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+.asm-inline:hover { text-decoration: underline; }
+
+/* watches: deep green and gold once painted */
+.asm-dial { display: block; width: 66%; max-width: 170px; margin: 10px auto; }
+.asm-dial .d-case { fill: none; stroke: var(--asm-gold); stroke-width: 4; }
+.asm-dial .d-face { fill: #f3ebd9; }
+.asm-dial .d-tick { stroke: #1d2f28; stroke-width: 2.6; stroke-linecap: round; }
+.asm-dial .d-hand { stroke: #1d2f28; stroke-width: 3.4; stroke-linecap: round; }
+.asm-dial .d-min { stroke-width: 2.4; }
+.asm-dial .d-pin { fill: var(--asm-gold); }
+.asm-dial.is-sketch * {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+}
+.asm-paint .asm-watches {
+  background: linear-gradient(165deg, #2a5546, var(--asm-green) 45%, #10271f);
+  color: #f3ebd9;
+}
+.asm-paint .asm-watches .eyebrow { color: var(--asm-gold); }
+.asm-paint .asm-watches .asm-note { color: rgba(243, 235, 217, 0.72); }
+.asm-paint .asm-watches .asm-inline { color: #e8c987; }
+
+/* marathon: rolled on in coral */
+.asm-marathon .asm-paint .stack { background: var(--asm-coral); color: #fff; }
+.asm-marathon .asm-paint .eyebrow,
+.asm-marathon .asm-paint .stat-sub { color: rgba(255, 255, 255, 0.86); }
+
+.asm-work { display: grid; margin: 0; padding: 0; list-style: none; }
+.asm-work li {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+}
+.asm-work li:first-child { border-top: 0; }
+.asm-work img { border-radius: 8px; background: var(--raised); }
+.asm-work b { display: block; font-size: 15px; letter-spacing: -0.01em; }
+.asm-work span,
+.asm-work time { font-size: 13px; color: var(--ink-3); }
+.asm-work time { font-variant-numeric: tabular-nums; }
+
+.asm-ball { width: 46px; height: 46px; margin-bottom: auto; }
+.asm-ball circle { fill: #d9f25b; stroke: var(--ink); stroke-width: 1.4; }
+.asm-ball path { fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; }
+
+.asm-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: grid;
+  place-content: center;
+  width: 78px;
+  height: 78px;
+  border: 3px solid #e5484d;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 5px #e5484d;
+  color: #e5484d;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-transform: uppercase;
+  transform: rotate(-12deg);
+}
+
+.asm-logo { margin-bottom: auto; border-radius: 10px; }
+
+.asm-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 4px; }
+.asm-tags span {
+  padding: 6px 11px;
+  border-radius: var(--pill);
+  background: var(--raised);
+  box-shadow: 0 0 0 1px var(--line);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.asm-island { flex: 1; width: 100%; min-height: 0; max-height: 210px; }
+.asm-island path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: clamp(0, calc(1 - (var(--draw, 1) * 7 - var(--i))), 1);
+}
+
+.asm-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 100%;
+  padding: 0 44px;
+}
+.asm-banner-title {
+  margin-bottom: 6px;
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+/* ---- ropes and cables ------------------------------------------------- */
+.asm-lines {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
+}
+.asm-lines path {
+  visibility: hidden;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.asm-lines .ln-haul { stroke: #a8743a; stroke-width: 3; }
+.asm-lines .ln-balloon { stroke-width: 1.2; opacity: 0.6; }
+.asm-lines .ln-crane { stroke-width: 2.4; }
+.asm-lines .ln-roller { stroke-width: 2.6; }
+
+/* ---- props ------------------------------------------------------------ */
+.asm-fx { position: absolute; inset: 0 auto auto 0; z-index: 3; }
+.asm-fx > * {
+  position: absolute;
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.asm-term {
+  overflow: hidden;
+  border-radius: 14px;
+  background: #131317;
+  color: #e8e8ee;
+  font: 12.5px/21px var(--asm-mono);
+  box-shadow: 0 30px 60px -22px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.07);
+  transform-origin: 50% 100%;
+}
+.asm-term-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  background: #1d1d23;
+  color: #8b8b96;
+  font-size: 11px;
+}
+.asm-term-bar i { width: 9px; height: 9px; border-radius: 50%; background: #ff5f57; }
+.asm-term-bar i:nth-child(2) { background: #febc2e; }
+.asm-term-bar i:nth-child(3) { background: #28c840; }
+.asm-term-bar span { margin-left: 8px; }
+.asm-term-body { padding: 10px 14px 14px; white-space: pre; }
+.asm-term-body div { min-height: 21px; overflow: hidden; text-overflow: clip; }
+.asm-term-body .ok { color: #6ee7a8; }
+.asm-term-body .add { color: #7dd3fc; }
+.asm-term-body .dim { color: #8b8b96; }
+.asm-term-body .has-caret::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 14px;
+  margin-left: 1px;
+  background: currentColor;
+  vertical-align: -2px;
+  animation: asm-caret 0.9s steps(2) infinite;
+}
+
+.asm-balloon {
+  width: 52px;
+  height: 64px;
+  border-radius: 50% 50% 47% 47% / 56% 56% 44% 44%;
+  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.6), transparent 34%), var(--c);
+  box-shadow: inset -7px -9px 0 rgba(0, 0, 0, 0.09);
+}
+.asm-balloon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 9px;
+  height: 7px;
+  translate: -50% 0;
+  background: var(--c);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.asm-hook rect { fill: #f5b300; stroke: var(--ink); stroke-width: 1.6; }
+.asm-hook path { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+
+.asm-mist {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: #2f6b57;
+  opacity: 0.6;
+}
+
+.asm-roller {
+  width: 22px;
+  border-radius: 11px;
+  background: linear-gradient(90deg, #ff8a63, var(--asm-coral) 55%, #e5532a);
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.asm-cube {
+  border-radius: 9px;
+  background: var(--c);
+  box-shadow: inset 0 0 0 1.5px var(--asm-cube-line), inset 0 4px 0 rgba(255, 255, 255, 0.55);
+}
+
+.asm-stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 26px 22px rgba(0, 0, 0, 0.22));
+}
+.asm-stamp .knob {
+  width: 38%;
+  aspect-ratio: 1;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff9a7a, #e5484d 60%);
+}
+.asm-stamp .neck {
+  width: 16%;
+  flex: 1;
+  margin-top: -3px;
+  border: 2px solid var(--ink);
+  border-top: 0;
+  background: #c8873a;
+}
+.asm-stamp .block {
+  width: 100%;
+  height: 34%;
+  border: 2px solid var(--ink);
+  border-radius: 14px 14px 8px 8px;
+  background: linear-gradient(#d39a50 0 62%, #2b2b31 62%);
+}
+
+.asm-splat {
+  width: 180px;
+  height: 180px;
+  margin: -90px 0 0 -90px;
+  border: 5px solid #e5484d;
+  border-radius: 50%;
+}
+
+.asm-roll {
+  border-radius: 30px;
+  background: linear-gradient(90deg, var(--surface-hover), var(--raised) 45%, var(--surface));
+  box-shadow: inset 0 0 0 1.5px var(--line-strong), 6px 10px 18px -8px rgba(0, 0, 0, 0.3);
+}
+
+/* ---- the helpers ------------------------------------------------------ */
+.asm-bots { position: absolute; left: 0; top: 0; z-index: 4; pointer-events: none; }
+.bot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  visibility: hidden;
+  transform-origin: 24px 66px;
+  will-change: transform;
+}
+.bot .limb { fill: none; stroke: var(--ink); stroke-width: 2.6; stroke-linecap: round; }
+.bot .limb.thin { stroke-width: 1.6; }
+.bot .foot,
+.bot .hand { fill: var(--ink); }
+.bot .torso { fill: var(--hat); stroke: var(--ink); stroke-width: 1.5; }
+.bot .strap,
+.bot .pocket { fill: none; stroke: color-mix(in srgb, var(--ink) 55%, transparent); stroke-width: 1.2; }
+.bot .face { fill: var(--raised); stroke: var(--ink); stroke-width: 1.6; }
+.bot .eyes {
+  fill: var(--ink);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: asm-blink 5.2s infinite;
+}
+.bot .cheek { stroke: color-mix(in srgb, var(--accent) 50%, transparent); stroke-width: 1.8; stroke-linecap: round; }
+.bot .hat { fill: var(--hat); stroke: var(--ink); stroke-width: 1.4; }
+.bot-shadow { fill: rgba(0, 0, 0, 0.13); }
+.bot.is-sitting .bot-shadow,
+.bot.is-flying .bot-shadow { display: none; }
+
+.bot .laptop { display: none; }
+.bot.has-laptop .laptop { display: inline; }
+.bot .laptop rect { fill: #2a2a31; stroke: var(--ink); stroke-width: 1.4; }
+.bot .laptop circle { fill: #f3f3f5; opacity: 0.85; }
+.bot .can rect { fill: #2f6b57; stroke: var(--ink); stroke-width: 1; }
+.bot .can .nozzle { fill: var(--ink); }
+.bot .baton { fill: #ff7a45; stroke: var(--ink); stroke-width: 0.8; }
+.bot .prop-blade {
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: asm-prop 0.22s linear infinite;
+}
+
+.bot.is-sitting .leg-swing {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: asm-swing 1.5s ease-in-out infinite alternate;
+}
+.bot.is-sitting .leg-swing-b { animation-delay: -0.75s; }
+.bot.is-cheer .arm-wave {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: asm-wave 0.45s ease-in-out infinite alternate;
+}
+.bot.is-cheer .arm-wave-r { animation-delay: -0.22s; }
+
+.asm-sign {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 9px 15px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--raised);
+  box-shadow: 0 4px 0 var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  visibility: hidden;
+  will-change: transform;
+}
+.asm-sign .s-done { display: none; }
+.asm[data-phase="done"] .asm-sign .s-intro { display: none; }
+.asm[data-phase="done"] .asm-sign .s-done { display: inline; }
+
+/* ---- celebration ------------------------------------------------------ */
+.asm-confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+.asm-confetti i {
+  position: absolute;
+  top: -20px;
+  left: var(--x);
+  height: 11px;
+  border-radius: 2px;
+  background: var(--c);
+  animation: asm-fall var(--d) linear var(--dl) infinite;
+}
+
+/* ---- progress pill ---------------------------------------------------- */
+.asm-hud {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 6px 6px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  background: color-mix(in srgb, var(--raised) 86%, transparent);
+  box-shadow: var(--shadow-nav);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-size: 13px;
+  translate: -50% 0;
+  white-space: nowrap;
+}
+.asm-hud-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f5b300;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #f5b300 25%, transparent);
+}
+.asm[data-phase="done"] .asm-hud-dot { background: #1fa971; box-shadow: 0 0 0 3px color-mix(in srgb, #1fa971 25%, transparent); }
+.asm-hud-label { font-weight: 600; }
+.asm[data-phase="done"] .asm-hud-label { display: none; }
+.asm-hud-count { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.asm-hud-bar {
+  width: 110px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--line);
+}
+.asm-hud-bar i {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+.asm-skip {
+  min-height: 32px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--pill);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s var(--ease), transform 0.15s var(--ease);
+}
+.asm-skip:hover { background: var(--surface-hover); }
+.asm-skip:active { transform: scale(0.96); }
+.asm-skip:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.asm[data-phase="done"] .asm-skip { display: none; }
+
+.asm-outro {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 18px;
+  min-height: 70vh;
+  padding: 80px 24px;
+  text-align: center;
+  color: var(--ink-2);
+}
+.asm-outro p { margin: 0; font-size: 17px; }
+.asm-outro .btn { cursor: pointer; border: 0; font: inherit; font-weight: 600; }
+
+/* ---- keyframes -------------------------------------------------------- */
+@keyframes asm-blink {
+  0%, 94%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes asm-swing {
+  from { transform: rotate(-14deg); }
+  to { transform: rotate(14deg); }
+}
+@keyframes asm-wave {
+  from { transform: rotate(-22deg); }
+  to { transform: rotate(22deg); }
+}
+@keyframes asm-prop {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.12); }
+}
+@keyframes asm-caret {
+  to { visibility: hidden; }
+}
+@keyframes asm-fall {
+  from { transform: translate3d(0, -20px, 0) rotate(0deg); }
+  to { transform: translate3d(var(--sway), 110vh, 0) rotate(var(--r)); }
+}
+
+/* ---- small screens ---------------------------------------------------- */
+@media (max-width: 900px) {
+  /* the site nav drops to the bottom here, so the pill moves up */
+  .asm-hud { top: 16px; bottom: auto; }
+  .asm-world { padding-top: 84px; }
+  .asm-grid { padding: 0 18px; }
+  .asm-banner { flex-direction: column; align-items: flex-start; justify-content: center; padding: 0 28px; }
+}
+@media (max-width: 620px) {
+  .asm-hud-label { display: none; }
+  .asm-hud-bar { width: 70px; }
+  .asm-pad { padding: 24px; }
+}
+
+/* no choreography: the finished page, with the crew already sitting on it */
+@media (prefers-reduced-motion: reduce) {
+  .asm-track { height: auto !important; }
+  .asm-stage { position: relative; height: auto; overflow: visible; }
+  .asm-world { position: relative; transform: none !important; padding-bottom: 80px; }
+  .asm-back,
+  .asm-front,
+  .asm-hud { display: none; }
+}
