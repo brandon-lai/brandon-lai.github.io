@@ -189,7 +189,8 @@
   font-weight: 600;
   text-underline-offset: 3px;
 }
-.asm-inline:hover { text-decoration: underline; }
+a.asm-inline:hover { text-decoration: underline; }
+.asm-soon { color: var(--ink-3); }
 
 /* watches: deep green and gold once painted */
 .asm-dial { display: block; width: 66%; max-width: 170px; margin: 10px auto; }

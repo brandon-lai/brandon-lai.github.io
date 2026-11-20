@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ABOUT, SOCIALS } from "../data/site";
 import { EXPERIENCE } from "../data/experience";
 import { ArrowUpRight, LinkedIn } from "../components/Icons";
@@ -215,9 +214,9 @@ function Island() {
       <div className="asm-big">
         <span data-step="2">A tiny island I&rsquo;m building</span>
       </div>
-      <Link className="asm-inline" href="/island">
-        <span data-step="3">Visit the island</span> <ArrowUpRight width={13} height={13} />
-      </Link>
+      <span className="asm-inline asm-soon">
+        <span data-step="3">Coming soon</span>
+      </span>
     </div>
   );
 }
@@ -363,7 +362,7 @@ export const BLOCKS = [
       { t: "+ <Eyebrow>Side project</Eyebrow>", add: true, step: 1 },
       { t: "+ <IslandSketch strokes={7} />", add: true, draw: true },
       { t: "+ <Title>A tiny island…</Title>", add: true, step: 2 },
-      { t: '+ <Link href="/island" />', add: true, step: 3 },
+      { t: "+ <Soon />", add: true, step: 3 },
       { t: "  ✓ rendered in 0.8s", ok: true },
     ],
     Content: Island,
