@@ -237,9 +237,90 @@ a.asm-inline:hover { text-decoration: underline; }
 .asm-work time { font-size: 13px; color: var(--ink-3); }
 .asm-work time { font-variant-numeric: tabular-nums; }
 
-.asm-ball { width: 46px; height: 46px; margin-bottom: auto; }
-.asm-ball circle { fill: #d9f25b; stroke: var(--ink); stroke-width: 1.4; }
-.asm-ball path { fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; }
+/* photo tiles: the picture fills the tile, the caption sits on a soft scrim */
+.asm-photo { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: inherit; }
+.asm-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.asm-tennis img { object-position: 42% 55%; }
+.asm-photo-cap {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 56px 24px 22px;
+  background: linear-gradient(to top, rgba(10, 14, 12, 0.62), rgba(10, 14, 12, 0));
+  color: #fff;
+}
+.asm-photo-cap .stat { color: #fff; }
+.asm-photo-cap .stat-sub { color: rgba(255, 255, 255, 0.82); }
+
+/* a frame waiting for its photo */
+.asm-photo-slot {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  flex: 1;
+  min-height: 150px;
+  margin-bottom: 16px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 16px;
+  background: repeating-linear-gradient(135deg, transparent 0 9px, color-mix(in srgb, var(--ink) 3%, transparent) 9px 10px);
+  color: var(--ink-3);
+  font-size: 12.5px;
+}
+.asm-photo-slot svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.asm-tiramisu .asm-badge { margin-bottom: 12px; }
+
+/* smoodi: the 2020 prototype on a loop beside the machine today */
+.asm-smoodi-card { display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr); width: 100%; height: 100%; }
+.asm-smoodi-clip { position: relative; margin: 0; overflow: hidden; background: #e9e6df; }
+.asm-smoodi-clip video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.asm-smoodi-clip figcaption {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 5px 9px;
+  border-radius: var(--pill);
+  background: rgba(10, 14, 12, 0.55);
+  color: #fff;
+  font: 500 11px/1 var(--asm-mono);
+  backdrop-filter: blur(6px);
+}
+.asm-smoodi-copy { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 22px 24px; }
+.asm-smoodi-render {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+.asm-smoodi-card .asm-inline { margin-top: auto; }
+
+/* one favourite line */
+.asm-quote-card { display: flex; flex-direction: column; justify-content: center; gap: 14px; width: 100%; height: 100%; box-sizing: border-box; margin: 0; padding: 28px; }
+.asm-quote-card svg { width: 26px; fill: var(--asm-gold, #c9a24a); }
+.asm-quote-card blockquote {
+  margin: 0;
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: 19px;
+  line-height: 1.38;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+.asm-quote-card figcaption { font-size: 13px; color: var(--ink-3); }
+
+/* the watch note, set like a page from a catalogue */
+.asm-watch-copy {
+  margin: 0;
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.asm-watch-copy a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.asm-paint .asm-watches .asm-watch-copy { color: rgba(243, 235, 217, 0.86); }
+.asm-paint .asm-watches .asm-watch-copy a { color: #e8c987; }
 
 .asm-badge {
   position: absolute;
@@ -742,6 +823,8 @@ a.asm-inline:hover { text-decoration: underline; }
 
 /* Beli: the Been list, as the app lays it out */
 .asm-beli { --beli-green: #2f9a5e; --beli-ring: #dcdcdc; }
+/* Beli's own screens are plain white */
+.asm [data-block="beli"] .tile { background: #fff; }
 .asm-beli-head { display: grid; gap: 10px; }
 .asm-beli-title {
   position: relative;
@@ -766,7 +849,8 @@ a.asm-inline:hover { text-decoration: underline; }
   line-height: 1;
   cursor: pointer;
 }
-.asm-beli-title select:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.asm-beli-title select:focus { outline: none; }
+.asm-beli-title:focus-within { color: var(--beli-green); }
 .asm-beli-title svg { position: absolute; right: 2px; top: 50%; margin-top: -7px; color: var(--ink-2); pointer-events: none; }
 .asm-beli-tabs {
   display: flex;
@@ -860,4 +944,5 @@ a.asm-inline:hover { text-decoration: underline; }
 @media (prefers-color-scheme: dark) {
   .asm-sample { color: #f5c84b; }
   .asm-beli { --beli-green: #4cc788; --beli-ring: #3a3a40; }
+  .asm [data-block="beli"] .tile { background: var(--surface); }
 }

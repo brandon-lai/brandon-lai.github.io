@@ -23,7 +23,7 @@ export const EXPERIENCE = [
     note: "Full-stack, agentic-AI-powered builder.",
   },
   {
-    role: "Software Engineer Intern",
+    role: "Full-Stack Software Engineer Intern",
     org: "Hearth",
     logo: "/logos/hearth.png",
     type: "Internship",
@@ -33,7 +33,7 @@ export const EXPERIENCE = [
     note: "Core product, front-end infrastructure, and growth initiatives.",
   },
   {
-    role: "Fellow",
+    role: "Engineering Fellow",
     org: "8VC",
     logo: "/logos/8vc.png",
     type: "Fellowship",

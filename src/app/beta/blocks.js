@@ -34,18 +34,18 @@ function Hero() {
       <h1 className="display">
         <span data-step="1">
           <span className="em">Brandon</span> is a software engineer at <span className="em">LinkedIn</span> who
-          builds small worlds for fun.
+          makes creative, whimsical, clean experiences for the web and apps.
         </span>
       </h1>
       <div className="rule" />
       <div className="manifesto">
-        {ABOUT.lead.map((line) => (
-          <p key={line}>
-            <span data-step="2">{line}</span>
-          </p>
-        ))}
         <p>
-          <span data-step="3">This page is one of them. Every block on it was put here by a small crew while you scrolled.</span>
+          <span data-step="2">
+            I like interfaces that stay out of the way until you touch them, then reward you a little for doing it.
+          </span>
+        </p>
+        <p>
+          <span data-step="3">This page is one. Every block on it was put here by a small crew while you scrolled.</span>
         </p>
       </div>
       <div className="footnote">
@@ -120,13 +120,17 @@ function Watches({ layer }) {
     <div className="asm-pad asm-watches">
       <div className="eyebrow">Off hours</div>
       <Dial sketch={sketch} />
-      <div className="asm-big">Vintage watches</div>
-      <p className="asm-note">A few hundred tiny parts that agree to keep time for fifty years.</p>
-      {!sketch && (
-        <a className="asm-inline" href={ABOUT.watches.href} target="_blank" rel="noreferrer">
-          {ABOUT.watches.handle} <ArrowUpRight width={13} height={13} />
-        </a>
-      )}
+      <p className="asm-watch-copy">
+        {ABOUT.watches.before}
+        {sketch ? (
+          ABOUT.watches.handle
+        ) : (
+          <a href={ABOUT.watches.href} target="_blank" rel="noreferrer">
+            {ABOUT.watches.handle}
+          </a>
+        )}
+        {ABOUT.watches.after}
+      </p>
     </div>
   );
 }
@@ -141,6 +145,14 @@ function Marathon() {
   );
 }
 
+/** "Sep 2022 – Present", or "May – Aug 2022" when a role starts and ends in one year */
+function span({ start, end }) {
+  const [sm, sy] = start.split(" ");
+  const [em, ey] = end.split(" ");
+  if (!ey) return `${start} \u2013 ${end}`;
+  return sy === ey ? `${sm} \u2013 ${em} ${ey}` : `${start} \u2013 ${end}`;
+}
+
 function Work() {
   return (
     <div className="asm-pad">
@@ -153,7 +165,7 @@ function Work() {
               <b>{job.org}</b>
               <span>{job.role}</span>
             </div>
-            <time>{job.start.slice(-4)}</time>
+            <time>{span(job)}</time>
           </li>
         ))}
       </ul>
@@ -163,20 +175,27 @@ function Work() {
 
 function Tennis() {
   return (
-    <div className="stack">
-      <svg className="asm-ball" viewBox="-20 -20 40 40" aria-hidden="true">
-        <circle r="17" />
-        <path d="M-12 -12C-4 -5 -4 5 -12 12M12 -12C4 -5 4 5 12 12" />
-      </svg>
-      <div className="stat">Tennis</div>
-      <div className="stat-sub">Most weekends, any weather</div>
+    <div className="asm-photo asm-tennis">
+      <img src="/beta/tennis-serve.jpg" alt="Brandon tossing the ball up to serve on a grass court at dusk" />
+      <div className="asm-photo-cap">
+        <div className="stat">Tennis</div>
+        <div className="stat-sub">Most weekends, any weather</div>
+      </div>
     </div>
   );
 }
 
 function Tiramisu() {
   return (
-    <div className="stack">
+    <div className="stack asm-tiramisu">
+      {/* placeholder until there's a photo from the competition */}
+      <div className="asm-photo-slot" role="img" aria-label="Photo from the Tiramisu World Cup, coming soon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
+          <circle cx="12" cy="13" r="3.5" />
+        </svg>
+        <span>Photo coming soon</span>
+      </div>
       <div className="asm-badge" aria-hidden="true">
         <span>Semi</span>
         <span>finalist</span>
@@ -224,14 +243,52 @@ function Island() {
   );
 }
 
+/** loops silently; holds on the first frame for anyone who prefers less motion */
+function Clip(props) {
+  const ref = (el) => {
+    if (!el) return;
+    const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (still) el.pause();
+    else el.play?.().catch(() => {});
+  };
+  return <video ref={ref} muted loop playsInline preload="metadata" {...props} />;
+}
+
 function Smoodi() {
   return (
-    <div className="stack">
-      <img className="asm-logo" src="/logos/smoodi.png" alt="" width="40" height="40" />
-      <div className="eyebrow">2019 · founding engineer</div>
-      <div className="stat">smoodi</div>
-      <div className="stat-sub">The first self-cleaning smoothie robot</div>
+    <div className="asm-smoodi-card">
+      <figure className="asm-smoodi-clip">
+        <Clip src="/beta/smoodi-prototype.mp4" poster="/beta/smoodi-prototype.jpg" aria-label="Our 2020 prototype blending a smoothie, then cleaning itself, sped up" />
+        <figcaption>Prototype, 2020 · 14× speed</figcaption>
+      </figure>
+      <div className="asm-smoodi-copy">
+        <img className="asm-smoodi-render" src="/beta/smoodi-render.jpg" alt="The smoodi machine today, next to a fridge of frozen smoothie cups" />
+        <div className="eyebrow">2019–2020 · founding engineer</div>
+        <div className="asm-big">smoodi</div>
+        <p className="asm-note">
+          Second hire. We built the first fully self-cleaning smoothie robot: scan a cup, it blends in under a minute,
+          then washes itself for the next person.
+        </p>
+        <a className="asm-inline" href="https://www.getsmoodi.com/technology" target="_blank" rel="noreferrer">
+          How it works <ArrowUpRight width={13} height={13} />
+        </a>
+      </div>
     </div>
+  );
+}
+
+/** one favourite line; swap the text and `by` to change it */
+const QUOTE = { text: ABOUT.lead.join(" "), by: null };
+
+function Quote() {
+  return (
+    <figure className="asm-quote-card">
+      <svg viewBox="0 0 32 24" aria-hidden="true">
+        <path d="M0 24V14C0 6 4 1 12 0l1 3C8 5 6 8 6 12h6v12zm19 0V14c0-8 4-13 12-14l1 3c-5 2-7 5-7 9h6v12z" />
+      </svg>
+      <blockquote>{QUOTE.text}</blockquote>
+      {QUOTE.by && <figcaption>{QUOTE.by}</figcaption>}
+    </figure>
   );
 }
 
@@ -243,7 +300,6 @@ function Also() {
         <span>guitar</span>
         <span>scuba</span>
         <span>snowboard</span>
-        <span>rowing</span>
       </div>
       <div className="stat-sub">All at a respectable beginner level</div>
     </div>
@@ -482,16 +538,6 @@ export const BLOCKS = [
     Content: Watches,
   },
   {
-    id: "marathon",
-    size: "sm",
-    act: "roller",
-    len: 75,
-    crew: [{ hat: HAT.orange }],
-    perch: [0.78],
-    paint: true,
-    Content: Marathon,
-  },
-  {
     id: "work",
     size: "lg",
     act: "voxel",
@@ -501,8 +547,18 @@ export const BLOCKS = [
     Content: Work,
   },
   {
+    id: "marathon",
+    size: "xs",
+    act: "roller",
+    len: 75,
+    crew: [{ hat: HAT.orange }],
+    perch: [0.78],
+    paint: true,
+    Content: Marathon,
+  },
+  {
     id: "tennis",
-    size: "sm",
+    size: "tall",
     act: "push",
     from: "right",
     len: 65,
@@ -512,7 +568,7 @@ export const BLOCKS = [
   },
   {
     id: "tiramisu",
-    size: "sm",
+    size: "tall",
     act: "stamp",
     len: 70,
     crew: [{ hat: HAT.red }],
@@ -540,7 +596,7 @@ export const BLOCKS = [
   },
   {
     id: "smoodi",
-    size: "sm",
+    size: "md",
     act: "crane",
     len: 70,
     crew: [{ hat: HAT.orange }],
@@ -558,13 +614,13 @@ export const BLOCKS = [
     Content: Also,
   },
   {
-    id: "running",
-    size: "md",
-    act: "run",
-    len: 85,
-    crew: [{ hat: HAT.orange }],
-    perch: [0.84],
-    Content: Running,
+    id: "quote",
+    size: "sm",
+    act: "balloon",
+    len: 75,
+    crew: [{ hat: HAT.yellow }],
+    perch: [0.5],
+    Content: Quote,
   },
   {
     id: "beli",
@@ -574,6 +630,15 @@ export const BLOCKS = [
     crew: [{ hat: HAT.green, tool: "tray" }],
     perch: [0.5],
     Content: Beli,
+  },
+  {
+    id: "running",
+    size: "md",
+    act: "run",
+    len: 85,
+    crew: [{ hat: HAT.orange }],
+    perch: [0.84],
+    Content: Running,
   },
   {
     id: "banner",
@@ -590,7 +655,7 @@ export const BLOCKS = [
 export const HELPERS = BLOCKS.reduce((n, b) => n + b.crew.length, 0) + 1;
 
 /** grid footprint shown on each empty slot: columns × row units */
-export const FOOTPRINT = { sm: "1×3", tall: "1×5", md: "2×4", lg: "2×5", xl: "2×7", wide: "4×3" };
+export const FOOTPRINT = { xs: "1×2", sm: "1×3", tall: "1×5", md: "2×4", lg: "2×5", xl: "2×7", wide: "4×3" };
 
 /* ---- the timeline, in % of a viewport of scroll ---------------------- */
 export const INTRO = 35;
