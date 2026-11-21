@@ -409,6 +409,9 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
 .asm-pool-copy .eyebrow { color: #9fe3d2; }
 .asm-pool-copy .asm-note { max-width: 34ch; color: rgba(244, 239, 230, 0.8); }
 .asm-pool-copy .asm-inline { margin-top: 4px; color: #fff; }
+/* the caption floats over the water: touches go through it, except the link */
+.asm-pool-copy { pointer-events: none; }
+.asm-pool-copy a { pointer-events: auto; }
 
 /* myrel: the app's own violet, a phone rising out of the bottom edge */
 .asm-myrel-card {
@@ -786,6 +789,35 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
 
 /* easter egg: helpers can be poked */
 .bot .bot-hop { pointer-events: auto; cursor: pointer; }
+
+/* the scuba tile's diver */
+.bot.is-scuba .torso { fill: #1f2a3a; }
+.bot .zip { stroke: var(--hat); stroke-width: 1.6; stroke-linecap: round; }
+.bot .fin { fill: var(--hat); stroke: var(--ink); stroke-width: 1.1; stroke-linejoin: round; }
+.bot .tank rect { fill: #f5b300; stroke: var(--ink); stroke-width: 1.2; }
+.bot .tank .valve { fill: #8a8f98; }
+.bot .mask-strap { stroke: #1f2a3a; stroke-width: 2.2; }
+.bot .mask { fill: rgba(120, 215, 235, 0.42); stroke: #1f2a3a; stroke-width: 1.8; }
+.bot .mask-glint { stroke: rgba(255, 255, 255, 0.85); stroke-width: 1.1; stroke-linecap: round; }
+.bot .snorkel { fill: none; stroke: #f5b300; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.bot .bubble {
+  fill: rgba(150, 220, 240, 0.35);
+  stroke: #5fb8d6;
+  stroke-width: 0.6;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: asm-bubble 2.6s ease-in infinite;
+}
+.bot .bubble:nth-of-type(2) { animation-delay: -0.9s; }
+.bot .bubble:nth-of-type(3) { animation-delay: -1.8s; }
+@keyframes asm-bubble {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(2px, -11px) scale(1.15); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bot .bubble { animation: none; opacity: 0.8; }
+}
 .bot.is-poked .bot-hop { animation: asm-poke 0.5s cubic-bezier(0.3, 0.7, 0.4, 1); }
 @keyframes asm-poke {
   0% { transform: translateY(0); }

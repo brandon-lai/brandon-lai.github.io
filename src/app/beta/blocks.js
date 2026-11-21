@@ -755,7 +755,7 @@ export const BLOCKS = [
     act: "push",
     from: "left",
     len: 65,
-    crew: [{ hat: HAT.violet }],
+    crew: [{ hat: HAT.violet, outfit: "scuba" }],
     perch: [0.7],
     Content: Also,
   },

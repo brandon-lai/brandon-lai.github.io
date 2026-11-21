@@ -157,7 +157,7 @@ const SAYS = {
   rockpool: "Mind the anemones.",
   myrel: "It never forgets a birthday.",
   smoodi: "Smoothie? It cleans up after itself.",
-  also: "Bring a snorkel.",
+  also: "Equalizing. Back in a sec.",
   quote: "Words to build by.",
   beli: "Table for one?",
   running: "Can\u2019t talk. Tempo run.",
@@ -282,7 +282,7 @@ export default function Assemble() {
 
             <div className="asm-bots" aria-hidden="true">
               {BLOCKS.flatMap((b) =>
-                b.crew.map((m, i) => <Bot key={`${b.id}:${i}`} id={`${b.id}:${i}`} hat={m.hat} tool={m.tool} prop={m.prop} />),
+                b.crew.map((m, i) => <Bot key={`${b.id}:${i}`} id={`${b.id}:${i}`} hat={m.hat} tool={m.tool} prop={m.prop} outfit={m.outfit} />),
               )}
               <Bot id="foreman" hat="#FFD23F" />
               <div className="asm-sign" data-fx="foreman:sign">
