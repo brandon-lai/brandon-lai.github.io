@@ -226,7 +226,7 @@ a.asm-inline:hover { text-decoration: underline; }
   align-items: center;
   gap: 14px;
   padding: 11px 0;
-  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 .asm-work li:first-child { border-top: 0; }
 .asm-work img { border-radius: 8px; background: var(--raised); }
@@ -758,36 +758,73 @@ a.asm-inline:hover { text-decoration: underline; }
 .asm-powered { font-weight: 700; color: #fc4c02; }
 .asm-powered:hover { text-decoration: underline; text-underline-offset: 3px; }
 
-.asm-ranks { display: grid; margin: 0; padding: 0; list-style: none; }
+/* Beli: the Been list, as the app lays it out */
+.asm-beli { --beli-green: #2f9a5e; --beli-ring: #dcdcdc; }
+.asm-beli-head { display: grid; gap: 10px; }
+.asm-beli-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.asm-beli-title svg { color: var(--ink-2); margin-top: 3px; }
+.asm-beli-tabs {
+  display: flex;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.asm-beli-tabs span { padding-bottom: 8px; opacity: 0.7; }
+.asm-beli-tabs .is-active { color: var(--ink); opacity: 1; box-shadow: inset 0 -2.5px 0 var(--ink); }
+
+.asm-ranks {
+  display: grid;
+  grid-template-rows: repeat(var(--rows, 5), auto);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  column-gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 .asm-ranks li {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  padding: 8px 0;
-  border-top: 1px solid var(--line);
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
 }
-.asm-ranks li:first-child { border-top: 0; }
-.asm-rank { font: 600 13px/1 var(--asm-mono); color: var(--ink-3); }
-.asm-place { display: grid; gap: 2px; min-width: 0; }
+.asm-place { display: grid; gap: 1px; min-width: 0; }
 .asm-place b,
 .asm-place span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.asm-place b { font-size: 15px; letter-spacing: -0.01em; }
-.asm-place span { font-size: 12.5px; color: var(--ink-3); }
+.asm-place b { font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+.asm-place span { font-size: 13px; line-height: 1.35; color: var(--ink-2); }
 .asm-score {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 2px solid currentColor;
+  width: 42px;
+  height: 42px;
+  border: 1.5px solid var(--beli-ring);
   border-radius: 50%;
-  font-size: 13.5px;
+  background: var(--raised);
+  font-size: 14px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: #1a9a68;
+  color: var(--beli-green);
 }
-.asm-score[data-tone="mid"] { color: #c98f00; }
-.asm-score[data-tone="low"] { color: #e5484d; }
+.asm-beli .asm-foot { padding-top: 4px; }
+
+@media (max-width: 700px) {
+  .asm-ranks { grid-auto-flow: row; grid-template-rows: none; grid-template-columns: minmax(0, 1fr); }
+  .asm-beli-title { font-size: 21px; }
+}
 
 /* served row by row while the waiter crosses */
 .asm-beli [data-step] { transition: opacity 0.3s var(--ease), transform 0.45s var(--ease); }
@@ -798,5 +835,5 @@ a.asm-inline:hover { text-decoration: underline; }
 
 @media (prefers-color-scheme: dark) {
   .asm-sample { color: #f5c84b; }
-  .asm-score { color: #3fcf8e; }
+  .asm-beli { --beli-green: #4cc788; --beli-ring: #3a3a40; }
 }

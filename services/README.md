@@ -1,19 +1,22 @@
-# Live data: Beli + Strava
+# Live data: Strava (and Beli, by hand)
 
-The Strava and Beli blocks on `/beta` read `src/app/data/live/*.json`. The
-deploy workflow runs `node services/sync.mjs` before every build, and it
-rebuilds on its own every six hours, so the site stays current with nothing
-to do by hand.
+The Strava block on `/beta` reads `src/app/data/live/strava.json`. The deploy
+workflow runs `node services/sync.mjs` before every build, and it rebuilds on
+its own every six hours, so once Strava is connected it stays current.
+
+The Beli block reads `src/app/data/beli.json`, which is edited by hand from
+the app (Restaurants → Been, sorted by score). It shows the leading run of
+ranks, up to ten, so a missing rank cuts the list off there.
 
 | file | what |
 |------|------|
 | `sync.mjs` | runs both services and writes the JSON; never fails the build |
 | `strava.mjs` | official Strava API: last 7 days, year-to-date, recent public activities |
-| `beli.mjs` | our Beli client: your ranked lists and want-to-try |
+| `beli.mjs` | our Beli client, parked: `--check` tells you if Beli's login opens up again |
 | `strava-auth.mjs` | one-time Strava connection that stores the repo secrets |
 | `lib.mjs` | shared helpers (polyline decoding, route shapes, prompts) |
 
-Until a service has synced, its block shows the committed sample data with a
+Until Strava has synced, its block shows the committed sample data with a
 "Sample data" tag.
 
 ## Connect Strava (once)
@@ -29,7 +32,7 @@ Only activities set to **Everyone** are shown. Routes are drawn as a bare
 shape, with no map, and the first and last 450 m are cut off so nothing points
 at where a run starts.
 
-## Connect Beli
+## Beli (parked)
 
 Beli has no public API. `beli.mjs` speaks the private API its app uses, as
 documented by [jcjc-dev/beli-mcp](https://github.com/jcjc-dev/beli-mcp) (MIT),
@@ -38,12 +41,12 @@ it at any time, and using it is likely against their terms.
 
 1. Check it works with your account (it asks for the password, hidden):
    `node services/beli.mjs --check`
-2. If it does, add `BELI_PHONE` (e.g. `+15551234567`) and `BELI_PASSWORD` as
-   repository secrets under Settings → Secrets and variables → Actions.
+2. If it does, wire `fetchBeli` back into `sync.mjs` (it was removed while
+   the login refused outside clients) and add `BELI_PHONE` and `BELI_PASSWORD`
+   as repository secrets.
 
 As of 2026-11-20, Beli's login refused requests from outside its app (403)
-even for malformed input. If `--check` shows a 403, the automatic sync can't
-log in, and the block keeps showing whatever `beli.json` holds.
+even for malformed input, so the block uses the hand-maintained list.
 
 ## Run it by hand
 

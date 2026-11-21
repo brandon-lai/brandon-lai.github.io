@@ -1,0 +1,18 @@
+{
+  "note": "Hand-maintained from the Beli app (Restaurants → Been, sorted by score). The /beta block shows the leading run of ranks, up to 10.",
+  "asOf": "2026-11-21",
+  "places": [
+    { "rank": 1, "name": "Kjolle", "price": "$$$$", "cuisines": ["Peruvian"], "location": "Barranco, Lima, Peru", "score": 10.0 },
+    { "rank": 2, "name": "NOUILLE VIVANTE", "price": "€", "cuisines": ["Chinese"], "location": "Vivienne, Paris, France", "score": 10.0 },
+    { "rank": 3, "name": "XI An Dining", "price": null, "cuisines": ["Chinese"], "location": "Sainte-Avoye, Paris, France", "score": 10.0 },
+    { "rank": 4, "name": "Umami Omakase", "price": "$$$$", "cuisines": ["Japanese", "Sushi", "Omakase"], "location": "North Cambridge, Cambridge, MA", "score": 10.0 },
+    { "rank": 5, "name": "Ceres", "price": "$$$", "cuisines": ["Pizza", "Italian"], "location": "Little Italy, Manhattan", "score": 10.0 },
+    { "rank": 6, "name": "NUBIANI - Koreatown", "price": "$$$$", "cuisines": ["Korean", "Barbecue", "Steakhouse"], "location": "Midtown South, Manhattan", "score": 10.0 },
+    { "rank": 7, "name": "Restaurant 20 Victoria", "price": "$$$$", "cuisines": ["Mexican", "French"], "location": "Downtown Yonge East, Toronto, ON, Canada", "score": 10.0 },
+    { "rank": 8, "name": "Mérito", "price": "$$$$", "cuisines": ["Venezuelan", "Peruvian"], "location": "Barranco, Lima, Peru", "score": 9.9 },
+    { "rank": 10, "name": "Kang Ho Dong Baekjeong", "price": "$$$$", "cuisines": ["Barbecue", "Korean"], "location": "Koreatown, Los Angeles, CA", "score": 9.9 },
+    { "rank": 11, "name": "Tsumo Omakase", "price": "$$$", "cuisines": ["Japanese", "Omakase", "Sushi"], "location": "Rose Hill, Manhattan", "score": 9.9 },
+    { "rank": 12, "name": "Pho Ngon Dat Viet", "price": "$$", "cuisines": ["Vietnamese"], "location": "Thornhill, Vaughan, ON, Canada", "score": 9.9 },
+    { "rank": 13, "name": "Rosie's Burgers", "price": "$", "cuisines": ["Burgers"], "location": "Queen Street West, Toronto, ON, Canada", "score": 9.9 }
+  ]
+}

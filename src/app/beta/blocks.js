@@ -2,7 +2,7 @@ import { ABOUT, SOCIALS } from "../data/site";
 import { EXPERIENCE } from "../data/experience";
 import { ArrowUpRight, LinkedIn } from "../components/Icons";
 import STRAVA from "../data/live/strava.json";
-import BELI from "../data/live/beli.json";
+import BELI from "../data/beli.json";
 
 /**
  * The page, block by block, and the act that builds each one.
@@ -327,38 +327,61 @@ function Strava() {
   );
 }
 
-const tone = (score) => (score >= 7 ? "high" : score >= 4 ? "mid" : "low");
+/** the leading run of ranks (a gap means a row is still missing), up to ten */
+function topTen(places) {
+  const byRank = [...places].sort((a, b) => a.rank - b.rank);
+  const out = [];
+  for (const p of byRank) {
+    if (p.rank !== out.length + 1 || out.length === 10) break;
+    out.push(p);
+  }
+  return out;
+}
 
+const asOf = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+
+/** laid out like Beli's own Been list: rank and name, price and cuisine, place, score ring */
 function Beli() {
-  const b = BELI;
-  const top = b.top.slice(0, 5);
+  const top = topTen(BELI.places);
   return (
     <div className="asm-pad asm-beli">
-      <div className="asm-head">
-        <div className="eyebrow">Beli · my top spots</div>
-        {b.sample && <span className="asm-sample">Sample data</span>}
+      <div className="asm-beli-head">
+        <div className="asm-beli-title">
+          Restaurants <ChevronDown />
+        </div>
+        <div className="asm-beli-tabs" aria-hidden="true">
+          <span className="is-active">Been</span>
+          <span>Want to Try</span>
+          <span>Recs</span>
+        </div>
       </div>
-      <ol className="asm-ranks">
-        {top.map((p, i) => (
-          <li key={`${p.name}-${i}`} data-step={i + 1}>
-            <span className="asm-rank">{i + 1}</span>
+      <ol className="asm-ranks" style={{ "--rows": Math.ceil(top.length / 2) }}>
+        {top.map((p) => (
+          <li key={p.rank} data-step={p.rank}>
             <span className="asm-place">
-              <b>{p.name}</b>
-              <span>{[p.area, p.cuisine, p.price ? "$".repeat(p.price) : null].filter(Boolean).join(" · ")}</span>
+              <b>
+                {p.rank}. {p.name}
+              </b>
+              <span>{[p.price, p.cuisines.join(", ")].filter(Boolean).join(" \u2022 ")}</span>
+              <span>{p.location}</span>
             </span>
-            <span className="asm-score" data-tone={tone(p.score)}>
-              {p.score.toFixed(1)}
-            </span>
+            <span className="asm-score">{p.score.toFixed(1)}</span>
           </li>
         ))}
       </ol>
       <div className="asm-foot" data-step={top.length + 1}>
-        <span>
-          <b>{b.counts.been}</b> ranked · <b>{b.counts.wantToTry}</b> on my want-to-try
-        </span>
-        {b.recent[0] && <span>Latest: {b.recent[0].name}</span>}
+        <span>My top {top.length} on Beli, by score</span>
+        <span>{asOf(BELI.asOf)}</span>
       </div>
     </div>
+  );
+}
+
+function ChevronDown() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M3.5 6l4.5 4.5L12.5 6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 
@@ -514,9 +537,9 @@ export const BLOCKS = [
   },
   {
     id: "beli",
-    size: "md",
+    size: "lg",
     act: "serve",
-    len: 90,
+    len: 110,
     crew: [{ hat: HAT.green, tool: "tray" }],
     perch: [0.5],
     Content: Beli,

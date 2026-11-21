@@ -1,16 +1,19 @@
 /**
- * Pulls Beli and Strava into src/app/data/live/*.json, which /beta reads at
+ * Pulls Strava into src/app/data/live/strava.json, which /beta reads at
  * build time. The deploy workflow runs this before every build, including a
  * scheduled one every six hours, so the site keeps itself current.
  *
  * It never fails the build: a service with no secrets is skipped, and one
  * that errors keeps its last good file (restored from the Actions cache), so
- * an outage at Beli or Strava only means slightly older numbers.
+ * an outage at Strava only means slightly older numbers.
+ *
+ * Beli isn't synced: its login refuses outside clients, so the Beli block
+ * reads the hand-maintained src/app/data/beli.json instead. beli.mjs is kept
+ * so `node services/beli.mjs --check` can tell when that changes.
  *
  *   node services/sync.mjs
  */
 import { fileURLToPath } from "node:url";
-import { fetchBeli } from "./beli.mjs";
 import { fetchStrava } from "./strava.mjs";
 import { readJson, warn, writeJson } from "./lib.mjs";
 
@@ -18,12 +21,6 @@ const out = (name) => fileURLToPath(new URL(`../src/app/data/live/${name}.json`,
 const env = process.env;
 
 const jobs = [
-  {
-    name: "beli",
-    ready: env.BELI_PHONE && env.BELI_PASSWORD,
-    run: () => fetchBeli({ phone: env.BELI_PHONE, password: env.BELI_PASSWORD }),
-    summary: (d) => `${d.counts.been} ranked, ${d.counts.wantToTry} want-to-try`,
-  },
   {
     name: "strava",
     ready: env.STRAVA_CLIENT_ID && env.STRAVA_CLIENT_SECRET && env.STRAVA_REFRESH_TOKEN,
