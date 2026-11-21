@@ -352,9 +352,11 @@ function Myrel() {
         <p className="asm-note">A private notebook for the people in your life. Jot what matters, get nudged to catch up, swap cards by QR.</p>
       </div>
       <div className="asm-myrel-phone" ref={box}>
-        {MYREL.map((s, k) => (
-          <img key={s.src} src={s.src} alt={s.alt} data-on={k === i || undefined} loading="lazy" />
-        ))}
+        <div className="asm-myrel-screen">
+          {MYREL.map((s, k) => (
+            <img key={s.src} src={s.src} alt={s.alt} data-on={k === i || undefined} loading="lazy" />
+          ))}
+        </div>
       </div>
     </div>
   );
