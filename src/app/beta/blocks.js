@@ -397,8 +397,12 @@ function Beli() {
       <BeliRows rows={served} ranked steps hidden={!isDefault} />
       {!isDefault && <BeliRows rows={rows} ranked={view === "been"} />}
       <div className="asm-foot" data-step={served.length + 1}>
-        <span>{view === "been" ? `My top ${rows.length}, by score` : "Next on my list"}</span>
-        <span>{asOf(BELI.asOf)}</span>
+        <span>
+          {view === "been" ? `My top ${rows.length}, by score` : "Next on my list"} · {asOf(BELI.asOf)}
+        </span>
+        <a className="asm-beli-profile" href={BELI.profile} target="_blank" rel="noreferrer">
+          @{BELI.profile.split("/").pop()} on Beli <ArrowUpRight width={13} height={13} />
+        </a>
       </div>
     </div>
   );
