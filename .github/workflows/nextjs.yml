@@ -12,6 +12,10 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+  # Rebuild every six hours so the Beli and Strava panels on /beta stay current
+  schedule:
+    - cron: "23 */6 * * *"
+
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
@@ -73,6 +77,28 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+      # Live data for /beta. The last good sync is kept in the Actions cache, so
+      # if Beli or Strava is down the site still builds, just with older numbers.
+      # Only the synced JSON is cached; credentials stay in repository secrets.
+      - name: Restore last synced data
+        uses: actions/cache/restore@v4
+        with:
+          path: src/app/data/live
+          key: live-data-${{ github.run_id }}
+          restore-keys: live-data-
+      - name: Sync Beli and Strava
+        run: node services/sync.mjs
+        env:
+          BELI_PHONE: ${{ secrets.BELI_PHONE }}
+          BELI_PASSWORD: ${{ secrets.BELI_PASSWORD }}
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+          STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+      - name: Save synced data
+        uses: actions/cache/save@v4
+        with:
+          path: src/app/data/live
+          key: live-data-${{ github.run_id }}
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Upload artifact

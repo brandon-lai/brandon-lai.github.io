@@ -678,3 +678,125 @@ a.asm-inline:hover { text-decoration: underline; }
   .asm-front,
   .asm-hud { display: none; }
 }
+
+/* ---- live panels: Strava + Beli --------------------------------------- */
+.asm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 22px;
+}
+.asm-sample {
+  padding: 5px 9px;
+  border-radius: var(--pill);
+  background: color-mix(in srgb, #f5b300 18%, transparent);
+  color: #8a6100;
+  font: 600 10.5px/1 var(--asm-mono);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.asm-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.asm-foot b { color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.asm-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.asm-stats b {
+  display: block;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+.asm-stats span { font-size: 12.5px; color: var(--ink-3); }
+
+.asm-route-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  padding: 12px 16px 12px 12px;
+  border-radius: var(--radius-inner);
+  background: var(--raised);
+  box-shadow: 0 0 0 1px var(--line);
+  transition: box-shadow 0.25s var(--ease), transform 0.2s var(--ease);
+}
+.asm-route-card:hover { box-shadow: 0 0 0 1px var(--line-strong), var(--shadow-md); }
+.asm-route-card:active { transform: scale(0.99); }
+.asm-route-card:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.asm-route { display: block; width: 100%; height: 100%; max-height: 160px; }
+.asm-route path {
+  fill: none;
+  stroke: #fc4c02;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--draw, 1));
+}
+.asm-route path.ghost { stroke: var(--line-strong); stroke-width: 1.4; stroke-dasharray: none; stroke-dashoffset: 0; }
+.asm-route-none {
+  aspect-ratio: 10 / 7;
+  border-radius: 12px;
+  background-image: radial-gradient(circle, var(--line-strong) 1px, transparent 1.4px);
+  background-size: 10px 10px;
+}
+.asm-route-meta { display: grid; gap: 3px; min-width: 0; }
+.asm-route-meta b,
+.asm-route-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asm-route-meta b { font-size: 15px; letter-spacing: -0.01em; }
+.asm-route-meta span { font-size: 13px; color: var(--ink-3); }
+.asm-powered { font-weight: 700; color: #fc4c02; }
+.asm-powered:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.asm-ranks { display: grid; margin: 0; padding: 0; list-style: none; }
+.asm-ranks li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+.asm-ranks li:first-child { border-top: 0; }
+.asm-rank { font: 600 13px/1 var(--asm-mono); color: var(--ink-3); }
+.asm-place { display: grid; gap: 2px; min-width: 0; }
+.asm-place b,
+.asm-place span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asm-place b { font-size: 15px; letter-spacing: -0.01em; }
+.asm-place span { font-size: 12.5px; color: var(--ink-3); }
+.asm-score {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #1a9a68;
+}
+.asm-score[data-tone="mid"] { color: #c98f00; }
+.asm-score[data-tone="low"] { color: #e5484d; }
+
+/* served row by row while the waiter crosses */
+.asm-beli [data-step] { transition: opacity 0.3s var(--ease), transform 0.45s var(--ease); }
+.asm .is-serving [data-step]:not(.is-on) { opacity: 0; transform: translateY(10px) scale(0.97); }
+
+.bot .tray .plate { fill: #e2e2e8; stroke: var(--ink); stroke-width: 1.1; }
+.bot .tray .cloche { fill: #f1f1f4; stroke: var(--ink); stroke-width: 1.1; }
+
+@media (prefers-color-scheme: dark) {
+  .asm-sample { color: #f5c84b; }
+  .asm-score { color: #3fcf8e; }
+}

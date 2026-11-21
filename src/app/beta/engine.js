@@ -39,6 +39,13 @@ const hash = (n) => {
 };
 const f1 = (n) => n.toFixed(1);
 
+/** a number ticking up toward its data-count, in the format it renders with */
+function setCount(el, k) {
+  const dec = +(el.dataset.dec || 0);
+  const v = (+el.dataset.count * k).toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  if (el.textContent !== v) el.textContent = v;
+}
+
 /* ---- helpers (the little builders) ------------------------------------ */
 function makeBot(el) {
   const part = (p) => el.querySelector(`[data-p="${p}"]`);
@@ -159,6 +166,7 @@ export function createAssembler(root) {
       tile: wrap.querySelector(".tile"),
       paint: wrap.querySelector("[data-paint]"),
       steps: [...wrap.querySelectorAll("[data-step]")],
+      counts: [...wrap.querySelectorAll("[data-count]")],
       bots: b.crew.map((_, k) => bots.get(`${b.id}:${k}`)),
       fxAll: [...root.querySelectorAll(`[data-fx^="${b.id}:"]`)],
       linesAll: [...root.querySelectorAll(`[data-line^="${b.id}:"]`)],
@@ -266,7 +274,8 @@ export function createAssembler(root) {
     a.tile.style.transform = "";
     a.tile.style.opacity = "0";
     a.tile.style.clipPath = "";
-    a.tile.classList.remove("is-skel");
+    a.tile.classList.remove("is-skel", "is-serving");
+    a.counts.forEach((el) => setCount(el, 0));
     a.wrap.removeAttribute("data-done");
     a.wrap.style.setProperty("--slot", "1");
     if (a.paint) a.paint.style.clipPath = "inset(0 100% 0 0)";
@@ -281,7 +290,8 @@ export function createAssembler(root) {
     a.tile.style.transform = "";
     a.tile.style.opacity = "1";
     a.tile.style.clipPath = "";
-    a.tile.classList.remove("is-skel");
+    a.tile.classList.remove("is-skel", "is-serving");
+    a.counts.forEach((el) => setCount(el, 1));
     a.wrap.setAttribute("data-done", "");
     a.wrap.style.setProperty("--slot", "0");
     if (a.paint) a.paint.style.clipPath = "none";
@@ -594,6 +604,48 @@ export function createAssembler(root) {
       if (t < 0.44) bot.pose(ride, sc);
       else if (t < 0.66) bot.pose(hopPose(ride, perch(a, 0, c), ease(seg(t, 0.44, 0.66)), 90), sc);
       else bot.pose(perch(a, 0, c), sc);
+    },
+
+    /** a helper jogs in along the bottom while the route draws and the totals tick up */
+    run(t, a, c) {
+      const r = a.rect;
+      tileStyle(a.tile, { o: seg(t, 0, 0.08) });
+      a.wrap.style.setProperty("--draw", ease(seg(t, 0.14, 0.82)).toFixed(3));
+      const k = easeOut(seg(t, 0.12, 0.72));
+      a.counts.forEach((el) => setCount(el, k));
+      const bot = a.bots[0];
+      const footY = r.y + r.h - 6;
+      const endX = r.x + r.w - 34 * sc;
+      if (t < 0.84) {
+        const x = lerp(c.view.left - 70, endX, seg(t, 0.02, 0.82));
+        const w = walkPose(x / (4.2 * sc), 1.45);
+        bot.pose(
+          { x, y: footY + w.bob * 1.8, lean: 12, legL: w.legL, legR: w.legR, armL: -24 + w.armL * 1.3, armR: -24 + w.armR * 1.3 },
+          sc,
+        );
+      } else {
+        bot.pose(hopPose({ x: endX, y: footY }, perch(a, 0, c), ease(seg(t, 0.84, 1)), 70), sc);
+      }
+    },
+
+    /** a waiter crosses the top edge with a tray, and the list is served row by row */
+    serve(t, a, c) {
+      const r = a.rect;
+      tileStyle(a.tile, { o: seg(t, 0, 0.08) });
+      a.tile.classList.add("is-serving");
+      const q = seg(t, 0.1, 0.84);
+      const n = a.steps.length || 1;
+      a.steps.forEach((el) => el.classList.toggle("is-on", q >= ((+el.dataset.step - 0.7) / n) * 0.95));
+      const bot = a.bots[0];
+      const footY = r.y - 2;
+      const endX = r.x + r.w * (a.b.perch?.[0] ?? 0.5);
+      if (t < 0.86) {
+        const x = t < 0.1 ? lerp(c.view.left - 60, r.x + 20, ease(seg(t, 0, 0.1))) : lerp(r.x + 20, r.x + r.w - 30 * sc, q);
+        const w = walkPose(x / (6 * sc));
+        bot.pose({ x, y: footY + w.bob, legL: w.legL, legR: w.legR, armL: w.armL, armR: -174 + Math.sin(x / 20) * 4 }, sc);
+      } else {
+        bot.pose(hopPose({ x: r.x + r.w - 30 * sc, y: footY }, { ...perch(a, 0, c), x: endX }, ease(seg(t, 0.86, 1)), 30), sc);
+      }
     },
 
     /** the closing banner rolls out like a carpet */

@@ -1,6 +1,8 @@
 import { ABOUT, SOCIALS } from "../data/site";
 import { EXPERIENCE } from "../data/experience";
 import { ArrowUpRight, LinkedIn } from "../components/Icons";
+import STRAVA from "../data/live/strava.json";
+import BELI from "../data/live/beli.json";
 
 /**
  * The page, block by block, and the act that builds each one.
@@ -247,12 +249,127 @@ function Also() {
   );
 }
 
+
+/* ---- live panels: data synced by services/sync.mjs at build time ------- */
+const MILE = 1609.344;
+const day = (iso) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+const hm = (s) => {
+  const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+  return h ? `${h}h ${m}m` : `${m}m`;
+};
+const num = (v, dec = 0) => v.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+const FOOT = new Set(["Run", "TrailRun", "VirtualRun", "Walk", "Hike"]);
+
+function Strava() {
+  const s = STRAVA;
+  const metric = s.units === "metric";
+  const unit = metric ? "km" : "mi";
+  const d = (m) => m / (metric ? 1000 : MILE);
+  const last = s.recent.find((a) => a.route) ?? s.recent[0];
+  const effort = (a) => {
+    if (!a.distance || !a.movingTime) return hm(a.movingTime);
+    if (FOOT.has(a.sport)) {
+      const per = a.movingTime / d(a.distance);
+      const mm = Math.floor(per / 60), ss = Math.round(per % 60);
+      return `${ss === 60 ? mm + 1 : mm}:${String(ss === 60 ? 0 : ss).padStart(2, "0")} /${unit}`;
+    }
+    return `${num(d(a.distance) / (a.movingTime / 3600), 1)} ${metric ? "km/h" : "mph"}`;
+  };
+  const href = (a) => (a?.id ? `https://www.strava.com/activities/${a.id}` : "https://www.strava.com/");
+  return (
+    <div className="asm-pad asm-strava">
+      <div className="asm-head">
+        <div className="eyebrow">Strava · last 7 days</div>
+        {s.sample && <span className="asm-sample">Sample data</span>}
+      </div>
+      <div className="asm-stats">
+        <div>
+          <b data-count={d(s.week.distance)} data-dec="1">{num(d(s.week.distance), 1)}</b>
+          <span>{metric ? "kilometres" : "miles"}</span>
+        </div>
+        <div>
+          <b data-count={s.week.count}>{s.week.count}</b>
+          <span>{s.week.count === 1 ? "activity" : "activities"}</span>
+        </div>
+        <div>
+          <b>{hm(s.week.movingTime)}</b>
+          <span>moving</span>
+        </div>
+      </div>
+      {last && (
+        <a className="asm-route-card" href={href(last)} target="_blank" rel="noreferrer">
+          {last.route ? (
+            <svg className="asm-route" viewBox="0 0 100 70" aria-hidden="true">
+              <path className="ghost" d={last.route} />
+              <path d={last.route} pathLength="1" />
+            </svg>
+          ) : (
+            <span className="asm-route asm-route-none" aria-hidden="true" />
+          )}
+          <span className="asm-route-meta">
+            <b>{last.name}</b>
+            <span>
+              {num(d(last.distance), 1)} {unit} · {effort(last)}
+            </span>
+            <span>{day(last.date)}</span>
+          </span>
+        </a>
+      )}
+      <div className="asm-foot">
+        <span>
+          {new Date(s.updated).getUTCFullYear()} so far: <b data-count={d(s.ytd.run.distance)}>{num(d(s.ytd.run.distance))}</b> {unit} run
+        </span>
+        <a className="asm-powered" href={href(last)} target="_blank" rel="noreferrer">
+          Powered by Strava
+        </a>
+      </div>
+    </div>
+  );
+}
+
+const tone = (score) => (score >= 7 ? "high" : score >= 4 ? "mid" : "low");
+
+function Beli() {
+  const b = BELI;
+  const top = b.top.slice(0, 5);
+  return (
+    <div className="asm-pad asm-beli">
+      <div className="asm-head">
+        <div className="eyebrow">Beli · my top spots</div>
+        {b.sample && <span className="asm-sample">Sample data</span>}
+      </div>
+      <ol className="asm-ranks">
+        {top.map((p, i) => (
+          <li key={`${p.name}-${i}`} data-step={i + 1}>
+            <span className="asm-rank">{i + 1}</span>
+            <span className="asm-place">
+              <b>{p.name}</b>
+              <span>{[p.area, p.cuisine, p.price ? "$".repeat(p.price) : null].filter(Boolean).join(" · ")}</span>
+            </span>
+            <span className="asm-score" data-tone={tone(p.score)}>
+              {p.score.toFixed(1)}
+            </span>
+          </li>
+        ))}
+      </ol>
+      <div className="asm-foot" data-step={top.length + 1}>
+        <span>
+          <b>{b.counts.been}</b> ranked · <b>{b.counts.wantToTry}</b> on my want-to-try
+        </span>
+        {b.recent[0] && <span>Latest: {b.recent[0].name}</span>}
+      </div>
+    </div>
+  );
+}
+
 function Banner() {
   return (
     <div className="asm-banner">
       <div>
         <div className="asm-banner-title">That&rsquo;s the whole page.</div>
-        <div className="asm-note">Twelve blocks, fifteen helpers, one scroll.</div>
+        <div className="asm-note">
+          {BLOCKS.length} blocks, {HELPERS} helpers, one scroll.
+        </div>
       </div>
       <a className="btn" href={LINKEDIN} target="_blank" rel="noreferrer">
         Say hi on LinkedIn <ArrowUpRight width={15} height={15} />
@@ -387,6 +504,24 @@ export const BLOCKS = [
     Content: Also,
   },
   {
+    id: "strava",
+    size: "md",
+    act: "run",
+    len: 85,
+    crew: [{ hat: HAT.orange }],
+    perch: [0.84],
+    Content: Strava,
+  },
+  {
+    id: "beli",
+    size: "md",
+    act: "serve",
+    len: 90,
+    crew: [{ hat: HAT.green, tool: "tray" }],
+    perch: [0.5],
+    Content: Beli,
+  },
+  {
     id: "banner",
     size: "wide",
     act: "unroll",
@@ -396,6 +531,9 @@ export const BLOCKS = [
     Content: Banner,
   },
 ];
+
+/** every crew member, plus the foreman who opens and closes the show */
+export const HELPERS = BLOCKS.reduce((n, b) => n + b.crew.length, 0) + 1;
 
 /** grid footprint shown on each empty slot: columns × row units */
 export const FOOTPRINT = { sm: "1×3", tall: "1×5", md: "2×4", lg: "2×5", xl: "2×7", wide: "4×3" };

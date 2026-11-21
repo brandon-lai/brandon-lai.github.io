@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { BLOCKS, FOOTPRINT, MAX_CUBES, TIMELINE } from "./blocks";
+import { BLOCKS, FOOTPRINT, HELPERS, MAX_CUBES, TIMELINE } from "./blocks";
 import { Bot, IsoCube } from "./Bot";
 import { createAssembler } from "./engine";
 
@@ -255,7 +255,7 @@ export default function Assemble() {
       </div>
 
       <section className="asm-outro">
-        <p>That&rsquo;s the page, put together by fifteen helpers while you scrolled.</p>
+        <p>That&rsquo;s the page, put together by {HELPERS} helpers while you scrolled.</p>
         <button type="button" className="btn" onClick={replay}>
           Take it apart and build it again
         </button>

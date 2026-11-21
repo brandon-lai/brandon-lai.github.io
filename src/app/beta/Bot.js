@@ -70,6 +70,13 @@ export function Bot({ id, hat, tool, prop }) {
                 </g>
               )}
               {tool === "batons" && <rect className="baton" x="6" y="-15" width="2.2" height="11" rx="1" />}
+              {tool === "tray" && (
+                <g className="tray">
+                  <path className="cloche" d="M1.5 -11.6A5.5 5.5 0 0 0 12.5 -11.6Z" />
+                  <circle className="cloche" cx="7" cy="-5.2" r="1.2" />
+                  <rect className="plate" x="-1.5" y="-13.6" width="17" height="2.2" rx="1.1" />
+                </g>
+              )}
             </g>
           </g>
           {tool === "laptop" && (
