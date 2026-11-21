@@ -247,7 +247,9 @@ function Tiramisu() {
  * while the tile is on screen (and unloads after it leaves), only where the
  * browser has WebGPU and motion is welcome, and shows only once the pool says
  * it is drawing; until then, and for everyone else, the still stays up.
- * The frame ignores the pointer so scrolling the page never gets caught in it.
+ * In ?embed mode the pool answers touch and hover (ripples, splashes, fleeing
+ * fish) but leaves the wheel and vertical swipes to this page, so scrolling
+ * over it still drives the build.
  */
 const POOL = "https://rockpool-tide.vercel.app";
 
@@ -292,7 +294,7 @@ function Rockpool() {
         </picture>
         {live && (
           <iframe
-            src={`${POOL}/?clean&hour=10&seed=7`}
+            src={`${POOL}/?embed&hour=10&seed=7`}
             title="Rockpool, running live"
             tabIndex={-1}
             aria-hidden="true"
@@ -308,7 +310,7 @@ function Rockpool() {
           <span data-step="2">Rockpool</span>
         </div>
         <p className="asm-note">
-          <span data-step="3">A tide pool running in your browser right now: WebGPU water, caustics and creatures. Not a video.</span>
+          <span data-step="3">A tide pool running live in your browser: WebGPU water, caustics and creatures. Touch the water.</span>
         </p>
         <a className="asm-inline" href={POOL} target="_blank" rel="noreferrer">
           <span data-step="3">Wade in</span> <ArrowUpRight width={13} height={13} />
@@ -731,7 +733,7 @@ export const BLOCKS = [
       { t: "+ <Eyebrow>Side project · live</Eyebrow>", add: true, step: 1 },
       { t: "+ <LivePool webgpu tide={10} />", add: true, draw: true },
       { t: "+ <Title>Rockpool</Title>", add: true, step: 2 },
-      { t: "+ <Note>Not a video.</Note>", add: true, step: 3 },
+      { t: "+ <Note>Touch the water.</Note>", add: true, step: 3 },
       { t: "  ✓ 60 fps, wet", ok: true },
     ],
     Content: Rockpool,

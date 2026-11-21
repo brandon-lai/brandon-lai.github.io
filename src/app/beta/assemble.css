@@ -395,8 +395,9 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
 }
 .asm-pool-view img,
 .asm-pool-view iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; }
+/* not touchable until it is the live pool (the still and a loading frame aren't) */
 .asm-pool-view iframe { pointer-events: none; opacity: 0; transition: opacity 0.8s var(--ease); }
-.asm-pool-view iframe[data-on] { opacity: 1; }
+.asm-pool-view iframe[data-on] { pointer-events: auto; opacity: 1; }
 .asm-pool-copy {
   position: absolute;
   inset: auto 0 0;
