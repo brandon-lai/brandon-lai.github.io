@@ -140,6 +140,73 @@ function Fx({ b }) {
   }
 }
 
+/**
+ * Easter egg: poke a helper and it hops and says something about the block
+ * it built. Poke again for small talk. Plus a hello for anyone in devtools.
+ */
+const SAYS = {
+  hero: "Hard hats on, please.",
+  now: "I carried all of that.",
+  linkedin: "Connect with him. I\u2019ll wait.",
+  watches: "That watch keeps real time. Check it.",
+  work: "Five jobs. One crew.",
+  bench: "Steel. I polished it myself.",
+  marathon: "26.2? I took the elevator.",
+  tennis: "Quiet, please.",
+  tiramisu: "Press the stamp. Go on.",
+  island: "Still pouring the sand.",
+  smoodi: "Smoothie? It cleans up after itself.",
+  also: "Bring a snorkel.",
+  quote: "Words to build by.",
+  beli: "Table for one?",
+  running: "Can\u2019t talk. Tempo run.",
+  banner: "That\u2019s a wrap!",
+  foreman: "Union break in five.",
+};
+const SMALL_TALK = ["Hey!", "That tickles.", "Back to work.", "I\u2019m on the clock.", "Do you mind?"];
+
+function pokeable(root) {
+  if (!root) return;
+  console.log(
+    `%cHi, curious one.%c This page was put together by ${HELPERS} helpers while you scrolled. Try poking one.`,
+    "font-weight:700",
+    "",
+  );
+  const layer = root.querySelector(".asm-bots");
+  const bubble = document.createElement("div");
+  bubble.className = "asm-say";
+  bubble.setAttribute("role", "status");
+  layer.appendChild(bubble);
+  const pokes = new WeakMap();
+  let hideTimer = 0;
+  const onClick = (e) => {
+    const bot = e.target.closest?.(".bot");
+    if (!bot) return;
+    const n = pokes.get(bot) ?? 0;
+    pokes.set(bot, n + 1);
+    bot.classList.remove("is-poked");
+    void bot.getBoundingClientRect();
+    bot.classList.add("is-poked");
+    const block = bot.dataset.bot.split(":")[0];
+    bubble.textContent = n === 0 ? SAYS[block] ?? "Hi!" : SMALL_TALK[(n - 1) % SMALL_TALK.length];
+    const m = /translate3d\(([-\d.]+)px,\s*([-\d.]+)px,\s*0(?:px)?\)\s*scale\(([-\d.]+),\s*([-\d.]+)\)/.exec(bot.style.transform);
+    if (!m) return;
+    const [x, y, s] = [+m[1], +m[2], Math.abs(+m[4])];
+    bubble.style.transform = `translate3d(${x + 24}px, ${y + 66 - 52 * s}px, 0)`;
+    bubble.classList.remove("is-on");
+    void bubble.offsetWidth;
+    bubble.classList.add("is-on");
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => bubble.classList.remove("is-on"), 2400);
+  };
+  root.addEventListener("click", onClick);
+  return () => {
+    clearTimeout(hideTimer);
+    root.removeEventListener("click", onClick);
+    bubble.remove();
+  };
+}
+
 export default function Assemble() {
   const root = useRef(null);
 
@@ -148,12 +215,13 @@ export default function Assemble() {
     return () => engine.destroy();
   }, []);
 
+  useEffect(() => pokeable(root.current), []);
+
   const track = () => root.current?.querySelector(".asm-track");
   const skip = () => {
     const t = track();
     if (t) window.scrollTo(0, t.offsetTop + t.offsetHeight - window.innerHeight);
   };
-  const replay = () => window.scrollTo(0, 0);
 
   return (
     <div className="asm" ref={root} data-phase="intro">
@@ -254,12 +322,6 @@ export default function Assemble() {
         </div>
       </div>
 
-      <section className="asm-outro">
-        <p>That&rsquo;s the page, put together by {HELPERS} helpers while you scrolled.</p>
-        <button type="button" className="btn" onClick={replay}>
-          Take it apart and build it again
-        </button>
-      </section>
     </div>
   );
 }

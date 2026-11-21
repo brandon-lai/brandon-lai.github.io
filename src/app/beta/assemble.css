@@ -200,6 +200,7 @@ a.asm-inline:hover { text-decoration: underline; }
 .asm-dial .d-hand { stroke: #1d2f28; stroke-width: 3.4; stroke-linecap: round; }
 .asm-dial .d-min { stroke-width: 2.4; }
 .asm-dial .d-pin { fill: var(--asm-gold); }
+.asm-dial .d-sec { stroke: #c0563a; stroke-width: 1.1; stroke-linecap: round; }
 .asm-dial.is-sketch * {
   fill: none;
   stroke: var(--ink-3);
@@ -345,6 +346,16 @@ a.asm-inline:hover { text-decoration: underline; }
   text-align: center;
   text-transform: uppercase;
   transform: rotate(-12deg);
+}
+/* easter egg: the stamp can be pressed again */
+button.asm-badge { padding: 0; background: none; font-family: inherit; cursor: pointer; transition: scale 0.2s var(--ease); }
+button.asm-badge:hover { scale: 1.04; }
+button.asm-badge:focus-visible { outline: 2px solid #e5484d; outline-offset: 4px; }
+button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
+@keyframes asm-restamp {
+  0% { scale: 1.7; opacity: 0; }
+  55% { scale: 0.92; opacity: 1; }
+  100% { scale: 1; }
 }
 
 .asm-logo { margin-bottom: auto; border-radius: 10px; }
@@ -704,18 +715,92 @@ svg.asm-island path {
 .asm-skip:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .asm[data-phase="done"] .asm-skip { display: none; }
 
-.asm-outro {
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 18px;
-  min-height: 70vh;
-  padding: 80px 24px;
-  text-align: center;
-  color: var(--ink-2);
+/* easter egg: helpers can be poked */
+.bot .bot-hop { pointer-events: auto; cursor: pointer; }
+.bot.is-poked .bot-hop { animation: asm-poke 0.5s cubic-bezier(0.3, 0.7, 0.4, 1); }
+@keyframes asm-poke {
+  0% { transform: translateY(0); }
+  35% { transform: translateY(-10px); }
+  60% { transform: translateY(0) scale(1.06, 0.92); }
+  100% { transform: none; }
 }
-.asm-outro p { margin: 0; font-size: 17px; }
-.asm-outro .btn { cursor: pointer; border: 0; font: inherit; font-weight: 600; }
+.asm-say {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  translate: -50% -100%;
+  padding: 7px 11px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--bg, #fff);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-md);
+  transition: opacity 0.18s var(--ease), scale 0.25s var(--ease);
+  scale: 0.9;
+}
+.asm-say::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  border-radius: 2px;
+  transform: translateX(-50%) rotate(45deg);
+}
+.asm-say.is-on { opacity: 1; scale: 1; }
+
+/* the watch I'm designing, in 3D */
+.asm-bench {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(120% 95% at 72% 45%, #2e4a40, #15261f 58%, #0d1814);
+  color: #f3ebd9;
+}
+.asm-bench-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
+.asm-bench-canvas:active { cursor: grabbing; }
+.asm-bench-copy { position: absolute; top: 24px; left: 26px; display: grid; gap: 6px; max-width: 42%; pointer-events: none; }
+.asm-bench-copy .eyebrow { color: var(--asm-gold); }
+.asm-bench-copy .asm-note { color: rgba(243, 235, 217, 0.72); }
+.asm-bench-pick {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--pill);
+  background: rgba(243, 235, 217, 0.08);
+  backdrop-filter: blur(8px);
+}
+.asm-bench-pick button {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: var(--pill);
+  background: none;
+  color: rgba(243, 235, 217, 0.7);
+  font: 600 13px/1 inherit;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.18s var(--ease), color 0.18s var(--ease);
+}
+.asm-bench-pick button span { margin-left: 3px; font: 500 11px var(--asm-mono); opacity: 0.6; }
+.asm-bench-pick button:hover { color: #fff; }
+.asm-bench-pick button[aria-pressed="true"] { background: rgba(243, 235, 217, 0.16); color: #fff; }
+.asm-bench-pick button:focus-visible { outline: 2px solid var(--asm-gold); outline-offset: 2px; }
+.asm-bench-wait { position: absolute; right: 24px; bottom: 30px; font: 500 11px var(--asm-mono); color: rgba(243, 235, 217, 0.5); }
+@media (max-width: 700px) {
+  .asm-bench-copy { max-width: none; right: 26px; }
+}
 
 /* ---- keyframes -------------------------------------------------------- */
 @keyframes asm-blink {

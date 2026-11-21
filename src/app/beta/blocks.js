@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ABOUT, SOCIALS } from "../data/site";
 import { EXPERIENCE } from "../data/experience";
 import { ArrowUpRight, LinkedIn } from "../components/Icons";
 import RUNNING from "../data/live/running.json";
 import BELI from "../data/beli.json";
+import WatchBench from "./WatchBench";
 
 /**
  * The page, block by block, and the act that builds each one.
@@ -90,8 +91,24 @@ function Card() {
   );
 }
 
+/** the painted watch keeps the visitor's real time; the primer sketch stays at ten past */
 function Dial({ sketch }) {
   const ticks = Array.from({ length: 12 }, (_, i) => i);
+  const hands = useRef(null);
+  useEffect(() => {
+    if (sketch) return;
+    const [h, m, s] = hands.current.querySelectorAll("[data-hand]");
+    const tick = () => {
+      const d = new Date();
+      const sec = d.getSeconds(), min = d.getMinutes() + sec / 60, hr = (d.getHours() % 12) + min / 60;
+      h.setAttribute("transform", `rotate(${(hr * 30).toFixed(2)})`);
+      m.setAttribute("transform", `rotate(${(min * 6).toFixed(2)})`);
+      s.setAttribute("transform", `rotate(${sec * 6})`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [sketch]);
   return (
     <svg className={sketch ? "asm-dial is-sketch" : "asm-dial"} viewBox="-50 -50 100 100" aria-hidden="true">
       <circle r="44" className="d-case" />
@@ -99,8 +116,11 @@ function Dial({ sketch }) {
       {ticks.map((i) => (
         <path key={i} className="d-tick" d={`M0 ${i % 3 ? -33 : -30}V-36`} transform={`rotate(${i * 30})`} />
       ))}
-      <path className="d-hand" d="M0 4V-22" transform="rotate(-50)" />
-      <path className="d-hand d-min" d="M0 5V-31" transform="rotate(62)" />
+      <g ref={hands}>
+        <path data-hand="h" className="d-hand" d="M0 4V-22" transform="rotate(-50)" />
+        <path data-hand="m" className="d-hand d-min" d="M0 5V-31" transform="rotate(62)" />
+        <path data-hand="s" className="d-sec" d="M0 8V-33" transform="rotate(0)" />
+      </g>
       <circle r="2.4" className="d-pin" />
     </svg>
   );
@@ -177,6 +197,14 @@ function Tennis() {
   );
 }
 
+/** a semi-finalist deserves to be stamped as often as they like */
+function restamp(e) {
+  const el = e.currentTarget;
+  el.classList.remove("is-restamped");
+  void el.offsetWidth;
+  el.classList.add("is-restamped");
+}
+
 function Tiramisu() {
   return (
     <div className="stack asm-tiramisu">
@@ -188,10 +216,10 @@ function Tiramisu() {
         </svg>
         <span>Photo coming soon</span>
       </div>
-      <div className="asm-badge" aria-hidden="true">
+      <button type="button" className="asm-badge" onClick={restamp} aria-label="Semi-finalist stamp. Press it again.">
         <span>Semi</span>
         <span>finalist</span>
-      </div>
+      </button>
       <div className="eyebrow">Tiramisu World Cup</div>
       <div className="stat">Canada</div>
       <div className="stat-sub">Mascarpone, taken seriously</div>
@@ -284,10 +312,14 @@ function Quote() {
   );
 }
 
+function Bench() {
+  return <WatchBench />;
+}
+
 function Also() {
   return (
     <div className="asm-photo asm-also-photo">
-      <img src="/beta/scuba.jpg" alt="Brandon scuba diving with friends, mask on, regulator in" />
+      <img src="/beta/scuba.jpg" alt="Brandon scuba diving, mask on, bubbles rising" />
       <div className="asm-photo-cap">
         <div className="eyebrow">Also</div>
         <div className="asm-tags">
@@ -295,7 +327,7 @@ function Also() {
           <span>scuba</span>
           <span>snowboard</span>
         </div>
-        <div className="stat-sub">All at a respectable beginner level</div>
+        <div className="stat-sub">All at a respectable amateur level</div>
       </div>
     </div>
   );
@@ -540,6 +572,15 @@ export const BLOCKS = [
     crew: [{ hat: HAT.yellow, tool: "batons" }],
     perch: [0.1],
     Content: Work,
+  },
+  {
+    id: "bench",
+    size: "md",
+    act: "crane",
+    len: 75,
+    crew: [{ hat: HAT.yellow }],
+    perch: [0.72],
+    Content: Bench,
   },
   {
     id: "marathon",
