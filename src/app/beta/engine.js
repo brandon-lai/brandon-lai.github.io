@@ -81,6 +81,7 @@ function makeBot(el) {
       flag("is-cheer", p.cheer);
       flag("has-laptop", p.laptop);
       flag("is-flying", p.fly);
+      flag("is-riding", p.ride);
     },
   };
 }
@@ -670,8 +671,10 @@ export function createAssembler(root) {
       if (t < 0.84) {
         const w = walkPose(px / (6 * sc));
         pusher.pose({ x: px, y: footY + w.bob, lean: 16, legL: w.legL, legR: w.legR, armL: -74, armR: -86 }, sc);
-        const w2 = walkPose(rx / (5 * sc));
-        rider.pose({ x: rx, y: r.y - 2 + w2.bob, legL: w2.legL, legR: w2.legR, armL: 84 + Math.sin(t * 50) * 14, armR: -84 + Math.sin(t * 50) * 14 }, sc);
+        // log-rolling on top: feet stay planted on the roll and tread as it turns
+        const w2 = walkPose(rx / (3.2 * sc), 0.8);
+        const wob = Math.sin(t * 50) * 12;
+        rider.pose({ x: rx, y: r.y + 1, ride: true, lean: -4 + wob * 0.25, legL: w2.legL, legR: w2.legR, armL: 70 + wob, armR: -70 + wob }, sc);
       } else {
         const hq = ease(seg(t, 0.84, 1));
         pusher.pose(hopPose({ x: px, y: footY }, perch(a, 0, c), hq, 90), sc);

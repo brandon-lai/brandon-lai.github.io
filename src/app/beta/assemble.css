@@ -455,18 +455,34 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
 
 .asm-banner {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+  justify-content: center;
+  gap: 8px;
   height: 100%;
-  padding: 0 44px;
+  padding: 28px 32px;
+  text-align: center;
 }
 .asm-banner-title {
-  margin-bottom: 6px;
-  font-size: clamp(24px, 3vw, 36px);
+  font-size: clamp(26px, 3.2vw, 38px);
   font-weight: 700;
   letter-spacing: -0.035em;
+  text-wrap: balance;
 }
+.asm-banner-note {
+  max-width: 54ch;
+  margin: 2px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.asm-banner-sign {
+  font: italic 400 19px/1.2 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  color: var(--ink);
+}
+.asm-banner .btn { margin-top: 10px; }
+.asm-banner-fine { margin: 4px 0 0; font: 500 11.5px/1.4 var(--asm-mono); color: var(--ink-3); }
 
 /* ---- ropes and cables ------------------------------------------------- */
 .asm-lines {
@@ -654,6 +670,7 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
 .bot .cheek { stroke: color-mix(in srgb, var(--accent) 50%, transparent); stroke-width: 1.8; stroke-linecap: round; }
 .bot .hat { fill: var(--hat); stroke: var(--ink); stroke-width: 1.4; }
 .bot-shadow { fill: rgba(0, 0, 0, 0.13); }
+.bot.is-riding .bot-shadow,
 .bot.is-sitting .bot-shadow,
 .bot.is-flying .bot-shadow { display: none; }
 
@@ -810,6 +827,37 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
 }
 .bot .bubble:nth-of-type(2) { animation-delay: -0.9s; }
 .bot .bubble:nth-of-type(3) { animation-delay: -1.8s; }
+/* runner: headband, race bib, shorts, trainers */
+.bot .headband rect { fill: var(--hat); stroke: var(--ink); stroke-width: 1.1; }
+.bot .headband .tails { fill: none; stroke: var(--hat); stroke-width: 1.8; stroke-linecap: round; }
+.bot .bib rect { fill: #fff; stroke: var(--ink); stroke-width: 0.9; }
+.bot .bib path { stroke: var(--ink); stroke-width: 0.9; stroke-linecap: round; }
+.bot .shorts { fill: #1f2a3a; stroke: var(--ink); stroke-width: 1.2; }
+.bot .shoe rect { fill: #fff; stroke: var(--ink); stroke-width: 1.1; }
+.bot .shoe path { stroke: var(--hat); stroke-width: 1.3; stroke-linecap: round; }
+/* tennis: whites, a visor and a racket */
+.bot.is-tennis .torso,
+.bot.is-chef .torso { fill: #fbfbf8; }
+.bot .visor .band { stroke: var(--hat); stroke-width: 2; }
+.bot .visor .brim { fill: var(--hat); stroke: var(--ink); stroke-width: 1.1; stroke-linejoin: round; }
+.bot .collar { fill: none; stroke: var(--hat); stroke-width: 1.3; stroke-linejoin: round; stroke-linecap: round; }
+.bot .racket ellipse { fill: rgba(255, 255, 255, 0.35); stroke: var(--hat); stroke-width: 1.6; }
+.bot .racket .grip { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+.bot .racket .strings { stroke: color-mix(in srgb, var(--ink) 45%, transparent); stroke-width: 0.5; }
+/* chef: toque and a double-breasted coat */
+.bot .toque path:not(.pleat),
+.bot .toque rect { fill: #fbfbf8; stroke: var(--ink); stroke-width: 1.2; stroke-linejoin: round; }
+.bot .toque .pleat { stroke: color-mix(in srgb, var(--ink) 30%, transparent); stroke-width: 0.8; }
+.bot .chef-coat circle { fill: var(--ink); }
+.bot .chef-coat .kerchief { fill: var(--hat); stroke: var(--ink); stroke-width: 0.9; stroke-linejoin: round; }
+/* watchmaker: a leather apron and a loupe in one eye */
+.bot.is-watchmaker .torso { fill: #7a5236; }
+.bot .apron { fill: none; stroke: color-mix(in srgb, #fff 55%, transparent); stroke-width: 1; stroke-linecap: round; }
+.bot .loupe-band { stroke: #2a2a31; stroke-width: 1.3; }
+.bot .loupe rect { fill: #2a2a31; stroke: var(--ink); stroke-width: 1; }
+.bot .loupe .lens { fill: rgba(150, 210, 235, 0.75); }
+.bot.is-watchmaker .eyes circle:last-child { display: none; }
+
 @keyframes asm-bubble {
   0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
   15% { opacity: 1; }
@@ -960,7 +1008,8 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
   .asm-hud { top: 16px; bottom: auto; }
   .asm-world { padding-top: 84px; }
   .asm-grid { padding: 0 18px; }
-  .asm-banner { flex-direction: column; align-items: flex-start; justify-content: center; padding: 0 28px; }
+  .asm-banner { padding: 24px 22px; }
+  .asm-banner-note { font-size: 14px; }
 }
 @media (max-width: 620px) {
   .asm-hud-label { display: none; }

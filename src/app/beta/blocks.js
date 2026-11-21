@@ -157,9 +157,7 @@ function Marathon() {
   return (
     <div className="stack asm-races">
       <div className="eyebrow">Marathons</div>
-      <div className="stat" data-count={MARATHONS.length}>
-        {MARATHONS.length}
-      </div>
+      <div className="stat">{MARATHONS.length}</div>
       <ul>
         {MARATHONS.map(([year, race], i) => (
           <li key={i}>
@@ -601,15 +599,18 @@ function ChevronDown() {
 function Banner() {
   return (
     <div className="asm-banner">
-      <div>
-        <div className="asm-banner-title">Thanks for stopping by.</div>
-        <div className="asm-note">
-          {BLOCKS.length} blocks, {HELPERS} helpers, zero bugs (that we know of).
-        </div>
-      </div>
+      <div className="asm-banner-title">Thanks for stopping by.</div>
+      <p className="asm-banner-note">
+        I hope something here made you smile. Whether you&rsquo;re building something, hiring, or just want to swap notes on
+        watches, tiramisu or tide pools, I&rsquo;d love to hear from you.
+      </p>
+      <span className="asm-banner-sign">&mdash; Brandon</span>
       <a className="btn" href={LINKEDIN} target="_blank" rel="noreferrer">
         Say hi on LinkedIn <ArrowUpRight width={15} height={15} />
       </a>
+      <p className="asm-banner-fine">
+        {BLOCKS.length} blocks, {HELPERS} helpers, zero bugs (that we know of).
+      </p>
     </div>
   );
 }
@@ -678,7 +679,7 @@ export const BLOCKS = [
     act: "push",
     from: "right",
     len: 65,
-    crew: [{ hat: HAT.green }],
+    crew: [{ hat: HAT.green, outfit: "tennis" }],
     perch: [0.3],
     Content: Tennis,
   },
@@ -687,7 +688,7 @@ export const BLOCKS = [
     size: "sm",
     act: "roller",
     len: 75,
-    crew: [{ hat: HAT.orange }],
+    crew: [{ hat: HAT.orange, outfit: "runner" }],
     perch: [0.78],
     paint: true,
     Content: Marathon,
@@ -699,7 +700,7 @@ export const BLOCKS = [
     len: 75,
     // after it lands, the camera stays put for this much scroll while the watch comes apart
     hold: 70,
-    crew: [{ hat: HAT.yellow }],
+    crew: [{ hat: HAT.yellow, outfit: "watchmaker" }],
     perch: [0.72],
     Content: Bench,
   },
@@ -708,7 +709,7 @@ export const BLOCKS = [
     size: "tall",
     act: "stamp",
     len: 70,
-    crew: [{ hat: HAT.red }],
+    crew: [{ hat: HAT.red, outfit: "chef" }],
     perch: [0.72],
     Content: Tiramisu,
   },
@@ -782,7 +783,7 @@ export const BLOCKS = [
     size: "md",
     act: "run",
     len: 85,
-    crew: [{ hat: HAT.orange }],
+    crew: [{ hat: HAT.orange, outfit: "runner" }],
     perch: [0.84],
     Content: Running,
   },
