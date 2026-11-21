@@ -13,10 +13,14 @@
   position: relative;
 }
 @media (prefers-color-scheme: dark) {
-  .asm { --asm-cube-line: rgba(255, 255, 255, 0.14); }
-  .asm-back .asm-depth:not(.asm-word) { opacity: 0.4 !important; }
-  .asm-front .asm-depth { opacity: 0.35 !important; }
+  :root:not([data-theme="light"]) .asm { --asm-cube-line: rgba(255, 255, 255, 0.14); }
+  :root:not([data-theme="light"]) .asm-back .asm-depth:not(.asm-word) { opacity: 0.4 !important; }
+  :root:not([data-theme="light"]) .asm-front .asm-depth { opacity: 0.35 !important; }
 }
+/* the same, when the visitor picks dark with the toggle */
+:root[data-theme="dark"] .asm { --asm-cube-line: rgba(255, 255, 255, 0.14); }
+:root[data-theme="dark"] .asm-back .asm-depth:not(.asm-word) { opacity: 0.4 !important; }
+:root[data-theme="dark"] .asm-front .asm-depth { opacity: 0.35 !important; }
 
 .asm-track { position: relative; }
 
@@ -161,6 +165,58 @@
   color: var(--ink-2);
 }
 .asm-list li { display: flex; align-items: center; gap: 11px; }
+
+/* TL;DR: eight lines that each jump to their block */
+.asm-tldr { gap: 10px; }
+.asm-tldr-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.asm-tldr-hint { font: 500 11px/1 var(--asm-mono); color: var(--ink-3); }
+.asm-tldr ul { display: grid; flex: 1; align-content: space-between; margin: 0 -10px; padding: 0; list-style: none; }
+.asm-tldr li + li { border-top: 1px solid var(--line); }
+.asm-tldr button {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto 14px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 46px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease);
+}
+.asm-tldr button:hover { background: var(--surface-hover); }
+.asm-tldr button:active { transform: scale(0.99); }
+.asm-tldr button:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.asm-tldr b { overflow: hidden; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; text-overflow: ellipsis; white-space: nowrap; }
+.asm-tldr-detail { font-size: 13.5px; color: var(--ink-3); white-space: nowrap; }
+.asm-tldr-go {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.asm-tldr button:hover .asm-tldr-go,
+.asm-tldr button:focus-visible .asm-tldr-go { opacity: 1; transform: none; }
+@media (max-width: 700px) {
+  .asm-tldr-hint { display: none; }
+  /* narrow: the label keeps its words and the grey detail gives way */
+  .asm-tldr button { grid-template-columns: 28px auto minmax(0, 1fr); gap: 10px; min-height: 40px; }
+  .asm-tldr-detail { overflow: hidden; text-align: right; text-overflow: ellipsis; }
+  .asm-tldr-go { display: none; }
+  .asm-tldr b { font-size: 14px; }
+  .asm-tldr-detail { font-size: 12.5px; }
+}
 .asm-chip {
   display: grid;
   place-items: center;
@@ -1207,7 +1263,11 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
 .bot .tray .cloche { fill: #f1f1f4; stroke: var(--ink); stroke-width: 1.1; }
 
 @media (prefers-color-scheme: dark) {
-  .asm-sample { color: #f5c84b; }
-  .asm-beli { --beli-green: #4cc788; --beli-ring: #3a3a40; }
-  .asm [data-block="beli"] .tile { background: var(--surface); }
+  :root:not([data-theme="light"]) .asm-sample { color: #f5c84b; }
+  :root:not([data-theme="light"]) .asm-beli { --beli-green: #4cc788; --beli-ring: #3a3a40; }
+  :root:not([data-theme="light"]) .asm [data-block="beli"] .tile { background: var(--surface); }
 }
+/* the same, when the visitor picks dark with the toggle */
+:root[data-theme="dark"] .asm-sample { color: #f5c84b; }
+:root[data-theme="dark"] .asm-beli { --beli-green: #4cc788; --beli-ring: #3a3a40; }
+:root[data-theme="dark"] .asm [data-block="beli"] .tile { background: var(--surface); }

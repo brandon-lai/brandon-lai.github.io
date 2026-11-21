@@ -50,15 +50,55 @@ function Hero() {
   );
 }
 
+/**
+ * TL;DR: the page in eight lines, next to the hero. Each line jumps to its
+ * block: the scroll lands just after that block is built (the watch, after it
+ * has come apart), so the build fast-forwards on the way there.
+ */
+const TLDR = [
+  { icon: "\u{1F4BB}", what: "Software engineer", detail: EXPERIENCE[0].org, to: "work" },
+  { icon: "\u231A", what: "Designing a watch", detail: "two cases so far", to: "bench" },
+  { icon: "\u{1F3C3}", what: "Marathoner", detail: "3 finished", to: "marathon" },
+  { icon: "\u{1F3BE}", what: "Tennis", detail: "most weekends", to: "tennis" },
+  { icon: "\u{1F370}", what: "Tiramisu World Cup", detail: "Canada semi-finalist", to: "tiramisu" },
+  { icon: "\u{1F4F1}", what: "Side projects", detail: "myrel, Rockpool", to: "myrel" },
+  { icon: "\u{1F3B8}", what: "Guitar, scuba, snowboard", detail: "amateur level", to: "also" },
+  { icon: "\u{1F35D}", what: "Eating out, ranked", detail: "Beli top 10", to: "beli" },
+];
+
+function jumpTo(id) {
+  const act = TIMELINE.acts.find((a) => a.id === id);
+  const track = document.querySelector(".asm-track");
+  const stage = document.querySelector(".asm-stage");
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!act || !track || !stage || still) {
+    document.querySelector(`[data-block="${id}"]`)?.scrollIntoView({ block: "center" });
+    return;
+  }
+  const T = act.hold ? act.end + act.hold - 6 : act.end + 3;
+  window.scrollTo({ top: track.offsetTop + (T / 100) * stage.clientHeight, behavior: "smooth" });
+}
+
 function Now() {
   return (
-    <div className="asm-pad">
-      <div className="eyebrow">Now</div>
-      <ul className="asm-list">
-        {ABOUT.bullets.map(({ emoji, label }) => (
-          <li key={label}>
-            <span className="asm-chip" aria-hidden="true">{emoji}</span>
-            {label}
+    <div className="asm-pad asm-tldr">
+      <div className="asm-tldr-head">
+        <div className="eyebrow">TL;DR</div>
+        <span className="asm-tldr-hint">tap a line to jump there</span>
+      </div>
+      <ul>
+        {TLDR.map((row) => (
+          <li key={row.to}>
+            <button type="button" onClick={() => jumpTo(row.to)}>
+              <span className="asm-chip" aria-hidden="true">
+                {row.icon}
+              </span>
+              <b>{row.what}</b>
+              <span className="asm-tldr-detail">{row.detail}</span>
+              <svg className="asm-tldr-go" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 3v9M4 8.5l4 4 4-4" />
+              </svg>
+            </button>
           </li>
         ))}
       </ul>
