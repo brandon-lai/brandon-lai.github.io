@@ -1,18 +1,72 @@
 {
-  "note": "Hand-maintained from the Beli app (Restaurants → Been, sorted by score). The /beta block shows the leading run of ranks, up to 10.",
+  "note": "Hand-maintained from the Beli app (My Lists, sorted by score). Been lists show the leading run of ranks, up to 10; want-to-try shows up to 10 in the order given.",
   "asOf": "2026-11-21",
-  "places": [
-    { "rank": 1, "name": "Kjolle", "price": "$$$$", "cuisines": ["Peruvian"], "location": "Barranco, Lima, Peru", "score": 10.0 },
-    { "rank": 2, "name": "NOUILLE VIVANTE", "price": "€", "cuisines": ["Chinese"], "location": "Vivienne, Paris, France", "score": 10.0 },
-    { "rank": 3, "name": "XI An Dining", "price": null, "cuisines": ["Chinese"], "location": "Sainte-Avoye, Paris, France", "score": 10.0 },
-    { "rank": 4, "name": "Umami Omakase", "price": "$$$$", "cuisines": ["Japanese", "Sushi", "Omakase"], "location": "North Cambridge, Cambridge, MA", "score": 10.0 },
-    { "rank": 5, "name": "Ceres", "price": "$$$", "cuisines": ["Pizza", "Italian"], "location": "Little Italy, Manhattan", "score": 10.0 },
-    { "rank": 6, "name": "NUBIANI - Koreatown", "price": "$$$$", "cuisines": ["Korean", "Barbecue", "Steakhouse"], "location": "Midtown South, Manhattan", "score": 10.0 },
-    { "rank": 7, "name": "Restaurant 20 Victoria", "price": "$$$$", "cuisines": ["Mexican", "French"], "location": "Downtown Yonge East, Toronto, ON, Canada", "score": 10.0 },
-    { "rank": 8, "name": "Mérito", "price": "$$$$", "cuisines": ["Venezuelan", "Peruvian"], "location": "Barranco, Lima, Peru", "score": 9.9 },
-    { "rank": 10, "name": "Kang Ho Dong Baekjeong", "price": "$$$$", "cuisines": ["Barbecue", "Korean"], "location": "Koreatown, Los Angeles, CA", "score": 9.9 },
-    { "rank": 11, "name": "Tsumo Omakase", "price": "$$$", "cuisines": ["Japanese", "Omakase", "Sushi"], "location": "Rose Hill, Manhattan", "score": 9.9 },
-    { "rank": 12, "name": "Pho Ngon Dat Viet", "price": "$$", "cuisines": ["Vietnamese"], "location": "Thornhill, Vaughan, ON, Canada", "score": 9.9 },
-    { "rank": 13, "name": "Rosie's Burgers", "price": "$", "cuisines": ["Burgers"], "location": "Queen Street West, Toronto, ON, Canada", "score": 9.9 }
+  "lists": [
+    {
+      "id": "restaurants",
+      "label": "Restaurants",
+      "been": [
+        { "rank": 1, "name": "Kjolle", "price": "$$$$", "cuisines": ["Peruvian"], "location": "Barranco, Lima, Peru", "score": 10.0 },
+        { "rank": 2, "name": "NOUILLE VIVANTE", "price": "€", "cuisines": ["Chinese"], "location": "Vivienne, Paris, France", "score": 10.0 },
+        { "rank": 3, "name": "XI An Dining", "price": null, "cuisines": ["Chinese"], "location": "Sainte-Avoye, Paris, France", "score": 10.0 },
+        { "rank": 4, "name": "Umami Omakase", "price": "$$$$", "cuisines": ["Japanese", "Sushi", "Omakase"], "location": "North Cambridge, Cambridge, MA", "score": 10.0 },
+        { "rank": 5, "name": "Ceres", "price": "$$$", "cuisines": ["Pizza", "Italian"], "location": "Little Italy, Manhattan", "score": 10.0 },
+        { "rank": 6, "name": "NUBIANI - Koreatown", "price": "$$$$", "cuisines": ["Korean", "Barbecue", "Steakhouse"], "location": "Midtown South, Manhattan", "score": 10.0 },
+        { "rank": 7, "name": "Restaurant 20 Victoria", "price": "$$$$", "cuisines": ["Mexican", "French"], "location": "Downtown Yonge East, Toronto, ON, Canada", "score": 10.0 },
+        { "rank": 8, "name": "Mérito", "price": "$$$$", "cuisines": ["Venezuelan", "Peruvian"], "location": "Barranco, Lima, Peru", "score": 9.9 },
+        { "rank": 9, "name": "Maria Grazia", "price": "€€", "cuisines": ["French", "Italian"], "location": "Menton, France", "score": 9.9 },
+        { "rank": 10, "name": "Kang Ho Dong Baekjeong", "price": "$$$$", "cuisines": ["Barbecue", "Korean"], "location": "Koreatown, Los Angeles, CA", "score": 9.9 },
+        { "rank": 11, "name": "Tsumo Omakase", "price": "$$$", "cuisines": ["Japanese", "Omakase", "Sushi"], "location": "Rose Hill, Manhattan", "score": 9.9 },
+        { "rank": 12, "name": "Pho Ngon Dat Viet", "price": "$$", "cuisines": ["Vietnamese"], "location": "Thornhill, Vaughan, ON, Canada", "score": 9.9 },
+        { "rank": 13, "name": "Rosie's Burgers", "price": "$", "cuisines": ["Burgers"], "location": "Queen Street West, Toronto, ON, Canada", "score": 9.9 }
+      ],
+      "want": [
+        { "name": "Aska", "price": "$$$$", "cuisines": ["Scandinavian"], "location": "Williamsburg, Brooklyn", "score": 9.6 },
+        { "name": "Don Angie", "price": "$$$", "cuisines": ["Italian", "American"], "location": "West Village, Manhattan", "score": 9.6 },
+        { "name": "El Celler de Can Roca", "price": "€€€€", "cuisines": ["Spanish", "Catalan", "Contemporary"], "location": "Girona, Spain", "score": 9.6 },
+        { "name": "Jungsik", "price": "$$$$", "cuisines": ["Korean"], "location": "Tribeca, Manhattan", "score": 9.6 },
+        { "name": "Kato Restaurant", "price": "$$$$", "cuisines": ["Taiwanese"], "location": "Fashion District, Los Angeles, CA", "score": 9.6 },
+        { "name": "Bánh Anh Em", "price": "$$$", "cuisines": ["Vietnamese", "Banh Mi"], "location": "East Village, Manhattan", "score": 9.6 },
+        { "name": "Omakase Room by Mitsu", "price": "$$$$", "cuisines": ["Japanese", "Omakase", "Sushi"], "location": "West Village, Manhattan", "score": 9.6 },
+        { "name": "Din Tai Fung 101", "price": "$$$", "cuisines": ["Taiwanese", "Shanghainese"], "location": "Xinyi District, Taipei City, Taiwan", "score": 9.6 },
+        { "name": "Theodora", "price": "$$$", "cuisines": ["Mediterranean", "Seafood"], "location": "Fort Greene, Brooklyn", "score": 9.6 }
+      ]
+    },
+    {
+      "id": "dessert",
+      "label": "Ice Cream & Dessert",
+      "been": [
+        { "rank": 1, "name": "Mimi's Frozen Yogurt", "price": "$$", "cuisines": ["Dessert", "Frozen Yogurt"], "location": "Nolita, Manhattan", "score": 10.0 },
+        { "rank": 2, "name": "Van Leeuwen Ice Cream", "price": "$$", "cuisines": ["Ice Cream", "Dessert"], "location": "Midtown West, Manhattan", "score": 10.0 },
+        { "rank": 3, "name": "Suso", "price": "€€", "cuisines": ["Gelato"], "location": "San Marco, Venice, Italy", "score": 9.7 },
+        { "rank": 4, "name": "Chocolats Favoris", "price": "$", "cuisines": ["Ice Cream", "Dessert"], "location": "Brossard, QC, Canada", "score": 9.6 },
+        { "rank": 5, "name": "Gelatoville Gelataria", "price": "$", "cuisines": ["Gelato", "Ice Cream", "Dessert"], "location": "East Village, Manhattan", "score": 9.6 },
+        { "rank": 6, "name": "Café Isaka", "price": null, "cuisines": [], "location": "Saint-Germain-l'Auxerrois, Paris, France", "score": 9.3 },
+        { "rank": 7, "name": "Tiramisù - I Tre Mercanti", "price": "€", "cuisines": ["Dessert", "Italian"], "location": "Castello, Venice, Italy", "score": 9.2 },
+        { "rank": 8, "name": "The Sweet Spot糖水有余", "price": "$$", "cuisines": ["Chinese", "Dessert"], "location": "Baldwin Village, Toronto, ON, Canada", "score": 9.2 },
+        { "rank": 9, "name": "Garden Creamery", "price": "$$", "cuisines": ["Ice Cream"], "location": "Mission District, San Francisco, CA", "score": 8.9 },
+        { "rank": 10, "name": "Chapon", "price": "€€€", "cuisines": ["Chocolate Shop"], "location": "Saint-Thomas-d'Aquin, Paris, France", "score": 8.9 },
+        { "rank": 11, "name": "CAFE 2BY2", "price": "$$", "cuisines": ["Dessert", "Cafe"], "location": "East Village, Manhattan", "score": 8.7 },
+        { "rank": 12, "name": "Lady M Cake Boutique - Bryant Park", "price": "$$$", "cuisines": ["Dessert", "Bakery", "Cake"], "location": "Midtown South, Manhattan", "score": 8.7 }
+      ]
+    },
+    {
+      "id": "bakeries",
+      "label": "Bakeries",
+      "been": [
+        { "rank": 1, "name": "Levain Bakery - Boston Seaport", "price": "$$", "cuisines": ["Bakery", "Cookies", "Dessert"], "location": "D Street / West Broadway, Boston, MA", "score": 10.0 },
+        { "rank": 2, "name": "Funny Face Bakery", "price": "$$", "cuisines": ["Cookies"], "location": "NoHo, Manhattan", "score": 9.8 },
+        { "rank": 3, "name": "Gateau Ghost", "price": "$$$", "cuisines": ["Korean", "French"], "location": "Dufferin Grove, Toronto, ON, Canada", "score": 9.7 },
+        { "rank": 4, "name": "Demo", "price": "$$", "cuisines": ["Coffee Shop", "Peruvian", "Bakery"], "location": "Barranco, Lima, Peru", "score": 9.5 },
+        { "rank": 5, "name": "Tompkins Square Bagels", "price": "$$", "cuisines": ["Bagels"], "location": "Union Square, Manhattan", "score": 9.5 },
+        { "rank": 6, "name": "Mei Lai Wah", "price": "$", "cuisines": ["Cantonese", "Bakery", "Dim Sum"], "location": "Chinatown, Manhattan", "score": 9.5 },
+        { "rank": 7, "name": "Levain Bakery – Back Bay, Boston", "price": "$$", "cuisines": ["Cookies", "Bakery"], "location": "Back Bay East, Boston, MA", "score": 9.5 },
+        { "rank": 8, "name": "Mamiche", "price": "€€", "cuisines": ["Bakery"], "location": "Porte-Saint-Martin, Paris, France", "score": 8.8 },
+        { "rank": 9, "name": "Les Saveurs de Cler (Maison Julien)", "price": null, "cuisines": ["Bakery"], "location": "Gros-Caillou, Paris, France", "score": 8.6 },
+        { "rank": 10, "name": "Pan Sal Aire", "price": "$$", "cuisines": ["American", "Bakery", "Italian"], "location": "Barranco, Lima, Peru", "score": 8.4 },
+        { "rank": 11, "name": "Café y sandwich", "price": null, "cuisines": [], "location": "Cusco, Peru", "score": 8.3 },
+        { "rank": 12, "name": "Golden Manna Bakery", "price": "$", "cuisines": ["Bakery", "Chinese"], "location": "Chinatown, Manhattan", "score": 8.1 }
+      ]
+    }
   ]
 }

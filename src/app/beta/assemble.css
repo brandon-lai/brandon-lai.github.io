@@ -225,6 +225,8 @@ a.asm-inline:hover { text-decoration: underline; }
   grid-template-columns: 30px 1fr auto;
   align-items: center;
   gap: 14px;
+  box-sizing: border-box;
+  min-height: 84px;
   padding: 11px 0;
   border-bottom: 1px solid var(--line);
 }
@@ -742,26 +744,53 @@ a.asm-inline:hover { text-decoration: underline; }
 .asm-beli { --beli-green: #2f9a5e; --beli-ring: #dcdcdc; }
 .asm-beli-head { display: grid; gap: 10px; }
 .asm-beli-title {
-  display: flex;
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-self: start;
+  color: var(--ink);
+}
+.asm-beli-title select {
+  appearance: none;
+  field-sizing: content;
+  min-height: 36px;
+  padding: 0 26px 0 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1;
+  cursor: pointer;
 }
-.asm-beli-title svg { color: var(--ink-2); margin-top: 3px; }
+.asm-beli-title select:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.asm-beli-title svg { position: absolute; right: 2px; top: 50%; margin-top: -7px; color: var(--ink-2); pointer-events: none; }
 .asm-beli-tabs {
   display: flex;
-  gap: 20px;
+  gap: 22px;
   border-bottom: 1px solid var(--line);
+}
+.asm-beli-tabs button {
+  min-height: 34px;
+  padding: 0 0 8px;
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font: inherit;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--ink-3);
+  cursor: pointer;
+  transition: color 0.15s var(--ease);
 }
-.asm-beli-tabs span { padding-bottom: 8px; opacity: 0.7; }
-.asm-beli-tabs .is-active { color: var(--ink); opacity: 1; box-shadow: inset 0 -2.5px 0 var(--ink); }
+.asm-beli-tabs button:hover:not(:disabled) { color: var(--ink-2); }
+.asm-beli-tabs button:disabled { opacity: 0.45; cursor: default; }
+.asm-beli-tabs button[aria-selected="true"] { color: var(--ink); box-shadow: inset 0 -2.5px 0 var(--ink); }
+.asm-beli-tabs button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
+.asm-ranks[hidden] { display: none; }
 
 .asm-ranks {
   display: grid;
@@ -778,6 +807,8 @@ a.asm-inline:hover { text-decoration: underline; }
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
+  box-sizing: border-box;
+  min-height: 84px;
   padding: 11px 0;
   border-bottom: 1px solid var(--line);
 }
@@ -802,8 +833,9 @@ a.asm-inline:hover { text-decoration: underline; }
 .asm-beli .asm-foot { padding-top: 4px; }
 
 @media (max-width: 700px) {
-  .asm-ranks { grid-auto-flow: row; grid-template-rows: none; grid-template-columns: minmax(0, 1fr); }
-  .asm-beli-title { font-size: 21px; }
+  /* one column: hold ten rows' height so switching lists never shifts the page */
+  .asm-ranks { grid-auto-flow: row; grid-template-rows: none; grid-template-columns: minmax(0, 1fr); align-content: start; min-height: 840px; }
+  .asm-beli-title select { font-size: 21px; }
 }
 
 /* served row by row while the waiter crosses */

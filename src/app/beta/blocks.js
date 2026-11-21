@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ABOUT, SOCIALS } from "../data/site";
 import { EXPERIENCE } from "../data/experience";
 import { ArrowUpRight, LinkedIn } from "../components/Icons";
@@ -328,37 +329,75 @@ function topTen(places) {
 
 const asOf = (iso) => new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
 
-/** laid out like Beli's own Been list: rank and name, price and cuisine, place, score ring */
+/** one Beli list as the app lays it out: rank and name, price and cuisine, place, score ring */
+function BeliRows({ rows, ranked, steps, hidden }) {
+  return (
+    <ol className="asm-ranks" style={{ "--rows": Math.ceil(rows.length / 2) }} hidden={hidden}>
+      {rows.map((p, i) => (
+        <li key={p.name} data-step={steps ? i + 1 : undefined}>
+          <span className="asm-place">
+            <b>{ranked ? `${p.rank}. ${p.name}` : p.name}</b>
+            {(p.price || p.cuisines.length > 0) && (
+              <span>{[p.price, p.cuisines.join(", ")].filter(Boolean).join(" \u2022 ")}</span>
+            )}
+            <span>{p.location}</span>
+          </span>
+          <span className="asm-score">{p.score.toFixed(1)}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/**
+ * My Beli lists, switchable like the app. The default view (Restaurants →
+ * Been) stays mounted and is the one the waiter serves row by row; the
+ * others mount only when picked, so they never carry the serve steps.
+ */
 function Beli() {
-  const top = topTen(BELI.places);
+  const lists = BELI.lists;
+  const [listId, setListId] = useState(lists[0].id);
+  const [tab, setTab] = useState("been");
+  const list = lists.find((l) => l.id === listId) ?? lists[0];
+  const view = tab === "want" && list.want?.length ? "want" : "been";
+  const isDefault = list === lists[0] && view === "been";
+  const served = topTen(lists[0].been);
+  const rows = view === "want" ? list.want.slice(0, 10) : topTen(list.been);
   return (
     <div className="asm-pad asm-beli">
       <div className="asm-beli-head">
-        <div className="asm-beli-title">
-          Restaurants <ChevronDown />
-        </div>
-        <div className="asm-beli-tabs" aria-hidden="true">
-          <span className="is-active">Been</span>
-          <span>Want to Try</span>
-          <span>Recs</span>
+        <label className="asm-beli-title">
+          <select aria-label="Beli list" value={list.id} onChange={(e) => setListId(e.target.value)}>
+            {lists.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown />
+        </label>
+        <div className="asm-beli-tabs" role="tablist" aria-label="Been or want to try">
+          {[
+            ["been", "Been"],
+            ["want", "Want to Try"],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={view === id}
+              disabled={id === "want" && !list.want?.length}
+              onClick={() => setTab(id)}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
-      <ol className="asm-ranks" style={{ "--rows": Math.ceil(top.length / 2) }}>
-        {top.map((p) => (
-          <li key={p.rank} data-step={p.rank}>
-            <span className="asm-place">
-              <b>
-                {p.rank}. {p.name}
-              </b>
-              <span>{[p.price, p.cuisines.join(", ")].filter(Boolean).join(" \u2022 ")}</span>
-              <span>{p.location}</span>
-            </span>
-            <span className="asm-score">{p.score.toFixed(1)}</span>
-          </li>
-        ))}
-      </ol>
-      <div className="asm-foot" data-step={top.length + 1}>
-        <span>My top {top.length} on Beli, by score</span>
+      <BeliRows rows={served} ranked steps hidden={!isDefault} />
+      {!isDefault && <BeliRows rows={rows} ranked={view === "been"} />}
+      <div className="asm-foot" data-step={served.length + 1}>
+        <span>{view === "been" ? `My top ${rows.length}, by score` : "Next on my list"}</span>
         <span>{asOf(BELI.asOf)}</span>
       </div>
     </div>
