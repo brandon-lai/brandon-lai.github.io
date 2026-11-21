@@ -147,12 +147,27 @@ function Watches({ layer }) {
   );
 }
 
+const MARATHONS = [
+  ["2024", "Toronto Marathon"],
+  ["2024", "TCS Toronto Waterfront Marathon"],
+  ["2026", "Toronto Marathon"],
+];
+
 function Marathon() {
   return (
-    <div className="stack">
-      <div className="eyebrow">Miles</div>
-      <div className="stat">26.2</div>
-      <div className="stat-sub">Marathoner, ex-rower</div>
+    <div className="stack asm-races">
+      <div className="eyebrow">Marathons</div>
+      <div className="stat" data-count={MARATHONS.length}>
+        {MARATHONS.length}
+      </div>
+      <ul>
+        {MARATHONS.map(([year, race], i) => (
+          <li key={i}>
+            <time>{year}</time>
+            <span>{race}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -227,38 +242,118 @@ function Tiramisu() {
   );
 }
 
-function IslandArt() {
-  const paths = [
-    "M6 92C30 86 52 98 76 92S122 86 146 92S190 98 214 92",
-    "M44 90C58 62 88 50 112 52S160 66 176 90",
-    "M94 58C93 44 96 32 103 22",
-    "M103 22C95 18 86 20 80 26M103 22C110 16 120 16 127 21M103 22C102 14 97 9 90 8M103 22C108 27 110 34 108 40",
-    "M128 66h18v-14l-9 -7l-9 7Z",
-    "M174 28a10 10 0 1 0 0.1 0",
-    "M20 106C40 102 60 110 80 106S120 102 140 106",
-  ];
+/**
+ * Rockpool, my WebGPU tide pool, running live inside the tile. It loads only
+ * while the tile is on screen (and unloads after it leaves), only where the
+ * browser has WebGPU and motion is welcome, and shows only once the pool says
+ * it is drawing; until then, and for everyone else, the still stays up.
+ * The frame ignores the pointer so scrolling the page never gets caught in it.
+ */
+const POOL = "https://rockpool-tide.vercel.app";
+
+function Rockpool() {
+  const box = useRef(null);
+  const [live, setLive] = useState(false);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || !("gpu" in navigator) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // the pool posts { rockpool: "ready" } once it is actually drawing
+    const ready = (e) => {
+      if (e.origin === POOL && e.data?.rockpool === "ready") setShown(true);
+    };
+    window.addEventListener("message", ready);
+    let off = 0;
+    const io = new IntersectionObserver(
+      ([en]) => {
+        clearTimeout(off);
+        if (en.isIntersecting) setLive(true);
+        else
+          off = setTimeout(() => {
+            setLive(false);
+            setShown(false);
+          }, 3000);
+      },
+      { rootMargin: "150px" },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      clearTimeout(off);
+      window.removeEventListener("message", ready);
+    };
+  }, []);
   return (
-    <svg className="asm-island" viewBox="0 0 220 116" aria-hidden="true">
-      {paths.map((d, i) => (
-        <path key={i} d={d} pathLength="1" style={{ "--i": i }} />
-      ))}
-    </svg>
+    <div className="asm-pool" ref={box}>
+      <div className="asm-pool-view">
+        <picture>
+          <source media="(max-width: 700px)" srcSet="/beta/rockpool-phone.jpg" />
+          <img src="/beta/rockpool.jpg" alt="" />
+        </picture>
+        {live && (
+          <iframe
+            src={`${POOL}/?clean&hour=10&seed=7`}
+            title="Rockpool, running live"
+            tabIndex={-1}
+            aria-hidden="true"
+            data-on={shown || undefined}
+          />
+        )}
+      </div>
+      <div className="asm-pool-copy">
+        <div className="eyebrow">
+          <span data-step="1">Side project · live</span>
+        </div>
+        <div className="asm-big">
+          <span data-step="2">Rockpool</span>
+        </div>
+        <p className="asm-note">
+          <span data-step="3">A tide pool running in your browser right now: WebGPU water, caustics and creatures. Not a video.</span>
+        </p>
+        <a className="asm-inline" href={POOL} target="_blank" rel="noreferrer">
+          <span data-step="3">Wade in</span> <ArrowUpRight width={13} height={13} />
+        </a>
+      </div>
+    </div>
   );
 }
 
-function Island() {
+/** myrel, my iOS app: its real screens cycling in a phone that rises out of the tile */
+const MYREL = [
+  { src: "/beta/myrel-inbox.jpg", alt: "myrel's inbox: who to catch up with, and birthdays coming up" },
+  { src: "/beta/myrel-contact-detail.jpg", alt: "A person in myrel, with a catch-up cadence and how you met" },
+  { src: "/beta/myrel-profile.jpg", alt: "Your myrel card, shared as a QR code" },
+];
+
+function Myrel() {
+  const box = useRef(null);
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let timer = 0;
+    const io = new IntersectionObserver(([en]) => {
+      clearInterval(timer);
+      if (en.isIntersecting) timer = setInterval(() => setI((k) => (k + 1) % MYREL.length), 3200);
+    });
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      clearInterval(timer);
+    };
+  }, []);
   return (
-    <div className="asm-pad asm-island-tile">
-      <div className="eyebrow">
-        <span data-step="1">Side project</span>
+    <div className="asm-myrel-card">
+      <div className="asm-myrel-copy">
+        <div className="eyebrow">Side project · iOS</div>
+        <div className="asm-big">myrel</div>
+        <p className="asm-note">A private notebook for the people in your life. Jot what matters, get nudged to catch up, swap cards by QR.</p>
       </div>
-      <IslandArt />
-      <div className="asm-big">
-        <span data-step="2">A tiny island I&rsquo;m building</span>
+      <div className="asm-myrel-phone" ref={box}>
+        {MYREL.map((s, k) => (
+          <img key={s.src} src={s.src} alt={s.alt} data-on={k === i || undefined} loading="lazy" />
+        ))}
       </div>
-      <span className="asm-inline asm-soon">
-        <span data-step="3">Coming soon</span>
-      </span>
     </div>
   );
 }
@@ -574,6 +669,26 @@ export const BLOCKS = [
     Content: Work,
   },
   {
+    id: "tennis",
+    size: "tall",
+    act: "push",
+    from: "right",
+    len: 65,
+    crew: [{ hat: HAT.green }],
+    perch: [0.3],
+    Content: Tennis,
+  },
+  {
+    id: "marathon",
+    size: "sm",
+    act: "roller",
+    len: 75,
+    crew: [{ hat: HAT.orange }],
+    perch: [0.78],
+    paint: true,
+    Content: Marathon,
+  },
+  {
     id: "bench",
     size: "md",
     act: "crane",
@@ -585,26 +700,6 @@ export const BLOCKS = [
     Content: Bench,
   },
   {
-    id: "marathon",
-    size: "xs",
-    act: "roller",
-    len: 75,
-    crew: [{ hat: HAT.orange }],
-    perch: [0.78],
-    paint: true,
-    Content: Marathon,
-  },
-  {
-    id: "tennis",
-    size: "tall",
-    act: "push",
-    from: "right",
-    len: 65,
-    crew: [{ hat: HAT.green }],
-    perch: [0.3],
-    Content: Tennis,
-  },
-  {
     id: "tiramisu",
     size: "tall",
     act: "stamp",
@@ -614,23 +709,32 @@ export const BLOCKS = [
     Content: Tiramisu,
   },
   {
-    id: "island",
-    size: "md",
+    id: "myrel",
+    size: "tall",
+    act: "balloon",
+    len: 75,
+    crew: [{ hat: HAT.violet }],
+    perch: [0.5],
+    Content: Myrel,
+  },
+  {
+    id: "rockpool",
+    size: "lg",
     act: "agent",
     len: 105,
     crew: [{ hat: HAT.blue, tool: "laptop" }],
     perch: [0.5],
     term: { u: 0.62, v: 0.52 },
-    title: "agent · island.jsx",
+    title: "agent · rockpool.jsx",
     script: [
-      { t: "$ agent build --block island" },
-      { t: "+ <Eyebrow>Side project</Eyebrow>", add: true, step: 1 },
-      { t: "+ <IslandSketch strokes={7} />", add: true, draw: true },
-      { t: "+ <Title>A tiny island…</Title>", add: true, step: 2 },
-      { t: "+ <Soon />", add: true, step: 3 },
-      { t: "  ✓ rendered in 0.8s", ok: true },
+      { t: "$ agent build --block rockpool" },
+      { t: "+ <Eyebrow>Side project · live</Eyebrow>", add: true, step: 1 },
+      { t: "+ <LivePool webgpu tide={10} />", add: true, draw: true },
+      { t: "+ <Title>Rockpool</Title>", add: true, step: 2 },
+      { t: "+ <Note>Not a video.</Note>", add: true, step: 3 },
+      { t: "  ✓ 60 fps, wet", ok: true },
     ],
-    Content: Island,
+    Content: Rockpool,
   },
   {
     id: "smoodi",
