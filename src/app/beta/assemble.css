@@ -250,6 +250,10 @@ a.asm-inline:hover { text-decoration: underline; }
 }
 .asm-photo-cap .stat { color: #fff; }
 .asm-photo-cap .stat-sub { color: rgba(255, 255, 255, 0.82); }
+.asm-also-photo img { object-position: 50% 30%; }
+.asm-also-photo .asm-photo-cap { padding-top: 90px; background: linear-gradient(to top, rgba(4, 24, 30, 0.82) 30%, rgba(4, 24, 30, 0)); }
+.asm-also-photo .eyebrow { color: rgba(255, 255, 255, 0.72); }
+.asm-also-photo .asm-tags span { border-color: transparent; background: rgba(255, 255, 255, 0.92); color: #101418; }
 
 /* a frame waiting for its photo */
 .asm-photo-slot {
@@ -355,8 +359,8 @@ a.asm-inline:hover { text-decoration: underline; }
   font-weight: 600;
 }
 
-.asm-island { flex: 1; width: 100%; min-height: 0; max-height: 210px; }
-.asm-island path {
+svg.asm-island { flex: 1; width: 100%; min-height: 0; max-height: 210px; }
+svg.asm-island path {
   fill: none;
   stroke: var(--ink);
   stroke-width: 2;

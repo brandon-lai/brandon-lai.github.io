@@ -44,14 +44,6 @@ function Hero() {
             I like interfaces that stay out of the way until you touch them, then reward you a little for doing it.
           </span>
         </p>
-        <p>
-          <span data-step="3">This page is one. Every block on it was put here by a small crew while you scrolled.</span>
-        </p>
-      </div>
-      <div className="footnote">
-        <span data-step="4">
-          <span className="star">*</span> <u>no blocks were harmed in the making of this page</u>
-        </span>
       </div>
     </div>
   );
@@ -259,7 +251,7 @@ function Smoodi() {
     <div className="asm-smoodi-card">
       <figure className="asm-smoodi-clip">
         <Clip src="/beta/smoodi-prototype.mp4" poster="/beta/smoodi-prototype.jpg" aria-label="Our 2020 prototype blending a smoothie, then cleaning itself, sped up" />
-        <figcaption>Prototype, 2020 · 14× speed</figcaption>
+        <figcaption>Prototype, 2020 · sped up</figcaption>
       </figure>
       <div className="asm-smoodi-copy">
         <img className="asm-smoodi-render" src="/beta/smoodi-render.jpg" alt="The smoodi machine today, next to a fridge of frozen smoothie cups" />
@@ -294,14 +286,17 @@ function Quote() {
 
 function Also() {
   return (
-    <div className="stack">
-      <div className="eyebrow">Also</div>
-      <div className="asm-tags">
-        <span>guitar</span>
-        <span>scuba</span>
-        <span>snowboard</span>
+    <div className="asm-photo asm-also-photo">
+      <img src="/beta/scuba.jpg" alt="Brandon scuba diving with friends, mask on, regulator in" />
+      <div className="asm-photo-cap">
+        <div className="eyebrow">Also</div>
+        <div className="asm-tags">
+          <span>guitar</span>
+          <span>scuba</span>
+          <span>snowboard</span>
+        </div>
+        <div className="stat-sub">All at a respectable beginner level</div>
       </div>
-      <div className="stat-sub">All at a respectable beginner level</div>
     </div>
   );
 }
@@ -476,9 +471,9 @@ function Banner() {
   return (
     <div className="asm-banner">
       <div>
-        <div className="asm-banner-title">That&rsquo;s the whole page.</div>
+        <div className="asm-banner-title">Thanks for stopping by.</div>
         <div className="asm-note">
-          {BLOCKS.length} blocks, {HELPERS} helpers, one scroll.
+          {BLOCKS.length} blocks, {HELPERS} helpers, zero bugs (that we know of).
         </div>
       </div>
       <a className="btn" href={LINKEDIN} target="_blank" rel="noreferrer">
@@ -491,7 +486,7 @@ function Banner() {
 export const BLOCKS = [
   {
     id: "hero",
-    size: "xl",
+    size: "lg",
     act: "agent",
     len: 125,
     crew: [{ hat: HAT.red, tool: "laptop" }],
