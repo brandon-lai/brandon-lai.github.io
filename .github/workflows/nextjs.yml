@@ -9,12 +9,22 @@ on:
   push:
     branches: ["main"]
 
-  # Allows you to run this workflow manually from the Actions tab
+  # Run by hand from the Actions tab, or by the iPhone Shortcut that sends
+  # daily running mileage from Apple Health (see services/README.md)
   workflow_dispatch:
+    inputs:
+      runs:
+        description: 'Running days, one "yyyy-mm-dd distance" per line'
+        required: false
+        default: ""
+      unit:
+        description: "Unit of those distances: mi or km"
+        required: false
+        default: "mi"
 
-  # Rebuild every six hours so the Strava panel on /beta stay current
+  # Rebuild daily so "this week" on /beta rolls over even without a new run
   schedule:
-    - cron: "23 */6 * * *"
+    - cron: "23 9 * * *"
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -77,21 +87,19 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
-      # Live data for /beta. The last good sync is kept in the Actions cache, so
-      # if Strava is down the site still builds, just with older numbers.
-      # Only the synced JSON is cached; credentials stay in repository secrets.
+      # Live data for /beta. The latest mileage is kept in the Actions cache, so
+      # pushes and scheduled rebuilds keep showing it between Shortcut runs.
       - name: Restore last synced data
         uses: actions/cache/restore@v4
         with:
           path: src/app/data/live
           key: live-data-${{ github.run_id }}
           restore-keys: live-data-
-      - name: Sync Strava
-        run: node services/sync.mjs
+      - name: Update running mileage
+        run: node services/running.mjs
         env:
-          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
-          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
-          STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+          RUN_DAYS: ${{ inputs.runs }}
+          RUN_UNIT: ${{ inputs.unit }}
       - name: Save synced data
         uses: actions/cache/save@v4
         with:

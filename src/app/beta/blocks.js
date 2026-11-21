@@ -1,7 +1,7 @@
 import { ABOUT, SOCIALS } from "../data/site";
 import { EXPERIENCE } from "../data/experience";
 import { ArrowUpRight, LinkedIn } from "../components/Icons";
-import STRAVA from "../data/live/strava.json";
+import RUNNING from "../data/live/running.json";
 import BELI from "../data/beli.json";
 
 /**
@@ -250,78 +250,66 @@ function Also() {
 }
 
 
-/* ---- live panels: data synced by services/sync.mjs at build time ------- */
-const MILE = 1609.344;
-const day = (iso) => new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
-const hm = (s) => {
-  const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
-  return h ? `${h}h ${m}m` : `${m}m`;
-};
+/* ---- live panels -------------------------------------------------------- */
+const DAY = 86400000;
+const iso = (t) => new Date(t).toISOString().slice(0, 10);
+const short = (t) => new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 const num = (v, dec = 0) => v.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec });
-const FOOT = new Set(["Run", "TrailRun", "VirtualRun", "Walk", "Hike"]);
 
-function Strava() {
-  const s = STRAVA;
-  const metric = s.units === "metric";
-  const unit = metric ? "km" : "mi";
-  const d = (m) => m / (metric ? 1000 : MILE);
-  const last = s.recent.find((a) => a.route) ?? s.recent[0];
-  const effort = (a) => {
-    if (!a.distance || !a.movingTime) return hm(a.movingTime);
-    if (FOOT.has(a.sport)) {
-      const per = a.movingTime / d(a.distance);
-      const mm = Math.floor(per / 60), ss = Math.round(per % 60);
-      return `${ss === 60 ? mm + 1 : mm}:${String(ss === 60 ? 0 : ss).padStart(2, "0")} /${unit}`;
-    }
-    return `${num(d(a.distance) / (a.movingTime / 3600), 1)} ${metric ? "km/h" : "mph"}`;
+/** totals as of the build (the site rebuilds daily, so "this week" stays true) */
+function runningStats(days, now = Date.now()) {
+  const today = Date.parse(iso(now));
+  const monday = today - ((new Date(today).getUTCDay() + 6) % 7) * DAY;
+  const year = new Date(today).getUTCFullYear();
+  const thisYear = days.filter((d) => d.date.startsWith(`${year}-`));
+  const weeks = Array.from({ length: 12 }, (_, i) => {
+    const start = monday - (11 - i) * DAY * 7;
+    const from = iso(start), to = iso(start + 7 * DAY);
+    return { start, mi: days.filter((d) => d.date >= from && d.date < to).reduce((s, d) => s + d.mi, 0) };
+  });
+  return {
+    year,
+    ytd: thisYear.reduce((s, d) => s + d.mi, 0),
+    runs: thisYear.length,
+    weeks,
+    peak: Math.max(...weeks.map((w) => w.mi), 1),
   };
-  const href = (a) => (a?.id ? `https://www.strava.com/activities/${a.id}` : "https://www.strava.com/");
+}
+
+function Running() {
+  const r = RUNNING;
+  const st = runningStats(r.days);
+  const week = st.weeks.at(-1).mi;
   return (
-    <div className="asm-pad asm-strava">
+    <div className="asm-pad asm-running">
       <div className="asm-head">
-        <div className="eyebrow">Strava · last 7 days</div>
-        {s.sample && <span className="asm-sample">Sample data</span>}
+        <div className="eyebrow">Running · {st.year}</div>
+        {r.sample && <span className="asm-sample">Sample data</span>}
       </div>
       <div className="asm-stats">
         <div>
-          <b data-count={d(s.week.distance)} data-dec="1">{num(d(s.week.distance), 1)}</b>
-          <span>{metric ? "kilometres" : "miles"}</span>
+          <b data-count={st.ytd}>{num(st.ytd)}</b>
+          <span>miles this year</span>
         </div>
         <div>
-          <b data-count={s.week.count}>{s.week.count}</b>
-          <span>{s.week.count === 1 ? "activity" : "activities"}</span>
+          <b data-count={st.runs}>{st.runs}</b>
+          <span>runs</span>
         </div>
         <div>
-          <b>{hm(s.week.movingTime)}</b>
-          <span>moving</span>
+          <b data-count={week} data-dec="1">{num(week, 1)}</b>
+          <span>this week</span>
         </div>
       </div>
-      {last && (
-        <a className="asm-route-card" href={href(last)} target="_blank" rel="noreferrer">
-          {last.route ? (
-            <svg className="asm-route" viewBox="0 0 100 70" aria-hidden="true">
-              <path className="ghost" d={last.route} />
-              <path d={last.route} pathLength="1" />
-            </svg>
-          ) : (
-            <span className="asm-route asm-route-none" aria-hidden="true" />
-          )}
-          <span className="asm-route-meta">
-            <b>{last.name}</b>
-            <span>
-              {num(d(last.distance), 1)} {unit} · {effort(last)}
-            </span>
-            <span>{day(last.date)}</span>
+      <div className="asm-weeks" role="img" aria-label={`Miles per week for the last 12 weeks: ${st.weeks.map((w) => num(w.mi, 1)).join(", ")}`}>
+        {st.weeks.map((w, i) => (
+          <span key={w.start} className="asm-week" style={{ "--h": (w.mi / st.peak).toFixed(3), "--i": i }} data-now={i === 11 || undefined}>
+            <i />
           </span>
-        </a>
-      )}
+        ))}
+      </div>
       <div className="asm-foot">
-        <span>
-          {new Date(s.updated).getUTCFullYear()} so far: <b data-count={d(s.ytd.run.distance)}>{num(d(s.ytd.run.distance))}</b> {unit} run
-        </span>
-        <a className="asm-powered" href={href(last)} target="_blank" rel="noreferrer">
-          Powered by Strava
-        </a>
+        <span>Weekly miles since {short(st.weeks[0].start)}</span>
+        <span>Nike Run Club</span>
       </div>
     </div>
   );
@@ -527,13 +515,13 @@ export const BLOCKS = [
     Content: Also,
   },
   {
-    id: "strava",
+    id: "running",
     size: "md",
     act: "run",
     len: 85,
     crew: [{ hat: HAT.orange }],
     perch: [0.84],
-    Content: Strava,
+    Content: Running,
   },
   {
     id: "beli",

@@ -4,7 +4,7 @@
  * contract (captured from app v9.3.1). It only ever reads, and only your own
  * account: one login, five ranked lists, one bookmark list per sync.
  *
- *   fetchBeli({ phone, password }) → the panel's data (see ../src/app/data/live/beli.json)
+ *   fetchBeli({ phone, password }) → your ranked lists (parked: the login refuses outside clients)
  *
  * Check it against your account from a terminal (asks for the password, hidden):
  *   node services/beli.mjs --check
