@@ -210,35 +210,31 @@ button.nav-item {
 .nav-item[data-locked="true"] { color: color-mix(in srgb, var(--ink-3) 62%, transparent); }
 .nav-item[data-locked="true"]:hover { color: var(--ink-3); }
 
-/* the theme toggle at the end of the nav */
-.nav-theme {
-  position: relative;
-  z-index: 1;
+/* the theme toggle, fixed in the top-right corner */
+.theme-toggle {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  z-index: 60;
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  margin-left: 4px;
-  border: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--line);
   border-radius: var(--pill);
-  background: none;
-  color: var(--ink-3);
+  background: color-mix(in srgb, var(--raised) 82%, transparent);
+  box-shadow: var(--shadow-nav);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--ink-2);
   cursor: pointer;
-  transition: color 0.25s var(--ease), background-color 0.25s var(--ease);
+  transition: color 0.2s var(--ease), transform 0.15s var(--ease);
 }
-.nav-theme::before {
-  content: "";
-  position: absolute;
-  left: -3px;
-  top: 10px;
-  bottom: 10px;
-  width: 1px;
-  background: var(--line-strong);
-}
-.nav-theme:hover { color: var(--ink); background: var(--nav-active); }
-.nav-theme:active { transform: scale(0.94); }
-.nav-theme:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.nav-theme svg { width: 18px; height: 18px; }
+.theme-toggle:hover { color: var(--ink); }
+.theme-toggle:active { transform: scale(0.94); }
+.theme-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+.theme-toggle svg { width: 19px; height: 19px; }
 
 /* the bubble that pops when you knock on a door that isn't open */
 .nav-bubble {
@@ -679,12 +675,8 @@ a.xp-item:hover { background: var(--surface-hover); transform: translateX(3px); 
     to   { opacity: 1; translate: -50% 0; scale: 1; }
   }
   .nav-item { padding: 9px 15px; font-size: 14px; }
-  .nav-theme { width: 34px; height: 34px; margin-left: 2px; }
+  .theme-toggle { top: 14px; right: 14px; width: 40px; height: 40px; }
   .page { padding: 92px 18px 120px; }
-}
-/* the smallest phones: tighten the pills so the theme toggle still fits */
-@media (max-width: 430px) {
-  .nav-item { padding: 9px 11px; }
 }
 
 @media (max-width: 620px) {

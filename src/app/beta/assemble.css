@@ -1072,6 +1072,10 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
   .asm-hud-bar { width: 70px; }
   .asm-pad { padding: 24px; }
 }
+/* the smallest phones: nudge the HUD left so it clears the theme toggle */
+@media (max-width: 420px) {
+  .asm-hud { left: calc(50% - 26px); }
+}
 
 /* no choreography: the finished page, with the crew already sitting on it */
 @media (prefers-reduced-motion: reduce) {

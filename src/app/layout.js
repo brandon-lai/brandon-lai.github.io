@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Nav from "./components/Nav";
+import ThemeToggle from "./components/ThemeToggle";
 import { SITE } from "./data/site";
 
 const inter = Inter({
@@ -37,6 +38,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <Nav />
+        <ThemeToggle />
         <main>{children}</main>
       </body>
     </html>

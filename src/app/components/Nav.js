@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NAV, NAV_HIDDEN_ON, NAV_LOCKED_LINES } from "../data/site";
-import ThemeToggle from "./ThemeToggle";
 
 const normalize = (p) => {
   if (!p) return "/";
@@ -109,8 +108,6 @@ export default function Nav() {
             </Link>
           );
         })}
-
-        <ThemeToggle />
 
         {bubble && (
           <span className="nav-bubble" style={{ left: `${bubble.x}px` }} role="status">

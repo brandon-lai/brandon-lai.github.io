@@ -1,10 +1,11 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 
 /**
- * Light/dark switch for the nav. The page follows the system theme until the
+ * Light/dark switch, fixed in the top-right corner of every page. The page follows the system theme until the
  * visitor picks one here; the pick is stored and re-applied before paint by
  * the script in layout.js. Switching floods the new theme out from the button
  * with a View Transition: the new page is revealed through a circle growing
@@ -12,11 +13,15 @@ import { flushSync } from "react-dom";
  * Transitions, and visitors who prefer reduced motion, get an instant switch.
  */
 const KEY = "theme";
+// pages that paint their own fixed look (the front page's night skyline), where
+// a theme switch would change nothing you can see
+const HIDDEN_ON = ["/", "/alpha"];
 const system = () => (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 const current = () => document.documentElement.dataset.theme || system();
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState(null); // unknown until mounted
+  const pathname = (usePathname() || "/").replace(/(.)\/+$/, "$1");
 
   useEffect(() => {
     setTheme(current());
@@ -53,11 +58,12 @@ export default function ThemeToggle() {
       .catch(() => {});
   };
 
+  if (HIDDEN_ON.includes(pathname)) return null;
   const dark = theme === "dark";
   return (
     <button
       type="button"
-      className="nav-theme"
+      className="theme-toggle"
       onClick={flip}
       aria-label={theme ? `Switch to ${dark ? "light" : "dark"} mode` : "Switch theme"}
       title={theme ? `${dark ? "Light" : "Dark"} mode` : undefined}
