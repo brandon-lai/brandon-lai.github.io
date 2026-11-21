@@ -578,6 +578,8 @@ export const BLOCKS = [
     size: "md",
     act: "crane",
     len: 75,
+    // after it lands, the camera stays put for this much scroll while the watch comes apart
+    hold: 70,
     crew: [{ hat: HAT.yellow }],
     perch: [0.72],
     Content: Bench,
@@ -701,8 +703,8 @@ export const FINALE = 80;
 export const TIMELINE = (() => {
   let at = INTRO;
   const acts = BLOCKS.map((b) => {
-    const a = { id: b.id, start: at, end: at + b.len };
-    at = a.end + GAP;
+    const a = { id: b.id, start: at, end: at + b.len, hold: b.hold ?? 0 };
+    at = a.end + a.hold + GAP;
     return a;
   });
   return { acts, finaleStart: at, total: at + FINALE };

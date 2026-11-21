@@ -2,9 +2,9 @@
 //
 //   node scripts/pack-stl.mjs <in.stl> <out.bin>
 //
-// Each separate shell in the STL (case, crystal, caseback, crown...) becomes
-// its own part, so the page can pull the watch apart. Parts are written
-// largest first; WatchBench.js names them in that order, so check the list
+// Each body in the STL (case, crystal, dial, crown...) becomes its own part,
+// so the page can pull the watch apart. Parts keep the order the CAD export
+// wrote them in; WatchBench.js names them in that order, so check the table
 // this prints against the `parts` names there after re-exporting.
 //
 // Layout (little endian):
@@ -38,26 +38,35 @@ for (let t = 0; t < n; t++) {
   }
 }
 
-// union-find over shared vertices -> shells
-const parent = Int32Array.from({ length: P.length / 3 }, (_, i) => i);
-const root = (a) => {
-  while (parent[a] !== a) a = parent[a] = parent[parent[a]];
-  return a;
-};
+// CAD exporters (Fusion included) write one body after another, and each body
+// is a closed surface: every edge is used an even number of times. So a body
+// ends where the running set of unpaired edges empties. That keeps bodies
+// apart even where they touch and share vertices (a dial sitting on the case).
+const bodies = [];
+const open = new Set();
+let from = 0;
 for (let t = 0; t < n; t++) {
-  const a = root(tri[t * 3]);
-  parent[root(tri[t * 3 + 1])] = a;
-  parent[root(tri[t * 3 + 2])] = a;
+  for (let e = 0; e < 3; e++) {
+    const a = tri[t * 3 + e], b = tri[t * 3 + ((e + 1) % 3)];
+    const k = a < b ? a * 4194304 + b : b * 4194304 + a;
+    if (open.has(k)) open.delete(k);
+    else open.add(k);
+  }
+  if (open.size === 0) {
+    bodies.push(Array.from({ length: t + 1 - from }, (_, i) => from + i));
+    from = t + 1;
+  }
 }
-const shells = new Map();
-for (let t = 0; t < n; t++) {
-  const r = root(tri[t * 3]);
-  if (!shells.has(r)) shells.set(r, []);
-  shells.get(r).push(t);
-}
+if (from < n) bodies.push(Array.from({ length: n - from }, (_, i) => from + i)); // an unclosed tail
+// a body split into several lumps comes out as several pieces; fold slivers back in
+const shells = bodies.reduce((acc, b) => {
+  if (b.length < 8 && acc.length) acc[acc.length - 1].push(...b);
+  else acc.push(b);
+  return acc;
+}, []);
 
 const chunks = [Buffer.from("WCH2"), Buffer.alloc(4)];
-const parts = [...shells.values()].sort((a, b) => b.length - a.length);
+const parts = shells;
 chunks[1].writeUInt32LE(parts.length);
 const report = [];
 for (const tris of parts) {
@@ -102,5 +111,5 @@ for (const tris of parts) {
 }
 const all = Buffer.concat(chunks);
 writeFileSync(out, all);
-console.log(`${src.split("/").pop()} → ${out} (${(all.length / 1024).toFixed(0)} KB, ${parts.length} parts, largest first)`);
+console.log(`${src.split("/").pop()} → ${out} (${(all.length / 1024).toFixed(0)} KB, ${parts.length} parts, in file order)`);
 console.table(report);

@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * The watch I'm designing, case first: each CAD export turns slowly, and you
- * can drag it over to see the back or take it apart into its pieces.
+ * The watch I'm designing: each CAD export turns slowly and you can drag it
+ * over. As you scroll past, it comes apart into its bodies, labelled.
  *
  * The meshes are the original STLs packed by scripts/pack-stl.mjs. Every
  * separate shell in the STL stays its own part, largest first, which is the
@@ -20,11 +20,15 @@ export const CASES = [
     label: "No.1",
     detail: "31.5 mm",
     src: "/beta/watch-no1.bin",
+    // the bodies in Fusion's export order, then how they stack when apart (bottom up)
     parts: [
-      ["Case", "steel"],
-      ["Caseback", "steel"],
+      ["Movement", "brass"],
       ["Crystal", "glass"],
+      ["Case Top", "steel"],
+      ["Dial", "dial"],
+      ["Case Back", "steel"],
     ],
+    stack: ["Case Back", "Movement", "Dial", "Case Top", "Crystal"],
   },
   {
     id: "tonneau",
@@ -32,13 +36,15 @@ export const CASES = [
     detail: "v3.2",
     src: "/beta/watch-tonneau.bin",
     parts: [
-      ["Gasket", "rubber"],
       ["Case", "steel"],
+      ["Caseback", "steel"],
       ["Dial", "dial"],
       ["Crystal", "glass"],
-      ["Crown", "steel"],
       ["Movement", "brass"],
+      ["Crown", "steel"],
+      ["Gasket", "rubber"],
     ],
+    stack: ["Caseback", "Gasket", "Movement", "Dial", "Case", "Crystal"],
   },
 ];
 
@@ -88,25 +94,24 @@ async function loadCase(THREE, creased, c) {
     return { name, kind, center, lo, hi, geo: creased(geo, (35 * Math.PI) / 180), apart: new THREE.Vector3() };
   });
 
-  // parts on the axis stack up along it, around the case; off-axis parts slide outward
+  // parts on the axis stack up along it (in the listed order, else by height);
+  // off-axis parts like the crown slide straight out instead
   const side = (p) => Math.hypot(p.center.x, p.center.y) > 4;
-  const stack = parts.filter((p) => !side(p)).sort((a, b) => a.center.z - b.center.z);
-  const home = Math.max(0, stack.findIndex((p) => p.name === "Case"));
-  // each part clears its neighbour nearer the case, however deep it sat inside it
-  for (let r = home + 1; r < stack.length; r++) {
+  const axial = parts.filter((p) => !side(p)).sort((a, b) => a.center.z - b.center.z);
+  const listed = (c.stack ?? []).map((n) => axial.find((p) => p.name === n)).filter(Boolean);
+  const stack = [...listed, ...axial.filter((p) => !listed.includes(p))];
+  // each part clears the one below it, however deep it sat inside it
+  for (let r = 1; r < stack.length; r++) {
     const [p, q] = [stack[r], stack[r - 1]];
     p.apart.z = Math.max(q.apart.z + STEP, q.apart.z + q.hi + CLEAR - p.lo);
   }
-  for (let r = home - 1; r >= 0; r--) {
-    const [p, q] = [stack[r], stack[r + 1]];
-    p.apart.z = Math.min(q.apart.z - STEP, q.apart.z + q.lo - CLEAR - p.hi);
-  }
-  stack.forEach((p, r) => (p.rank = Math.abs(r - home)));
   const shift = -(stack[0].apart.z + stack[stack.length - 1].apart.z) / 2;
+  const middle = (stack.length - 1) / 2;
+  stack.forEach((p, r) => (p.rank = Math.abs(r - middle)));
   for (const p of parts) {
     if (side(p)) {
       p.apart.set(p.center.x, p.center.y, 0).setLength(PULL);
-      p.rank = 1;
+      p.rank = middle;
     }
     p.apart.z += shift;
   }
@@ -122,7 +127,6 @@ export default function WatchBench() {
   const api = useRef(null);
   const [current, setCurrent] = useState(CASES[0].id);
   const [ready, setReady] = useState(false);
-  const [apart, setApart] = useState(false);
   const [names, setNames] = useState([]);
 
   useEffect(() => {
@@ -178,7 +182,7 @@ export default function WatchBench() {
       const cache = {};
 
       const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-      const view = { yaw: -0.55, pitch: -0.32, vYaw: 0, vPitch: 0, drag: null, swap: 1, apart: 0, goal: 0 };
+      const view = { yaw: -0.55, pitch: -0.32, vYaw: 0, vPitch: 0, drag: null, swap: 1, apart: 0 };
       let visible = false;
       let raf = 0;
       let last = performance.now();
@@ -225,23 +229,23 @@ export default function WatchBench() {
         raf = 0;
         const dt = Math.min(0.05, (now - last) / 1000);
         last = now;
-        const rest = view.goal ? 0.42 : -0.32;
+        // together it faces you; apart it lies face-up so the stack reads top to bottom
+        const e = ease(view.apart);
+        const rest = -0.32 + 0.74 * e;
         if (!view.drag) {
           view.yaw += view.vYaw * dt + (still ? 0 : 0.35 * dt);
           view.pitch += view.vPitch * dt;
           view.vYaw *= Math.pow(0.04, dt);
           view.vPitch *= Math.pow(0.04, dt);
           // drift back toward a flattering three-quarter tilt
-          view.pitch += (rest - view.pitch) * Math.min(1, dt * (view.goal !== view.apart ? 3 : 1.5));
+          view.pitch += (rest - view.pitch) * Math.min(1, dt * 3);
         }
-        view.apart = still ? view.goal : view.goal ? Math.min(1, view.apart + dt / 1.1) : Math.max(0, view.apart - dt / 0.8);
         view.swap = Math.min(1, view.swap + dt * 3.5);
 
-        const e = ease(view.apart);
         // the outermost parts lift first, so it comes apart like someone's doing it
         model.meshes.forEach((m, i) => {
           const p = model.parts[i];
-          const lag = Math.min(0.3, 0.12 * Math.max(0, 3 - p.rank));
+          const lag = 0.3 * (1 - p.rank / Math.max(1, model.outer));
           m.position.copy(p.apart).multiplyScalar(ease(clamp01((view.apart - lag) / (1 - lag))));
         });
         lie.rotation.x = (-Math.PI / 2) * e;
@@ -278,16 +282,21 @@ export default function WatchBench() {
           return m;
         });
         const reach = Math.max(...parts.map((p) => p.geo.boundingBox ?? (p.geo.computeBoundingBox(), p.geo.boundingBox)).map((b) => Math.max(b.max.x, b.max.y)));
-        model = { parts, meshes, reach };
+        model = { parts, meshes, reach, outer: Math.max(...parts.map((p) => p.rank)) };
         setNames(parts.map((p) => p.name));
         view.swap = 0;
         setReady(true);
         wake();
       };
-      const setApartNow = (on) => {
-        view.goal = on ? 1 : 0;
+      // how far apart is scroll-driven: the assembly engine holds the camera on
+      // this tile for a stretch of scroll and reports progress through it (0 → 1)
+      const block = el.closest("[data-block]");
+      const onHold = (ev) => {
+        view.apart = clamp01(ev.detail);
         wake();
       };
+      view.apart = clamp01(Number(block?.dataset.hold ?? 0));
+      block?.addEventListener("asm-hold", onHold);
 
       const down = (e) => {
         view.drag = { x: e.clientX, y: e.clientY, t: performance.now() };
@@ -327,7 +336,7 @@ export default function WatchBench() {
       document.addEventListener("visibilitychange", wake);
       size();
 
-      api.current = { show, apart: setApartNow };
+      api.current = { show };
       show(CASES[0].id);
 
       cleanup = () => {
@@ -335,6 +344,7 @@ export default function WatchBench() {
         io.disconnect();
         ro.disconnect();
         document.removeEventListener("visibilitychange", wake);
+        block?.removeEventListener("asm-hold", onHold);
         el.removeEventListener("pointerdown", down);
         el.removeEventListener("pointermove", move);
         el.removeEventListener("pointerup", up);
@@ -366,17 +376,13 @@ export default function WatchBench() {
     setCurrent(id);
     api.current?.show(id);
   };
-  const toggle = () => {
-    setApart(!apart);
-    api.current?.apart(!apart);
-  };
 
   return (
-    <div className="asm-bench" data-apart={apart || undefined}>
+    <div className="asm-bench">
       <canvas
         ref={canvas}
         className="asm-bench-canvas"
-        aria-label={`A 3D model of the watch case, slowly turning${apart ? ", taken apart into its pieces" : ""}. Drag to rotate it.`}
+        aria-label="A 3D model of the watch, slowly turning. Scrolling past takes it apart into its pieces; drag to rotate it."
         role="img"
       />
       <div ref={tags} className="asm-bench-tags" aria-hidden="true">
@@ -388,7 +394,7 @@ export default function WatchBench() {
       <div className="asm-bench-copy">
         <div className="eyebrow">On the bench</div>
         <div className="asm-big">My own watch</div>
-        <p className="asm-note">I&rsquo;m designing one from scratch, starting with the case. Drag to turn it over, or take it apart.</p>
+        <p className="asm-note">I&rsquo;m designing one from scratch, starting with the case. Drag to turn it over.</p>
       </div>
       <div className="asm-bench-bar">
         <div className="asm-bench-pick" role="group" aria-label="Case design">
@@ -398,9 +404,6 @@ export default function WatchBench() {
             </button>
           ))}
         </div>
-        <button type="button" className="asm-bench-apart" aria-pressed={apart} onClick={toggle} disabled={!ready}>
-          {apart ? "Put it back" : "Take it apart"}
-        </button>
       </div>
     </div>
   );

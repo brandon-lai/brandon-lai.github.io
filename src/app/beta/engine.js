@@ -162,6 +162,8 @@ export function createAssembler(root) {
       i,
       start: TIMELINE.acts[i].start,
       end: TIMELINE.acts[i].end,
+      hold: TIMELINE.acts[i].hold,
+      lastHold: -1,
       wrap,
       tile: wrap.querySelector(".tile"),
       paint: wrap.querySelector("[data-paint]"),
@@ -721,7 +723,7 @@ export function createAssembler(root) {
     let cam = acts[0].cam;
     for (let i = 1; i < acts.length; i++) {
       const p = acts[i - 1], a = acts[i];
-      cam = lerp(cam, a.cam, smooth(seg(T, p.end - 4, a.start + (a.end - a.start) * 0.2)));
+      cam = lerp(cam, a.cam, smooth(seg(T, p.end + p.hold - 4, a.start + (a.end - a.start) * 0.2)));
     }
     const fin = reduce ? 0 : smooth(seg(T, FIN, FIN + 45));
     // a phone's single column is too tall to pull back on; it ends on the banner instead
@@ -757,6 +759,16 @@ export function createAssembler(root) {
       }
     }
     bookends(T, c);
+
+    // a block with a hold keeps the camera after it lands; tell it how far through that it is
+    for (const a of acts) {
+      if (!a.hold) continue;
+      const h = reduce ? 1 : Math.round(clamp01((T - a.end) / a.hold) * 1000) / 1000;
+      if (h === a.lastHold) continue;
+      a.lastHold = h;
+      a.wrap.dataset.hold = h;
+      a.wrap.dispatchEvent(new CustomEvent("asm-hold", { detail: h }));
+    }
 
     // parallax: dots, then cube layers at their own depth
     if (dots) dots.style.transform = `translate3d(0,${f1(-((camEff * 0.3) % 24))}px,0)`;

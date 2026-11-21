@@ -806,23 +806,6 @@ svg.asm-island path {
 .asm-bench-pick button:hover { color: #fff; }
 .asm-bench-pick button[aria-pressed="true"] { background: rgba(243, 235, 217, 0.16); color: #fff; }
 .asm-bench-pick button:focus-visible { outline: 2px solid var(--asm-gold); outline-offset: 2px; }
-.asm-bench-apart {
-  min-height: 42px;
-  padding: 0 16px;
-  border: 1px solid rgba(243, 235, 217, 0.22);
-  border-radius: var(--pill);
-  background: none;
-  color: #f3ebd9;
-  font: 600 13px/1 inherit;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 0.18s var(--ease), border-color 0.18s var(--ease), transform 0.12s var(--ease);
-}
-.asm-bench-apart:hover { background: rgba(243, 235, 217, 0.08); border-color: rgba(243, 235, 217, 0.4); }
-.asm-bench-apart:active { transform: scale(0.97); }
-.asm-bench-apart[aria-pressed="true"] { border-color: var(--asm-gold); color: var(--asm-gold); }
-.asm-bench-apart:focus-visible { outline: 2px solid var(--asm-gold); outline-offset: 2px; }
-.asm-bench-apart:disabled { opacity: 0.4; cursor: default; }
 /* part names, placed level with each part by WatchBench */
 .asm-bench-tags { position: absolute; inset: 0; pointer-events: none; visibility: hidden; opacity: 0; }
 .asm-bench-tags span {
@@ -842,10 +825,7 @@ svg.asm-island path {
 .asm-bench-wait { position: absolute; right: 24px; bottom: 30px; font: 500 11px var(--asm-mono); color: rgba(243, 235, 217, 0.5); }
 @media (max-width: 700px) {
   .asm-bench-copy { max-width: none; right: 26px; }
-  .asm-bench-bar { flex-wrap: nowrap; left: 16px; right: 16px; bottom: 16px; }
-  .asm-bench-pick button { padding: 0 11px; }
-  .asm-bench-pick button span { display: none; }
-  .asm-bench-apart { padding: 0 14px; white-space: nowrap; }
+  .asm-bench-bar { left: 16px; right: 16px; bottom: 16px; }
 }
 
 /* ---- keyframes -------------------------------------------------------- */
