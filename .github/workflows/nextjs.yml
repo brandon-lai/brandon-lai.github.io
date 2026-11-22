@@ -10,19 +10,19 @@ on:
     branches: ["main"]
 
   # Run by hand from the Actions tab, or by the iPhone Shortcut that sends
-  # daily running mileage from Apple Health (see services/README.md)
+  # workouts from Apple Health (see services/README.md)
   workflow_dispatch:
     inputs:
-      runs:
-        description: 'Running days, one "yyyy-mm-dd distance" per line'
+      workouts:
+        description: 'Workouts, one "yyyy-mm-dd | type | duration | distance" per line'
         required: false
         default: ""
       unit:
-        description: "Unit of those distances: mi or km"
+        description: "Unit of distances without one: mi or km"
         required: false
         default: "mi"
 
-  # Rebuild daily so "this week" on /beta rolls over even without a new run
+  # Rebuild daily so "this week" on /beta rolls over even without a new workout
   schedule:
     - cron: "23 9 * * *"
 
@@ -87,19 +87,19 @@ jobs:
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
-      # Live data for /beta. The latest mileage is kept in the Actions cache, so
-      # pushes and scheduled rebuilds keep showing it between Shortcut runs.
+      # Live data for /beta. The latest workouts are kept in the Actions cache, so
+      # pushes and scheduled rebuilds keep showing them between Shortcut runs.
       - name: Restore last synced data
         uses: actions/cache/restore@v4
         with:
           path: src/app/data/live
           key: live-data-${{ github.run_id }}
           restore-keys: live-data-
-      - name: Update running mileage
-        run: node services/running.mjs
+      - name: Update workouts
+        run: node services/activity.mjs
         env:
-          RUN_DAYS: ${{ inputs.runs }}
-          RUN_UNIT: ${{ inputs.unit }}
+          ACTIVITY: ${{ inputs.workouts }}
+          ACTIVITY_UNIT: ${{ inputs.unit }}
       - name: Save synced data
         uses: actions/cache/save@v4
         with:

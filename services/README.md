@@ -1,26 +1,28 @@
-# Live data: running mileage (and Beli, by hand)
+# Live data: workouts (and Beli, by hand)
 
 | file | what |
 |------|------|
-| `running.mjs` | turns the mileage the iPhone Shortcut sends into `src/app/data/live/running.json` |
+| `activity.mjs` | turns the workouts the iPhone Shortcut sends into `src/app/data/live/activity.json` |
 | `beli.mjs` | our Beli client, parked: `--check` tells you if Beli's login opens up again |
 | `lib.mjs` | shared helpers |
 
-## Running
+## Workouts
 
-The Running block on `/beta` shows miles this year, runs this year, miles this
-week, and a 12-week bar chart. It reads `src/app/data/live/running.json`.
+The activity block on `/beta` shows workouts and hours this year and this
+week, the top three sports (hours of tennis, miles run, number of classes),
+hours per week for 12 weeks coloured by sport, and the latest three workouts.
+It reads `src/app/data/live/activity.json`. Only the day of each workout is
+shown, never the time.
 
-Runs are recorded in Nike Run Club, which saves them to Apple Health. A
-Shortcut on the iPhone reads the daily running distance from Health and
-starts the deploy workflow with it. The workflow passes it to `running.mjs`,
+Everything comes from Apple Health, where the Apple Watch, Nike Run Club and
+other apps save every workout. A Shortcut on the iPhone reads them and starts
+the deploy workflow with them. The workflow passes them to `activity.mjs`,
 keeps the result in the Actions cache, and rebuilds the site. It also rebuilds
-daily on its own, so "this week" rolls over even without a new run.
+daily on its own, so "this week" rolls over even without a new workout.
 
-Strava isn't used: since June 2026 its API needs a paid subscription.
-
-Until the Shortcut has run once, the block shows committed sample data with a
-"Sample data" tag.
+Until the Shortcut has sent workouts once, the block shows this week and the
+latest runs from Strava's public widgets instead. Strava's API isn't used: since
+June 2026 it needs a paid subscription, and its free widgets only list runs.
 
 ### 1. Make a GitHub token (once)
 
@@ -37,15 +39,19 @@ can't read or change any code.
 
 ### 2. Build the Shortcut
 
-In the Shortcuts app, create a shortcut named **Send runs to site**:
+In the Shortcuts app, create a shortcut named **Send workouts to site**:
 
-1. **Find Health Samples**: Type is *Walking + Running Distance*. Add a filter,
-   *Source is Nike Run Club*, and another, *Start Date is in the last 400
-   days*. Set *Group By* to **Day** and the unit to **mi**.
-2. **Repeat with Each** item in *Health Samples*:
+1. **Find Health Samples**: Type is **Workouts**. Add a filter, *Start Date is
+   in the last 400 days*. Leave the limit off.
+2. **Repeat with Each** item in *Health Samples*, and inside it:
    - **Format Date**: *Repeat Item → Start Date*, Date Format *Custom*,
      `yyyy-MM-dd`.
-   - **Text**: *Formatted Date*, a space, then *Repeat Item → Value*.
+   - **Get Details of Health Sample**, three times, on *Repeat Item*: the
+     sport (called *Name*, *Type* or *Workout Type* depending on your iOS
+     version; pick the one that reads "Tennis" for a tennis session),
+     *Duration*, and *Distance*.
+   - **Text**: *Formatted Date* `|` *sport* `|` *Duration* `|` *Distance*
+     (type the bars yourself; spaces around them are fine).
 3. **Combine Text**: *Repeat Results*, with *New Lines*.
 4. **Get Contents of URL**:
    - URL: `https://api.github.com/repos/brandon-lai/brandon-lai.github.io/actions/workflows/nextjs.yml/dispatches`
@@ -56,33 +62,49 @@ In the Shortcuts app, create a shortcut named **Send runs to site**:
    - Request Body **JSON**, with two fields:
      - `ref` (Text): `main`
      - `inputs` (Dictionary), containing:
-       - `runs` (Text): *Combined Text*
+       - `workouts` (Text): *Combined Text*
        - `unit` (Text): `mi`
 
 Run it once by hand. Then open the repo's Actions tab: a "Deploy Next.js site
-to Pages" run should start, and its "Update running mileage" step should say
-something like `running: 142 days, 985.3 mi sent`. If it says it couldn't find
-any pairs, the warning shows the start of what arrived.
+to Pages" run should start, and its "Update workouts" step should say
+something like `activity: 212 workouts sent (98 tennis, 60 run, 54 class)`. If
+it says it couldn't read any workouts, the warning shows the start of what
+arrived; that's all that's needed to adjust the parser.
+
+The parser is forgiving: any `yyyy-mm-dd` date, the sport in words, a
+duration as `85 min`, `1 hr 25 min`, `1:25:00`, `46:13` or plain seconds or
+minutes, and a distance with `mi`, `km` or `m`. Durations under a minute and
+lines without a date are skipped. Tennis, pickleball and other racquet sports
+count as tennis; strength, HIIT, yoga, pilates, cardio and the
+like count as classes.
+
+If GitHub answers that the inputs are too large, change *the last 400 days*
+to 200.
+
+**If Shortcuts doesn't offer Workouts** as a type on your iOS version, the
+*Health Exporter & Shortcuts* app adds an "Export Workouts" action that can
+stand in for steps 1 and 2; its text output goes into step 3 the same way.
 
 ### 3. Make it automatic
 
-In Shortcuts → Automation → **+** → **App** → *Nike Run Club*, choose **Is
-Closed** and **Run Immediately**, then pick *Send runs to site*. The site
-updates a couple of minutes after each run, once you close the app.
+iOS locks Health data while the phone is locked, so the Shortcut has to run
+while it's unlocked. In Shortcuts → Automation → **+** → **App**, pick an app
+you open every day (Messages, Instagram...), choose **Is Closed** and **Run
+Immediately**, then pick *Send workouts to site*. The site updates a couple of
+minutes later.
 
-Use the app trigger rather than a time of day: Health data can't be read while
-the phone is locked, so a night-time automation would find nothing.
+(*Apple Watch Workout → Ends* also works as a trigger, but when the phone is
+locked in a pocket it finds nothing and sends nothing; harmless, just late.)
 
 ### Run it by hand
 
 ```sh
-RUN_DAYS="2026-11-19 6.2
-2026-11-17 3.1" node services/running.mjs
+ACTIVITY="2026-11-20 | Tennis | 85 min |
+2026-11-19 | Running | 46:13 | 2.6 mi" node services/activity.mjs
 ```
 
-The parser takes every `yyyy-mm-dd <number>` pair it can find, whatever is
-between them, and accepts a decimal comma. Days sent replace the stored days
-in that date range; older days are kept.
+Workouts sent replace the stored ones in their date range; older ones are
+kept for about two years.
 
 ## Beli (parked)
 

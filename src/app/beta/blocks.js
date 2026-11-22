@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ABOUT, SOCIALS } from "../data/site";
 import { EXPERIENCE } from "../data/experience";
 import { ArrowUpRight, LinkedIn } from "../components/Icons";
-import RUNNING from "../data/live/running.json";
+import ACTIVITY from "../data/live/activity.json";
 import BELI from "../data/beli.json";
 import WatchBench from "./WatchBench";
 
@@ -474,22 +474,47 @@ const short = (t) => new Date(t).toLocaleDateString("en-US", { month: "short", d
 const num = (v, dec = 0) => v.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec });
 
 /** totals as of the build (the site rebuilds daily, so "this week" stays true) */
-function runningStats(days, now = Date.now()) {
+/** how each kind of workout shows up: chip, bar colour, and the number that suits it */
+const SPORT = {
+  tennis: { icon: "\u{1F3BE}", color: "#9bc53d", stat: (w) => [hours(w), "h tennis"] },
+  run: { icon: "\u{1F3C3}", color: "#ff6a3d", stat: (w) => (miles(w) ? [miles(w), "mi run"] : [hours(w), "h running"]) },
+  class: { icon: "\u{1F3CB}\u{FE0F}", color: "#8b5cf6", stat: (w) => [w.length, w.length === 1 ? "class" : "classes"] },
+  ride: { icon: "\u{1F6B4}", color: "#3b82f6", stat: (w) => (miles(w) ? [miles(w), "mi ridden"] : [hours(w), "h riding"]) },
+  swim: { icon: "\u{1F3CA}", color: "#06b6d4", stat: (w) => [w.length, w.length === 1 ? "swim" : "swims"] },
+  walk: { icon: "\u{1F6B6}", color: "#94a3b8", stat: (w) => [miles(w) || hours(w), miles(w) ? "mi walked" : "h walking"] },
+  other: { icon: "\u26A1", color: "#f5b300", stat: (w) => [hours(w), "h other"] },
+};
+const ORDER = ["tennis", "run", "class", "ride", "swim", "walk", "other"];
+const hours = (ws) => Math.round(ws.reduce((t, w) => t + w.min, 0) / 6) / 10;
+const miles = (ws) => Math.round(ws.reduce((t, w) => t + (w.mi ?? 0), 0));
+const span2 = (min) => (min >= 60 ? `${Math.floor(min / 60)}h ${String(min % 60).padStart(2, "0")}m` : `${min}m`);
+const dayOf = (date) => new Date(`${date}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+
+function activityStats(workouts, now = Date.now()) {
   const today = Date.parse(iso(now));
   const monday = today - ((new Date(today).getUTCDay() + 6) % 7) * DAY;
   const year = new Date(today).getUTCFullYear();
-  const thisYear = days.filter((d) => d.date.startsWith(`${year}-`));
+  const thisYear = workouts.filter((w) => w.date.startsWith(`${year}-`));
+  const thisWeek = workouts.filter((w) => w.date >= iso(monday));
   const weeks = Array.from({ length: 12 }, (_, i) => {
     const start = monday - (11 - i) * DAY * 7;
     const from = iso(start), to = iso(start + 7 * DAY);
-    return { start, mi: days.filter((d) => d.date >= from && d.date < to).reduce((s, d) => s + d.mi, 0) };
+    const ws = workouts.filter((w) => w.date >= from && w.date < to);
+    return { start, total: ws.reduce((t, w) => t + w.min, 0), by: ORDER.map((g) => [g, ws.filter((w) => w.group === g).reduce((t, w) => t + w.min, 0)]).filter(([, m]) => m) };
   });
+  const sports = ORDER.map((g) => [g, thisYear.filter((w) => w.group === g)])
+    .filter(([, ws]) => ws.length)
+    .sort((a, b) => b[1].reduce((t, w) => t + w.min, 0) - a[1].reduce((t, w) => t + w.min, 0))
+    .slice(0, 3);
   return {
     year,
-    ytd: thisYear.reduce((s, d) => s + d.mi, 0),
-    runs: thisYear.length,
+    count: thisYear.length,
+    hours: hours(thisYear),
+    week: { count: thisWeek.length, hours: hours(thisWeek) },
     weeks,
-    peak: Math.max(...weeks.map((w) => w.mi), 1),
+    peak: Math.max(...weeks.map((w) => w.total), 1),
+    sports,
+    latest: [...workouts].sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 3),
   };
 }
 
@@ -541,9 +566,8 @@ function StravaLatest() {
 }
 
 function Running() {
-  const r = RUNNING;
-  // until the Shortcut has sent real mileage, show only what's real: Strava
-  if (r.sample)
+  // until the Shortcut has sent workouts, show only what's real: Strava
+  if (ACTIVITY.sample || !ACTIVITY.workouts.length)
     return (
       <div className="asm-pad asm-running is-strava">
         <div className="asm-head">
@@ -556,35 +580,70 @@ function Running() {
         <StravaLatest />
       </div>
     );
-  const st = runningStats(r.days);
+  const st = activityStats(ACTIVITY.workouts);
   return (
-    <div className="asm-pad asm-running">
+    <div className="asm-pad asm-running asm-activity">
       <div className="asm-head">
-        <div className="eyebrow">Running · {st.year}</div>
-        {r.sample && <span className="asm-sample">Sample data</span>}
+        <div className="eyebrow">Staying active · {st.year}</div>
+        <a className="asm-strava-link" href={STRAVA.profile} target="_blank" rel="noreferrer">
+          Strava <ArrowUpRight width={11} height={11} />
+        </a>
       </div>
       <div className="asm-stats">
         <div>
-          <b data-count={st.ytd}>{num(st.ytd)}</b>
-          <span>miles this year</span>
+          <b data-count={st.count}>{st.count}</b>
+          <span>
+            workouts<span className="asm-wide"> this year</span>
+          </span>
         </div>
         <div>
-          <b data-count={st.runs}>{st.runs}</b>
-          <span>runs</span>
+          <b data-count={Math.round(st.hours)}>{num(Math.round(st.hours))}</b>
+          <span>hours</span>
+        </div>
+        <div>
+          <b data-count={st.week.count}>{st.week.count}</b>
+          <span>
+            this week<span className="asm-wide">{st.week.count ? ` · ${num(st.week.hours, 1)} h` : ""}</span>
+          </span>
         </div>
       </div>
-      <StravaWeek />
-      <div className="asm-weeks" role="img" aria-label={`Miles per week for the last 12 weeks: ${st.weeks.map((w) => num(w.mi, 1)).join(", ")}`}>
+      <ul className="asm-sports">
+        {st.sports.map(([g, ws]) => {
+          const [v, label] = SPORT[g].stat(ws);
+          return (
+            <li key={g} style={{ "--c": SPORT[g].color }}>
+              <span aria-hidden="true">{SPORT[g].icon}</span>
+              <b>{num(v)}</b> {label}
+            </li>
+          );
+        })}
+      </ul>
+      <div className="asm-weeks" role="img" aria-label={`Hours active per week for the last 12 weeks: ${st.weeks.map((w) => num(w.total / 60, 1)).join(", ")}`}>
         {st.weeks.map((w, i) => (
-          <span key={w.start} className="asm-week" style={{ "--h": (w.mi / st.peak).toFixed(3), "--i": i }} data-now={i === 11 || undefined}>
-            <i />
+          <span key={w.start} className="asm-week is-stacked" style={{ "--h": (w.total / st.peak).toFixed(3), "--i": i }} data-now={i === 11 || undefined}>
+            <i>
+              {w.by.map(([g, m]) => (
+                <em key={g} style={{ "--c": SPORT[g].color, flexGrow: m }} />
+              ))}
+            </i>
           </span>
         ))}
       </div>
-      <div className="asm-foot">
-        <span>Weekly miles since {short(st.weeks[0].start)}</span>
-        <span>Nike Run Club</span>
-      </div>
+      <ol className="asm-latest">
+        {st.latest.map((w, i) => (
+          <li key={`${w.date}-${i}`}>
+            <span className="asm-chip" aria-hidden="true">
+              {SPORT[w.group].icon}
+            </span>
+            <b>{w.type}</b>
+            <span className="asm-latest-d">
+              {span2(w.min)}
+              {w.mi ? ` · ${num(w.mi, 1)} mi` : ""}
+            </span>
+            <time dateTime={w.date}>{dayOf(w.date)}</time>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
