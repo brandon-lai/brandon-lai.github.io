@@ -1001,6 +1001,13 @@ export const INTRO = 35;
 export const GAP = 10;
 export const FINALE = 80;
 
+/**
+ * How much page scroll each unit of the timeline takes: 1.3 means 130% of a
+ * viewport of scrolling per 100 timeline units, so the builds unfold over more
+ * scroll and feel calmer at an ordinary scroll speed.
+ */
+export const PACE = 1.3;
+
 export const TIMELINE = (() => {
   let at = INTRO;
   const acts = BLOCKS.map((b) => {

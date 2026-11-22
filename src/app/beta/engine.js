@@ -1,4 +1,4 @@
-import { BLOCKS, TIMELINE, INTRO } from "./blocks";
+import { BLOCKS, TIMELINE, INTRO, PACE } from "./blocks";
 
 /**
  * The choreography. Everything on screen is a pure function of one number,
@@ -12,6 +12,9 @@ import { BLOCKS, TIMELINE, INTRO } from "./blocks";
  * pulls back to show the finished page. Background and foreground cube
  * layers move at their own depth against that camera.
  */
+
+/** the fastest the timeline plays, in units per second (100 units ≈ one act's worth) */
+const MAX_RATE = 110;
 
 /** how far ahead of a block's act (in % of a viewport of scroll) its heavy content loads */
 const NEAR = 60;
@@ -217,7 +220,7 @@ export function createAssembler(root) {
     lines.setAttribute("width", vw);
     lines.setAttribute("height", worldH);
     lines.setAttribute("viewBox", `0 0 ${vw} ${worldH}`);
-    if (!reduce) track.style.height = `${(TIMELINE.total / 100) * vh + vh}px`;
+    if (!reduce) track.style.height = `${((TIMELINE.total * PACE) / 100) * vh + vh}px`;
 
     for (const a of acts) {
       const r = (a.rect = {
@@ -721,7 +724,7 @@ export function createAssembler(root) {
   function scrollT() {
     if (reduce) return TIMELINE.total;
     const y = -track.getBoundingClientRect().top;
-    return clamp((y / vh) * 100, 0, TIMELINE.total);
+    return clamp((y / (vh * PACE)) * 100, 0, TIMELINE.total);
   }
 
   function render(T) {
@@ -820,7 +823,14 @@ export function createAssembler(root) {
     last = now;
     Ttarget = scrollT();
     const k = 1 - Math.exp(-dt / 0.085);
-    const next = Math.abs(Ttarget - Tshow) < 0.01 ? Ttarget : lerp(Tshow, Ttarget, k);
+    const gap = Ttarget - Tshow;
+    let next = Math.abs(gap) < 0.01 ? Ttarget : lerp(Tshow, Ttarget, k);
+    // A speed limit, so a fling doesn't flash the builds past: the timeline moves
+    // at most MAX_RATE per second and catches up after the scroll stops. Far
+    // jumps (Skip, End, dragging the scrollbar) get faster the farther they are,
+    // so nobody sits through the whole show to reach the bottom.
+    const limit = (MAX_RATE + Math.max(0, Math.abs(gap) - 150) * 2.5) * dt;
+    if (Math.abs(next - Tshow) > limit) next = Tshow + Math.sign(gap) * limit;
     const moved = next !== Tshow || dirty;
     if (moved) {
       Tshow = next;
@@ -853,9 +863,12 @@ export function createAssembler(root) {
   window.__assemble = {
     total: TIMELINE.total,
     acts: TIMELINE.acts,
+    get T() {
+      return Tshow;
+    },
     seek: (T) => {
       Tshow = Ttarget = T;
-      window.scrollTo(0, track.offsetTop + (T / 100) * vh);
+      window.scrollTo(0, track.offsetTop + (T / 100) * vh * PACE);
       render(T);
     },
   };

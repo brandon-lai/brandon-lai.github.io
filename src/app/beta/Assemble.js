@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { BLOCKS, FOOTPRINT, HELPERS, MAX_CUBES, TIMELINE } from "./blocks";
+import { BLOCKS, FOOTPRINT, HELPERS, MAX_CUBES, PACE, TIMELINE } from "./blocks";
 import { Bot, IsoCube } from "./Bot";
 import { createAssembler } from "./engine";
 
@@ -231,7 +231,7 @@ export default function Assemble() {
         <style>{".asm .tile{opacity:1!important}.asm-stage{position:relative!important;height:auto!important}"}</style>
       </noscript>
 
-      <div className="asm-track" style={{ height: `${TIMELINE.total + 100}vh` }}>
+      <div className="asm-track" style={{ height: `${TIMELINE.total * PACE + 100}vh` }}>
         <div className="asm-stage">
           <div className="asm-back" aria-hidden="true">
             <div className="asm-dots" />
