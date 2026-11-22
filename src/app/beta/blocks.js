@@ -697,7 +697,7 @@ export const BLOCKS = [
   },
   {
     id: "linkedin",
-    size: "sm",
+    size: "xs",
     act: "balloon",
     len: 75,
     crew: [{ hat: HAT.green }],
@@ -725,14 +725,13 @@ export const BLOCKS = [
     Content: Tennis,
   },
   {
-    id: "marathon",
-    size: "sm",
-    act: "roller",
-    len: 75,
-    crew: [{ hat: HAT.orange, outfit: "runner" }],
-    perch: [0.78],
-    paint: true,
-    Content: Marathon,
+    id: "rockpool",
+    size: "md",
+    act: "haul",
+    len: 90,
+    crew: [{ hat: HAT.yellow }, { hat: HAT.blue }],
+    perch: [0.16, 0.3],
+    Content: Rockpool,
   },
   {
     id: "tiramisu",
@@ -744,22 +743,24 @@ export const BLOCKS = [
     Content: Tiramisu,
   },
   {
-    id: "myrel",
-    size: "tall",
-    act: "balloon",
+    id: "marathon",
+    size: "sm",
+    act: "roller",
     len: 75,
-    crew: [{ hat: HAT.violet }],
-    perch: [0.5],
-    Content: Myrel,
+    crew: [{ hat: HAT.orange, outfit: "runner" }],
+    perch: [0.78],
+    paint: true,
+    Content: Marathon,
   },
   {
-    id: "rockpool",
-    size: "md",
-    act: "haul",
-    len: 90,
-    crew: [{ hat: HAT.yellow }, { hat: HAT.blue }],
-    perch: [0.16, 0.3],
-    Content: Rockpool,
+    id: "music",
+    size: "band",
+    act: "push",
+    from: "right",
+    len: 65,
+    crew: [{ hat: HAT.green, outfit: "dj" }],
+    perch: [0.5],
+    Content: Music,
   },
   {
     id: "also",
@@ -781,6 +782,15 @@ export const BLOCKS = [
     Content: Smoodi,
   },
   {
+    id: "myrel",
+    size: "tall",
+    act: "balloon",
+    len: 75,
+    crew: [{ hat: HAT.violet }],
+    perch: [0.5],
+    Content: Myrel,
+  },
+  {
     id: "quote",
     size: "sm",
     act: "balloon",
@@ -788,16 +798,6 @@ export const BLOCKS = [
     crew: [{ hat: HAT.yellow }],
     perch: [0.5],
     Content: Quote,
-  },
-  {
-    id: "music",
-    size: "sm",
-    act: "push",
-    from: "right",
-    len: 65,
-    crew: [{ hat: HAT.green, outfit: "dj" }],
-    perch: [0.5],
-    Content: Music,
   },
   {
     id: "beli",
@@ -810,7 +810,7 @@ export const BLOCKS = [
   },
   {
     id: "running",
-    size: "lg",
+    size: "md",
     act: "run",
     len: 85,
     crew: [{ hat: HAT.orange, outfit: "runner" }],
@@ -832,7 +832,7 @@ export const BLOCKS = [
 export const HELPERS = BLOCKS.reduce((n, b) => n + b.crew.length, 0) + 1;
 
 /** grid footprint shown on each empty slot: columns × row units */
-export const FOOTPRINT = { xs: "1×2", sm: "1×3", tall: "1×5", md: "2×4", lg: "2×5", xl: "2×7", wide: "4×3" };
+export const FOOTPRINT = { xs: "1×2", sm: "1×3", tall: "1×5", md: "2×4", lg: "2×5", xl: "2×7", wide: "4×3", band: "2×3" };
 
 /* ---- the timeline, in % of a viewport of scroll ---------------------- */
 export const INTRO = 35;
