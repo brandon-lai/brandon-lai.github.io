@@ -486,7 +486,6 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
   color: var(--ink);
 }
 .asm-banner .btn { margin-top: 10px; }
-.asm-banner-fine { margin: 4px 0 0; font: 500 11.5px/1.4 var(--asm-mono); color: var(--ink-3); }
 
 /* ---- ropes and cables ------------------------------------------------- */
 .asm-lines {

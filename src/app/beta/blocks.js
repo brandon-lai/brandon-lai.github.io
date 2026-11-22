@@ -180,7 +180,7 @@ function Tennis() {
       <img src="/beta/tennis-serve.jpg" alt="Brandon tossing the ball up to serve on a grass court at dusk" />
       <div className="asm-photo-cap">
         <div className="stat">Tennis</div>
-        <div className="stat-sub">Most weekends, any weather</div>
+        <div className="stat-sub">Rain or shine. If there&rsquo;s a court, I&rsquo;m on it.</div>
       </div>
     </div>
   );
@@ -337,13 +337,31 @@ function Myrel() {
 }
 
 /** loops silently; holds on the first frame for anyone who prefers less motion */
+/**
+ * A muted, looping clip that starts from the top each time it comes into view
+ * and pauses once it leaves. With reduced motion it stays on its poster.
+ */
 function Clip(props) {
-  const ref = (el) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
     if (!el) return;
-    const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (still) el.pause();
-    else el.play?.().catch(() => {});
-  };
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return el.pause();
+    let inView = false;
+    const io = new IntersectionObserver(
+      ([en]) => {
+        if (en.isIntersecting === inView) return;
+        inView = en.isIntersecting;
+        if (inView) {
+          el.currentTime = 0;
+          el.play?.().catch(() => {});
+        } else el.pause();
+      },
+      { threshold: 0.35 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   return <video ref={ref} muted loop playsInline preload="metadata" {...props} />;
 }
 
@@ -576,16 +594,13 @@ function Banner() {
     <div className="asm-banner">
       <div className="asm-banner-title">Thanks for stopping by.</div>
       <p className="asm-banner-note">
-        I hope something here made you smile. Whether you&rsquo;re building something, hiring, or just want to swap notes on
-        watches, tiramisu or tide pools, I&rsquo;d love to hear from you.
+        Whether you&rsquo;re building something, hiring, or just want to swap notes on watches or tiramisu, I&rsquo;d
+        love to hear from you.
       </p>
       <span className="asm-banner-sign">&mdash; Brandon</span>
       <a className="btn" href={LINKEDIN} target="_blank" rel="noreferrer">
         Say hi on LinkedIn <ArrowUpRight width={15} height={15} />
       </a>
-      <p className="asm-banner-fine">
-        {BLOCKS.length} blocks, {HELPERS} helpers, zero bugs (that we know of).
-      </p>
     </div>
   );
 }
@@ -609,13 +624,15 @@ export const BLOCKS = [
     Content: Hero,
   },
   {
-    id: "rockpool",
+    id: "bench",
     size: "lg",
-    act: "haul",
-    len: 90,
-    crew: [{ hat: HAT.yellow }, { hat: HAT.blue }],
-    perch: [0.16, 0.3],
-    Content: Rockpool,
+    act: "crane",
+    len: 75,
+    // after it lands, the camera stays put for this much scroll while the watch comes apart
+    hold: 70,
+    crew: [{ hat: HAT.yellow, outfit: "watchmaker" }],
+    perch: [0.72],
+    Content: Bench,
   },
   {
     id: "linkedin",
@@ -684,15 +701,13 @@ export const BLOCKS = [
     Content: Myrel,
   },
   {
-    id: "bench",
+    id: "rockpool",
     size: "md",
-    act: "crane",
-    len: 75,
-    // after it lands, the camera stays put for this much scroll while the watch comes apart
-    hold: 70,
-    crew: [{ hat: HAT.yellow, outfit: "watchmaker" }],
-    perch: [0.72],
-    Content: Bench,
+    act: "haul",
+    len: 90,
+    crew: [{ hat: HAT.yellow }, { hat: HAT.blue }],
+    perch: [0.16, 0.3],
+    Content: Rockpool,
   },
   {
     id: "smoodi",
