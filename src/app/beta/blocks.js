@@ -170,7 +170,7 @@ function Lived() {
 }
 
 /**
- * "Songs I Keep Coming Back To": Spotify's own playlist player, filling a small
+ * "Timeless Tunes": Spotify's own playlist player, filling a small
  * tile. It plays right on the page (whole songs when signed in to Spotify,
  * previews otherwise). The share link's tracking parameter is left off.
  */
@@ -181,7 +181,7 @@ function Music() {
     <div className="asm-music">
       <iframe
         src={`https://open.spotify.com/embed/playlist/${PLAYLIST}?utm_source=generator`}
-        title="Songs I Keep Coming Back To, a Spotify playlist"
+        title="Timeless Tunes, a Spotify playlist"
         loading="lazy"
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
       />
@@ -785,10 +785,10 @@ export const BLOCKS = [
   {
     id: "work",
     size: "lg",
-    act: "voxel",
-    len: 105,
-    crew: [{ hat: HAT.yellow, tool: "batons" }],
-    perch: [0.1],
+    act: "haul",
+    len: 95,
+    crew: [{ hat: HAT.yellow }, { hat: HAT.blue }],
+    perch: [0.16, 0.3],
     Content: Work,
   },
   {
@@ -803,9 +803,9 @@ export const BLOCKS = [
   {
     id: "lived",
     size: "sm",
-    act: "balloon",
-    len: 70,
-    crew: [{ hat: HAT.red }],
+    act: "voxel",
+    len: 85,
+    crew: [{ hat: HAT.red, tool: "batons" }],
     perch: [0.5],
     Content: Lived,
   },
@@ -851,10 +851,20 @@ export const BLOCKS = [
   {
     id: "rockpool",
     size: "md",
-    act: "haul",
-    len: 90,
-    crew: [{ hat: HAT.yellow }, { hat: HAT.blue }],
-    perch: [0.16, 0.3],
+    act: "agent",
+    len: 105,
+    crew: [{ hat: HAT.blue, tool: "laptop" }],
+    perch: [0.5],
+    term: { u: 0.62, v: 0.52 },
+    title: "agent · rockpool.jsx",
+    script: [
+      { t: "$ agent build --block rockpool" },
+      { t: "+ <Eyebrow>Side project · live</Eyebrow>", add: true, step: 1 },
+      { t: "+ <LivePool webgpu tide={10} />", add: true },
+      { t: "+ <Title>Rockpool</Title>", add: true, step: 2 },
+      { t: "+ <Note>Touch the water.</Note>", add: true, step: 3 },
+      { t: "  ✓ 60 fps, wet", ok: true },
+    ],
     Content: Rockpool,
   },
   {
