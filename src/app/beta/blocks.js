@@ -504,16 +504,20 @@ function runningStats(days, now = Date.now()) {
 const STRAVA = {
   profile: "https://www.strava.com/athletes/70165341",
   summary: "https://www.strava.com/athletes/70165341/activity-summary/ad90afb35a87bed54247661f23519e2fd3b600ff",
+  // same share token; this one lists the latest runs (cropped below to leave out the route maps)
+  latest: "https://www.strava.com/athletes/70165341/latest-rides/ad90afb35a87bed54247661f23519e2fd3b600ff",
 };
 
-function StravaWeek() {
+function StravaWeek({ link = true }) {
   return (
     <div className="asm-strava">
       <div className="asm-strava-head">
-        <span>This week, live</span>
-        <a href={STRAVA.profile} target="_blank" rel="noreferrer">
-          Strava <ArrowUpRight width={11} height={11} />
-        </a>
+        <span>This week</span>
+        {link && (
+          <a href={STRAVA.profile} target="_blank" rel="noreferrer">
+            Strava <ArrowUpRight width={11} height={11} />
+          </a>
+        )}
       </div>
       <div className="asm-strava-crop">
         <iframe src={STRAVA.summary} title="This week's distance, time and elevation on Strava" scrolling="no" loading="lazy" tabIndex={-1} />
@@ -522,8 +526,36 @@ function StravaWeek() {
   );
 }
 
+/** the latest three runs: names, distance, time, climb and date, without the route maps */
+function StravaLatest() {
+  return (
+    <div className="asm-strava">
+      <div className="asm-strava-head">
+        <span>Latest runs</span>
+      </div>
+      <div className="asm-strava-crop is-latest">
+        <iframe src={STRAVA.latest} title="My latest runs on Strava" scrolling="no" loading="lazy" tabIndex={-1} />
+      </div>
+    </div>
+  );
+}
+
 function Running() {
   const r = RUNNING;
+  // until the Shortcut has sent real mileage, show only what's real: Strava
+  if (r.sample)
+    return (
+      <div className="asm-pad asm-running is-strava">
+        <div className="asm-head">
+          <div className="eyebrow">Running</div>
+          <a className="asm-strava-link" href={STRAVA.profile} target="_blank" rel="noreferrer">
+            Follow on Strava <ArrowUpRight width={11} height={11} />
+          </a>
+        </div>
+        <StravaWeek link={false} />
+        <StravaLatest />
+      </div>
+    );
   const st = runningStats(r.days);
   return (
     <div className="asm-pad asm-running">

@@ -1158,8 +1158,21 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
 /* Strava's week, cropped to its stats row and blended into the tile */
 .asm-strava { --k: 1.18; display: grid; gap: 6px; margin: 4px 0 6px; }
 .asm-strava-head { display: flex; align-items: baseline; justify-content: space-between; font: 500 11px/1 var(--asm-mono); color: var(--ink-3); }
-.asm-strava-head a { display: inline-flex; align-items: center; gap: 3px; color: #fc5200; text-decoration: none; }
-.asm-strava-head a:hover { text-decoration: underline; text-underline-offset: 2px; }
+.asm-strava-head a,
+.asm-strava-link { display: inline-flex; align-items: center; gap: 3px; font: 500 11px/1 var(--asm-mono); color: #fc5200; text-decoration: none; }
+.asm-strava-head a:hover,
+.asm-strava-link:hover { text-decoration: underline; text-underline-offset: 2px; }
+.asm-running.is-strava { gap: 16px; }
+/* on the wide tile, set Strava's text a size up so the tile reads full */
+.asm-running.is-strava .asm-strava { --k: 1.34; }
+.asm-running.is-strava .asm-strava-crop.is-latest { --k: 1.36; }
+@media (max-width: 620px) {
+  .asm-running.is-strava .asm-strava { --k: 1.18; }
+  .asm-running.is-strava .asm-strava-crop.is-latest { --k: 1.16; }
+}
+/* latest runs: the text column of three rows, maps and header left out */
+.asm-strava-crop.is-latest { --k: 1.16; width: calc(222px * var(--k)); height: calc(210px * var(--k)); }
+.asm-strava-crop.is-latest iframe { height: 454px; transform: scale(var(--k)) translate(-74px, -68px); }
 .asm-strava-crop { position: relative; width: calc(215px * var(--k)); max-width: 100%; height: calc(34px * var(--k)); overflow: hidden; }
 .asm-strava-crop iframe {
   position: absolute;
@@ -1172,12 +1185,14 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
   transform-origin: 0 0;
   /* the widget's stats row sits at x 11, y 68 inside its frame */
   transform: scale(var(--k)) translate(-11px, -68px);
+  /* greyscale so Strava's blue run names take the tile's ink */
+  filter: grayscale(1) contrast(1.15);
   mix-blend-mode: multiply;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .asm-strava-crop iframe { filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen; }
+  :root:not([data-theme="light"]) .asm-strava-crop iframe { filter: grayscale(1) invert(1) contrast(1.1); mix-blend-mode: screen; }
 }
-:root[data-theme="dark"] .asm-strava-crop iframe { filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen; }
+:root[data-theme="dark"] .asm-strava-crop iframe { filter: grayscale(1) invert(1) contrast(1.1); mix-blend-mode: screen; }
 
 .asm-weeks {
   display: grid;
