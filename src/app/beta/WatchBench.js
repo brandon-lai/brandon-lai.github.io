@@ -187,6 +187,8 @@ export default function WatchBench() {
       let raf = 0;
       let last = performance.now();
       let w = 1, h = 1, wide = true;
+      let free = 0.55; // vertical centre of the space between the copy and the picker, 0 = top
+      const tanHalf = Math.tan((camera.fov * Math.PI) / 360);
 
       const size = () => {
         w = el.clientWidth;
@@ -195,6 +197,10 @@ export default function WatchBench() {
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
         wide = w / h > 1.05;
+        const box = el.parentElement;
+        const copy = box?.querySelector(".asm-bench-copy");
+        const bar = box?.querySelector(".asm-bench-bar");
+        if (copy && bar) free = (copy.offsetTop + copy.offsetHeight + bar.offsetTop) / 2 / h;
         camera.updateProjectionMatrix();
       };
 
@@ -253,10 +259,12 @@ export default function WatchBench() {
         turn.rotation.x = view.pitch;
         const pop = 0.9 + 0.1 * (1 - Math.pow(1 - view.swap, 3));
         turn.scale.setScalar(pop);
-        // wide tile: the case sits right of the copy; narrow: below it. Apart, it needs more room.
-        const z = wide ? 120 : 148 / Math.min(1, w / h);
-        camera.position.set(0, 0, z * (1 + (wide ? 0.32 : 0.12) * e));
-        turn.position.set(wide ? 13 - 9 * e : -7 * e, (wide ? -2 : -7) - 4 * e, 0);
+        // wide tile: the case sits right of the copy. Narrow (taller than wide): centred
+        // in the space between the copy and the picker, together or apart.
+        const z = (wide ? 120 : 148 / Math.min(1, w / h)) * (1 + (wide ? 0.32 : 0.12) * e);
+        camera.position.set(0, 0, z);
+        if (wide) turn.position.set(13 - 9 * e, -2 - 4 * e, 0);
+        else turn.position.set(0, (1 - 2 * free) * z * tanHalf, 0);
 
         renderer.render(scene, camera);
         placeTags(clamp01((view.apart - 0.65) / 0.35));
