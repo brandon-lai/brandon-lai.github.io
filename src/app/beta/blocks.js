@@ -5,6 +5,7 @@ import { ArrowUpRight, LinkedIn } from "../components/Icons";
 import ACTIVITY from "../data/live/activity.json";
 import BELI from "../data/beli.json";
 import WatchBench from "./WatchBench";
+import { useNear } from "./near";
 
 /**
  * The page, block by block, and the act that builds each one.
@@ -176,15 +177,37 @@ function Lived() {
  */
 const PLAYLIST = "1zwhgNBZgMcdpFAR8QyBlW";
 
-function Music() {
+/**
+ * A photo that loads once its block is about to be built (see near.js) rather
+ * than on arrival. Tiles fix the photo's size, so a late load shifts nothing.
+ * Without JavaScript the <noscript> copy shows it straight away.
+ */
+function NearImg({ src, alt, ...rest }) {
+  const ref = useRef(null);
+  const near = useNear(ref);
   return (
-    <div className="asm-music">
-      <iframe
-        src={`https://open.spotify.com/embed/playlist/${PLAYLIST}?utm_source=generator`}
-        title="Timeless Tunes, a Spotify playlist"
-        loading="lazy"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      />
+    <>
+      <img ref={ref} src={near ? src : undefined} alt={alt} {...rest} />
+      <noscript>
+        <img src={src} alt={alt} {...rest} />
+      </noscript>
+    </>
+  );
+}
+
+function Music() {
+  const box = useRef(null);
+  const near = useNear(box);
+  // once loaded it stays loaded, so scrolling away never stops a song
+  return (
+    <div className="asm-music" ref={box}>
+      {near && (
+        <iframe
+          src={`https://open.spotify.com/embed/playlist/${PLAYLIST}?utm_source=generator`}
+          title="Timeless Tunes, a Spotify playlist"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        />
+      )}
     </div>
   );
 }
@@ -220,7 +243,7 @@ function Work() {
 function Tennis() {
   return (
     <div className="asm-photo asm-tennis">
-      <img src="/beta/tennis-serve.jpg" alt="Brandon tossing the ball up to serve on a grass court at dusk" />
+      <NearImg src="/beta/tennis-serve.jpg" alt="Brandon tossing the ball up to serve on a grass court at dusk" />
       <div className="asm-photo-cap">
         <div className="stat">Tennis</div>
         <div className="stat-sub">Rain or shine. If there&rsquo;s a court, I&rsquo;m on it.</div>
@@ -272,11 +295,12 @@ const POOL = "https://rockpool-tide.vercel.app";
 
 function Rockpool() {
   const box = useRef(null);
+  const near = useNear(box);
   const [live, setLive] = useState(false);
   const [shown, setShown] = useState(false);
   useEffect(() => {
     const el = box.current;
-    if (!el || !("gpu" in navigator) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!near || !el || !("gpu" in navigator) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // the pool posts { rockpool: "ready" } once it is actually drawing
     const ready = (e) => {
       if (e.origin === POOL && e.data?.rockpool === "ready") setShown(true);
@@ -301,14 +325,16 @@ function Rockpool() {
       clearTimeout(off);
       window.removeEventListener("message", ready);
     };
-  }, []);
+  }, [near]);
   return (
     <div className="asm-pool" ref={box}>
       <div className="asm-pool-view">
-        <picture>
-          <source media="(max-width: 700px)" srcSet="/beta/rockpool-phone.jpg" />
-          <img src="/beta/rockpool.jpg" alt="" />
-        </picture>
+        {near && (
+          <picture>
+            <source media="(max-width: 700px)" srcSet="/beta/rockpool-phone.jpg" />
+            <img src="/beta/rockpool.jpg" alt="" />
+          </picture>
+        )}
         {live && (
           <iframe
             src={`${POOL}/?embed&hour=10&seed=7`}
@@ -346,6 +372,7 @@ const MYREL = [
 
 function Myrel() {
   const box = useRef(null);
+  const near = useNear(box);
   const [i, setI] = useState(0);
   useEffect(() => {
     const el = box.current;
@@ -371,7 +398,7 @@ function Myrel() {
       <div className="asm-myrel-phone" ref={box}>
         <div className="asm-myrel-screen">
           {MYREL.map((s, k) => (
-            <img key={s.src} src={s.src} alt={s.alt} data-on={k === i || undefined} loading="lazy" />
+            <img key={s.src} src={near ? s.src : undefined} alt={s.alt} data-on={k === i || undefined} />
           ))}
         </div>
       </div>
@@ -405,7 +432,9 @@ function Clip(props) {
     io.observe(el);
     return () => io.disconnect();
   }, []);
-  return <video ref={ref} muted loop playsInline preload="metadata" {...props} />;
+  const near = useNear(ref);
+  const { src, poster, ...rest } = props;
+  return <video ref={ref} muted loop playsInline preload="metadata" src={near ? src : undefined} poster={near ? poster : undefined} {...rest} />;
 }
 
 function Smoodi() {
@@ -416,7 +445,7 @@ function Smoodi() {
         <figcaption>Prototype, 2020 · sped up</figcaption>
       </figure>
       <div className="asm-smoodi-copy">
-        <img className="asm-smoodi-render" src="/beta/smoodi-render.jpg" alt="The smoodi machine today, next to a fridge of frozen smoothie cups" />
+        <NearImg className="asm-smoodi-render" src="/beta/smoodi-render.jpg" alt="The smoodi machine today, next to a fridge of frozen smoothie cups" />
         <div className="eyebrow">2019–2020 · founding engineer</div>
         <div className="asm-big">smoodi</div>
         <p className="asm-note">
@@ -453,7 +482,7 @@ function Bench() {
 function Also() {
   return (
     <div className="asm-photo asm-also-photo">
-      <img src="/beta/scuba.jpg" alt="Brandon scuba diving, mask on, bubbles rising" />
+      <NearImg src="/beta/scuba.jpg" alt="Brandon scuba diving, mask on, bubbles rising" />
       <div className="asm-photo-cap">
         <div className="eyebrow">Also</div>
         <div className="asm-tags">
@@ -533,6 +562,17 @@ const STRAVA = {
   latest: "https://www.strava.com/athletes/70165341/latest-rides/ad90afb35a87bed54247661f23519e2fd3b600ff",
 };
 
+/** a Strava widget, cropped by its box, loaded once its block is near */
+function NearFrame({ className, src, title }) {
+  const box = useRef(null);
+  const near = useNear(box);
+  return (
+    <div className={className} ref={box}>
+      {near && <iframe src={src} title={title} scrolling="no" tabIndex={-1} />}
+    </div>
+  );
+}
+
 function StravaWeek({ link = true }) {
   return (
     <div className="asm-strava">
@@ -544,9 +584,7 @@ function StravaWeek({ link = true }) {
           </a>
         )}
       </div>
-      <div className="asm-strava-crop">
-        <iframe src={STRAVA.summary} title="This week's distance, time and elevation on Strava" scrolling="no" loading="lazy" tabIndex={-1} />
-      </div>
+      <NearFrame className="asm-strava-crop" src={STRAVA.summary} title="This week's distance, time and elevation on Strava" />
     </div>
   );
 }
@@ -558,9 +596,7 @@ function StravaLatest() {
       <div className="asm-strava-head">
         <span>Latest runs</span>
       </div>
-      <div className="asm-strava-crop is-latest">
-        <iframe src={STRAVA.latest} title="My latest runs on Strava" scrolling="no" loading="lazy" tabIndex={-1} />
-      </div>
+      <NearFrame className="asm-strava-crop is-latest" src={STRAVA.latest} title="My latest runs on Strava" />
     </div>
   );
 }

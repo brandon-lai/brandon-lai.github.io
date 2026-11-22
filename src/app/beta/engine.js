@@ -13,6 +13,9 @@ import { BLOCKS, TIMELINE, INTRO } from "./blocks";
  * layers move at their own depth against that camera.
  */
 
+/** how far ahead of a block's act (in % of a viewport of scroll) its heavy content loads */
+const NEAR = 60;
+
 /* ---- easing and small math ------------------------------------------- */
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const clamp01 = (v) => clamp(v, 0, 1);
@@ -763,6 +766,18 @@ export function createAssembler(root) {
     }
     bookends(T, c);
 
+    // heavy content (embeds, photos, the 3D watch) loads just ahead of its block's
+    // act: mark the block "near" once, a little over half a screen of scroll early.
+    // Reduced motion has no acts, so blocks watch their own visibility instead.
+    if (!reduce) {
+      for (const a of acts) {
+        if (a.near || T < a.start - NEAR) continue;
+        a.near = true;
+        a.wrap.setAttribute("data-near", "");
+        a.wrap.dispatchEvent(new CustomEvent("asm-near"));
+      }
+    }
+
     // a block with a hold keeps the camera after it lands; tell it how far through that it is
     for (const a of acts) {
       if (!a.hold) continue;
@@ -789,31 +804,46 @@ export function createAssembler(root) {
       phase = ph;
       root.dataset.phase = ph;
     }
-    if (confetti) show(confetti, T > FIN + 20 && !reduce);
+    if (confetti) {
+      const on = T > FIN + 20 && !reduce;
+      show(confetti, on);
+      if (confetti.classList.contains("is-on") !== on) confetti.classList.toggle("is-on", on);
+    }
     dirty = false;
   }
 
+  // The frame loop runs only while there's something to catch up on: a scroll
+  // or resize wakes it, it eases T toward the scroll position as before, and it
+  // goes back to sleep once T has settled, instead of reading layout every frame.
   function tick(now) {
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
     Ttarget = scrollT();
     const k = 1 - Math.exp(-dt / 0.085);
     const next = Math.abs(Ttarget - Tshow) < 0.01 ? Ttarget : lerp(Tshow, Ttarget, k);
-    if (next !== Tshow || dirty) {
+    const moved = next !== Tshow || dirty;
+    if (moved) {
       Tshow = next;
       render(Tshow);
     }
+    raf = moved ? requestAnimationFrame(tick) : 0;
+  }
+  function wake() {
+    if (raf) return;
+    last = performance.now();
     raf = requestAnimationFrame(tick);
   }
 
   const onResize = () => {
     measure();
     dirty = true;
+    wake();
   };
   measure();
   Tshow = Ttarget = scrollT();
   render(Tshow);
-  raf = requestAnimationFrame(tick);
+  wake();
+  window.addEventListener("scroll", wake, { passive: true });
   window.addEventListener("resize", onResize);
   document.fonts?.ready?.then(onResize).catch(() => {});
   const imgs = [...root.querySelectorAll("img")];
@@ -833,6 +863,7 @@ export function createAssembler(root) {
   return {
     destroy() {
       cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", wake);
       window.removeEventListener("resize", onResize);
       delete window.__assemble;
     },

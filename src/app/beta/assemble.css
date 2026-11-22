@@ -22,6 +22,9 @@
 :root[data-theme="dark"] .asm-back .asm-depth:not(.asm-word) { opacity: 0.4 !important; }
 :root[data-theme="dark"] .asm-front .asm-depth { opacity: 0.35 !important; }
 
+/* a photo waiting for its block (near.js) shows nothing, not alt text or a broken icon */
+.asm img:not([src]) { visibility: hidden; }
+
 .asm-track { position: relative; }
 
 .asm-stage {
@@ -71,6 +74,10 @@
   color: transparent;
   -webkit-text-stroke: 1.5px var(--line-strong);
   opacity: 1;
+  /* where the engine puts it at the top of the page (data-y), set here too so
+     the name paints in place before any script runs; it's the page's largest
+     element, so this is what the first meaningful paint waits on */
+  transform: translate3d(0, 260px, 0);
 }
 .asm-front .asm-depth { filter: blur(5px); opacity: 0.7; }
 
@@ -815,8 +822,10 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
   height: 11px;
   border-radius: 2px;
   background: var(--c);
-  animation: asm-fall var(--d) linear var(--dl) infinite;
 }
+/* the confetti only falls once it's shown for the finale; hidden, its 70
+   animations still cost style work on every frame */
+.asm-confetti.is-on i { animation: asm-fall var(--d) linear var(--dl) infinite; }
 
 /* ---- progress pill ---------------------------------------------------- */
 .asm-hud {

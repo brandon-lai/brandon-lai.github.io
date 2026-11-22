@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useNear } from "./near";
 
 /**
  * The watch I'm designing: each CAD export turns slowly and you can drag it
@@ -128,6 +129,7 @@ export default function WatchBench() {
   const [current, setCurrent] = useState(CASES[0].id);
   const [ready, setReady] = useState(false);
   const [names, setNames] = useState([]);
+  const near = useNear(canvas);
 
   useEffect(() => {
     const el = canvas.current;
@@ -363,22 +365,13 @@ export default function WatchBench() {
       };
     };
 
-    // load three.js only once the tile is about to be seen
-    const gate = new IntersectionObserver(
-      ([en]) => {
-        if (!en.isIntersecting) return;
-        gate.disconnect();
-        start();
-      },
-      { rootMargin: "600px" },
-    );
-    gate.observe(el);
+    // three.js and the model load once the block is about to be built (near.js)
+    if (near) start();
     return () => {
       alive = false;
-      gate.disconnect();
       cleanup();
     };
-  }, []);
+  }, [near]);
 
   const pick = (id) => {
     setCurrent(id);
