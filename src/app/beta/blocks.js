@@ -34,74 +34,10 @@ function Hero() {
     <div className="tile-pad is-hero">
       <h1 className="display">
         <span data-step="1">
-          <span className="em">Brandon</span> is a software engineer at <span className="em">LinkedIn</span> who
-          makes creative, whimsical, clean experiences for the web and apps.
+          <span className="em">Brandon</span> is a software engineer who makes creative, whimsical, clean experiences
+          for the web and apps.
         </span>
       </h1>
-      <div className="rule" />
-      <div className="manifesto">
-        <p>
-          <span data-step="2">
-            I like interfaces that stay out of the way until you touch them, then reward you a little for doing it.
-          </span>
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/**
- * TL;DR: the page in eight lines, next to the hero. Each line jumps to its
- * block: the scroll lands just after that block is built (the watch, after it
- * has come apart), so the build fast-forwards on the way there.
- */
-const TLDR = [
-  { icon: "\u{1F4BB}", what: "Software engineer", detail: EXPERIENCE[0].org, to: "work" },
-  { icon: "\u231A", what: "Designing a watch", detail: "two cases so far", to: "bench" },
-  { icon: "\u{1F3C3}", what: "Marathoner", detail: "3 finished", to: "marathon" },
-  { icon: "\u{1F3BE}", what: "Tennis", detail: "most weekends", to: "tennis" },
-  { icon: "\u{1F370}", what: "Tiramisu World Cup", detail: "Canada semi-finalist", to: "tiramisu" },
-  { icon: "\u{1F4F1}", what: "Side projects", detail: "myrel, Rockpool", to: "myrel" },
-  { icon: "\u{1F3B8}", what: "Guitar, scuba, snowboard", detail: "amateur level", to: "also" },
-  { icon: "\u{1F35D}", what: "Eating out, ranked", detail: "Beli top 10", to: "beli" },
-];
-
-function jumpTo(id) {
-  const act = TIMELINE.acts.find((a) => a.id === id);
-  const track = document.querySelector(".asm-track");
-  const stage = document.querySelector(".asm-stage");
-  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (!act || !track || !stage || still) {
-    document.querySelector(`[data-block="${id}"]`)?.scrollIntoView({ block: "center" });
-    return;
-  }
-  const T = act.hold ? act.end + act.hold - 6 : act.end + 3;
-  window.scrollTo({ top: track.offsetTop + (T / 100) * stage.clientHeight, behavior: "smooth" });
-}
-
-function Now() {
-  return (
-    <div className="asm-pad asm-tldr">
-      <div className="asm-tldr-head">
-        <div className="eyebrow">TL;DR</div>
-        <span className="asm-tldr-hint">tap a line to jump there</span>
-      </div>
-      <ul>
-        {TLDR.map((row) => (
-          <li key={row.to}>
-            <button type="button" onClick={() => jumpTo(row.to)}>
-              <span className="asm-chip" aria-hidden="true">
-                {row.icon}
-              </span>
-              <b>{row.what}</b>
-              <span className="asm-tldr-detail">{row.detail}</span>
-              <svg className="asm-tldr-go" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M8 3v9M4 8.5l4 4 4-4" />
-              </svg>
-            </button>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
@@ -435,7 +371,7 @@ function Smoodi() {
 }
 
 /** one favourite line; swap the text and `by` to change it */
-const QUOTE = { text: ABOUT.lead.join(" "), by: null };
+const QUOTE = { text: "What is impossible to envision is impossible to do.", by: null };
 
 function Quote() {
   return (
@@ -464,7 +400,6 @@ function Also() {
           <span>scuba</span>
           <span>snowboard</span>
         </div>
-        <div className="stat-sub">All at a respectable amateur level</div>
       </div>
     </div>
   );
@@ -669,21 +604,18 @@ export const BLOCKS = [
       { t: "$ agent build --block hero" },
       { t: "  reading data/site.js", dim: true },
       { t: "  ✓ headline", ok: true, step: 1 },
-      { t: "  ✓ the two lines about cities", ok: true, step: 2 },
-      { t: "  ✓ the line about this page", ok: true, step: 3 },
-      { t: "  ✓ footnote", ok: true, step: 4 },
       { t: "  done · 1 block, 0 errors", dim: true },
     ],
     Content: Hero,
   },
   {
-    id: "now",
-    size: "md",
+    id: "rockpool",
+    size: "lg",
     act: "haul",
-    len: 85,
+    len: 90,
     crew: [{ hat: HAT.yellow }, { hat: HAT.blue }],
     perch: [0.16, 0.3],
-    Content: Now,
+    Content: Rockpool,
   },
   {
     id: "linkedin",
@@ -734,17 +666,6 @@ export const BLOCKS = [
     Content: Marathon,
   },
   {
-    id: "bench",
-    size: "md",
-    act: "crane",
-    len: 75,
-    // after it lands, the camera stays put for this much scroll while the watch comes apart
-    hold: 70,
-    crew: [{ hat: HAT.yellow, outfit: "watchmaker" }],
-    perch: [0.72],
-    Content: Bench,
-  },
-  {
     id: "tiramisu",
     size: "tall",
     act: "stamp",
@@ -763,23 +684,15 @@ export const BLOCKS = [
     Content: Myrel,
   },
   {
-    id: "rockpool",
-    size: "lg",
-    act: "agent",
-    len: 105,
-    crew: [{ hat: HAT.blue, tool: "laptop" }],
-    perch: [0.5],
-    term: { u: 0.62, v: 0.52 },
-    title: "agent · rockpool.jsx",
-    script: [
-      { t: "$ agent build --block rockpool" },
-      { t: "+ <Eyebrow>Side project · live</Eyebrow>", add: true, step: 1 },
-      { t: "+ <LivePool webgpu tide={10} />", add: true, draw: true },
-      { t: "+ <Title>Rockpool</Title>", add: true, step: 2 },
-      { t: "+ <Note>Touch the water.</Note>", add: true, step: 3 },
-      { t: "  ✓ 60 fps, wet", ok: true },
-    ],
-    Content: Rockpool,
+    id: "bench",
+    size: "md",
+    act: "crane",
+    len: 75,
+    // after it lands, the camera stays put for this much scroll while the watch comes apart
+    hold: 70,
+    crew: [{ hat: HAT.yellow, outfit: "watchmaker" }],
+    perch: [0.72],
+    Content: Bench,
   },
   {
     id: "smoodi",

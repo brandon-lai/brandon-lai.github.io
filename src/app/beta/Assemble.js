@@ -146,7 +146,6 @@ function Fx({ b }) {
  */
 const SAYS = {
   hero: "Hard hats on, please.",
-  now: "I carried all of that.",
   linkedin: "Connect with him. I\u2019ll wait.",
   watches: "That watch keeps real time. Check it.",
   work: "Five jobs. One crew.",
@@ -154,7 +153,7 @@ const SAYS = {
   marathon: "Three times 26.2? I took the elevator.",
   tennis: "Quiet, please.",
   tiramisu: "Press the stamp. Go on.",
-  rockpool: "Mind the anemones.",
+  rockpool: "Heavy. It's full of water.",
   myrel: "It never forgets a birthday.",
   smoodi: "Smoothie? It cleans up after itself.",
   also: "Equalizing. Back in a sec.",
