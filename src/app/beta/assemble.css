@@ -166,6 +166,75 @@
 }
 .asm-list li { display: flex; align-items: center; gap: 11px; }
 
+/* where I've lived: one transit line, a stop per city, home at the end */
+.asm-lived { --route: #3b6cf6; gap: 12px; }
+.asm-route {
+  position: relative;
+  display: grid;
+  flex: 1;
+  align-content: space-between;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.asm-route::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 10px;
+  bottom: 10px;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--route);
+}
+.asm-route li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  padding-left: 28px;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink-2);
+}
+.asm-stop {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border: 2.5px solid var(--route);
+  border-radius: 50%;
+  background: var(--surface);
+}
+.asm-route li[data-now] { font-weight: 700; color: var(--ink); }
+.asm-route li[data-now] .asm-stop { left: -1px; width: 18px; height: 18px; margin-top: -9px; background: var(--route); box-shadow: 0 0 0 4px color-mix(in srgb, var(--route) 22%, transparent); }
+.asm-route li[data-now] .asm-stop::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--route);
+  animation: asm-ping 2.4s var(--ease) infinite;
+}
+.asm-now {
+  padding: 3px 8px;
+  border-radius: var(--pill);
+  background: color-mix(in srgb, var(--route) 14%, transparent);
+  font: 600 11px/1.2 var(--asm-mono);
+  color: var(--route);
+}
+@keyframes asm-ping {
+  from { transform: scale(0.6); opacity: 0.9; }
+  to { transform: scale(1.7); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .asm-route li[data-now] .asm-stop::after { animation: none; opacity: 0; }
+}
+
 .asm-chip {
   display: grid;
   place-items: center;

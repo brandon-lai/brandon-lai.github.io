@@ -146,6 +146,29 @@ function Marathon() {
   );
 }
 
+/** Where I've lived, in order, drawn as one transit line; the last stop is home now */
+const PLACES = ["Minnesota", "Nashville", "Boston", "Montreal", "Chicago", "Paris", "NYC"];
+
+function Lived() {
+  return (
+    <div className="asm-pad asm-lived">
+      <div className="eyebrow">Where I&rsquo;ve lived</div>
+      <ol className="asm-route">
+        {PLACES.map((place, i) => {
+          const now = i === PLACES.length - 1;
+          return (
+            <li key={place} data-now={now || undefined} style={{ "--i": i }}>
+              <span className="asm-stop" aria-hidden="true" />
+              {place}
+              {now && <span className="asm-now">now</span>}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
 /** "Sep 2022 – Present", or "May – Aug 2022" when a role starts and ends in one year */
 function span({ start, end }) {
   const [sm, sy] = start.split(" ");
@@ -624,6 +647,15 @@ export const BLOCKS = [
     Content: Hero,
   },
   {
+    id: "work",
+    size: "lg",
+    act: "voxel",
+    len: 105,
+    crew: [{ hat: HAT.yellow, tool: "batons" }],
+    perch: [0.1],
+    Content: Work,
+  },
+  {
     id: "bench",
     size: "lg",
     act: "crane",
@@ -633,6 +665,15 @@ export const BLOCKS = [
     crew: [{ hat: HAT.yellow, outfit: "watchmaker" }],
     perch: [0.72],
     Content: Bench,
+  },
+  {
+    id: "lived",
+    size: "sm",
+    act: "balloon",
+    len: 70,
+    crew: [{ hat: HAT.red }],
+    perch: [0.5],
+    Content: Lived,
   },
   {
     id: "linkedin",
@@ -652,15 +693,6 @@ export const BLOCKS = [
     perch: [0.6],
     paint: true,
     Content: Watches,
-  },
-  {
-    id: "work",
-    size: "lg",
-    act: "voxel",
-    len: 105,
-    crew: [{ hat: HAT.yellow, tool: "batons" }],
-    perch: [0.1],
-    Content: Work,
   },
   {
     id: "tennis",
@@ -710,6 +742,16 @@ export const BLOCKS = [
     Content: Rockpool,
   },
   {
+    id: "also",
+    size: "tall",
+    act: "push",
+    from: "left",
+    len: 65,
+    crew: [{ hat: HAT.violet, outfit: "scuba" }],
+    perch: [0.7],
+    Content: Also,
+  },
+  {
     id: "smoodi",
     size: "md",
     act: "crane",
@@ -719,18 +761,8 @@ export const BLOCKS = [
     Content: Smoodi,
   },
   {
-    id: "also",
-    size: "sm",
-    act: "push",
-    from: "left",
-    len: 65,
-    crew: [{ hat: HAT.violet, outfit: "scuba" }],
-    perch: [0.7],
-    Content: Also,
-  },
-  {
     id: "quote",
-    size: "sm",
+    size: "xs",
     act: "balloon",
     len: 75,
     crew: [{ hat: HAT.yellow }],
