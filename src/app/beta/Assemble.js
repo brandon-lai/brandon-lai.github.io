@@ -146,6 +146,7 @@ function Fx({ b }) {
  */
 const SAYS = {
   hero: "Hard hats on, please.",
+  music: "Headphones on. Volume up.",
   lived: "Seven cities. I carried every box.",
   linkedin: "Connect with him. I\u2019ll wait.",
   watches: "That watch keeps real time. Check it.",

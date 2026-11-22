@@ -169,6 +169,26 @@ function Lived() {
   );
 }
 
+/**
+ * "Songs I Keep Coming Back To": Spotify's own playlist player, filling a small
+ * tile. It plays right on the page (whole songs when signed in to Spotify,
+ * previews otherwise). The share link's tracking parameter is left off.
+ */
+const PLAYLIST = "1zwhgNBZgMcdpFAR8QyBlW";
+
+function Music() {
+  return (
+    <div className="asm-music">
+      <iframe
+        src={`https://open.spotify.com/embed/playlist/${PLAYLIST}?utm_source=generator`}
+        title="Songs I Keep Coming Back To, a Spotify playlist"
+        loading="lazy"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+      />
+    </div>
+  );
+}
+
 /** "Sep 2022 – Present", or "May – Aug 2022" when a role starts and ends in one year */
 function span({ start, end }) {
   const [sm, sy] = start.split(" ");
@@ -743,7 +763,7 @@ export const BLOCKS = [
   },
   {
     id: "also",
-    size: "tall",
+    size: "sm",
     act: "push",
     from: "left",
     len: 65,
@@ -762,12 +782,22 @@ export const BLOCKS = [
   },
   {
     id: "quote",
-    size: "xs",
+    size: "sm",
     act: "balloon",
     len: 75,
     crew: [{ hat: HAT.yellow }],
     perch: [0.5],
     Content: Quote,
+  },
+  {
+    id: "music",
+    size: "sm",
+    act: "push",
+    from: "right",
+    len: 65,
+    crew: [{ hat: HAT.green, outfit: "dj" }],
+    perch: [0.5],
+    Content: Music,
   },
   {
     id: "beli",
@@ -780,7 +810,7 @@ export const BLOCKS = [
   },
   {
     id: "running",
-    size: "md",
+    size: "lg",
     act: "run",
     len: 85,
     crew: [{ hat: HAT.orange, outfit: "runner" }],

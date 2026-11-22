@@ -5,7 +5,7 @@
  * is CSS, so a still page still breathes.
  *
  * A helper on a themed block dresses for it (`outfit`): scuba, runner, tennis,
- * chef or watchmaker. The outfit swaps the hat, what's on the torso, the feet
+ * chef, watchmaker or dj. The outfit swaps the hat, what's on the torso, the feet
  * and anything carried; `--hat` stays the accent colour throughout.
  *
  * Geometry is local to the feet: (0,0) is between the soles, up is -y.
@@ -58,6 +58,14 @@ function Headgear({ outfit, prop }) {
           <path d="M-8.4 -49.6C-14 -50 -14.4 -58.4 -8 -58C-7.4 -64.4 2.6 -64.6 3.6 -59C9.6 -61.4 14 -55 8.4 -49.6Z" />
           <rect x="-9.2" y="-51.6" width="18.4" height="4" rx="1.2" />
           <path className="pleat" d="M-3.6 -51.2V-55M0 -51.2V-56M3.6 -51.2V-55" />
+        </g>
+      );
+    case "dj":
+      return (
+        <g className="headphones">
+          <path className="band" d="M-12 -40C-12.6 -57 12.6 -57 12 -40" />
+          <rect x="-15" y="-44.5" width="5" height="9" rx="2.2" />
+          <rect x="10" y="-44.5" width="5" height="9" rx="2.2" />
         </g>
       );
     case "watchmaker":
