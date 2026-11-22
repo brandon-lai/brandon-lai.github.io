@@ -1155,6 +1155,30 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
 .asm-stats span { font-size: 12.5px; color: var(--ink-3); }
 
 /* weekly mileage: bars rise left to right as the jogger passes */
+/* Strava's week, cropped to its stats row and blended into the tile */
+.asm-strava { --k: 1.18; display: grid; gap: 6px; margin: 4px 0 6px; }
+.asm-strava-head { display: flex; align-items: baseline; justify-content: space-between; font: 500 11px/1 var(--asm-mono); color: var(--ink-3); }
+.asm-strava-head a { display: inline-flex; align-items: center; gap: 3px; color: #fc5200; text-decoration: none; }
+.asm-strava-head a:hover { text-decoration: underline; text-underline-offset: 2px; }
+.asm-strava-crop { position: relative; width: calc(215px * var(--k)); max-width: 100%; height: calc(34px * var(--k)); overflow: hidden; }
+.asm-strava-crop iframe {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 300px;
+  height: 160px;
+  border: 0;
+  pointer-events: none;
+  transform-origin: 0 0;
+  /* the widget's stats row sits at x 11, y 68 inside its frame */
+  transform: scale(var(--k)) translate(-11px, -68px);
+  mix-blend-mode: multiply;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .asm-strava-crop iframe { filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen; }
+}
+:root[data-theme="dark"] .asm-strava-crop iframe { filter: invert(1) hue-rotate(180deg); mix-blend-mode: screen; }
+
 .asm-weeks {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));

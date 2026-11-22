@@ -493,10 +493,38 @@ function runningStats(days, now = Date.now()) {
   };
 }
 
+/**
+ * This week from Strava, via Strava's own activity-summary widget. It's a
+ * cross-origin frame with a fixed 300x160 layout, so it can't be restyled
+ * inside; instead it's cropped to its stats row (our own heading and a Strava
+ * link stand in for its header and button), scaled to our type size, and
+ * blended into the tile: multiplied in light mode so its white melts into the
+ * surface, inverted and screened in dark mode.
+ */
+const STRAVA = {
+  profile: "https://www.strava.com/athletes/70165341",
+  summary: "https://www.strava.com/athletes/70165341/activity-summary/ad90afb35a87bed54247661f23519e2fd3b600ff",
+};
+
+function StravaWeek() {
+  return (
+    <div className="asm-strava">
+      <div className="asm-strava-head">
+        <span>This week, live</span>
+        <a href={STRAVA.profile} target="_blank" rel="noreferrer">
+          Strava <ArrowUpRight width={11} height={11} />
+        </a>
+      </div>
+      <div className="asm-strava-crop">
+        <iframe src={STRAVA.summary} title="This week's distance, time and elevation on Strava" scrolling="no" loading="lazy" tabIndex={-1} />
+      </div>
+    </div>
+  );
+}
+
 function Running() {
   const r = RUNNING;
   const st = runningStats(r.days);
-  const week = st.weeks.at(-1).mi;
   return (
     <div className="asm-pad asm-running">
       <div className="asm-head">
@@ -512,11 +540,8 @@ function Running() {
           <b data-count={st.runs}>{st.runs}</b>
           <span>runs</span>
         </div>
-        <div>
-          <b data-count={week} data-dec="1">{num(week, 1)}</b>
-          <span>this week</span>
-        </div>
       </div>
+      <StravaWeek />
       <div className="asm-weeks" role="img" aria-label={`Miles per week for the last 12 weeks: ${st.weeks.map((w) => num(w.mi, 1)).join(", ")}`}>
         {st.weeks.map((w, i) => (
           <span key={w.start} className="asm-week" style={{ "--h": (w.mi / st.peak).toFixed(3), "--i": i }} data-now={i === 11 || undefined}>
@@ -676,15 +701,13 @@ export const BLOCKS = [
     Content: Work,
   },
   {
-    id: "bench",
-    size: "lg",
-    act: "crane",
+    id: "linkedin",
+    size: "sm",
+    act: "balloon",
     len: 75,
-    // after it lands, the camera stays put for this much scroll while the watch comes apart
-    hold: 70,
-    crew: [{ hat: HAT.yellow, outfit: "watchmaker" }],
-    perch: [0.72],
-    Content: Bench,
+    crew: [{ hat: HAT.green }],
+    perch: [0.5],
+    Content: Card,
   },
   {
     id: "lived",
@@ -696,13 +719,15 @@ export const BLOCKS = [
     Content: Lived,
   },
   {
-    id: "linkedin",
-    size: "xs",
-    act: "balloon",
+    id: "bench",
+    size: "lg",
+    act: "crane",
     len: 75,
-    crew: [{ hat: HAT.green }],
-    perch: [0.5],
-    Content: Card,
+    // after it lands, the camera stays put for this much scroll while the watch comes apart
+    hold: 70,
+    crew: [{ hat: HAT.yellow, outfit: "watchmaker" }],
+    perch: [0.72],
+    Content: Bench,
   },
   {
     id: "watches",
@@ -715,14 +740,22 @@ export const BLOCKS = [
     Content: Watches,
   },
   {
-    id: "tennis",
+    id: "myrel",
     size: "tall",
-    act: "push",
-    from: "right",
-    len: 65,
-    crew: [{ hat: HAT.green, outfit: "tennis" }],
-    perch: [0.3],
-    Content: Tennis,
+    act: "balloon",
+    len: 75,
+    crew: [{ hat: HAT.violet }],
+    perch: [0.5],
+    Content: Myrel,
+  },
+  {
+    id: "smoodi",
+    size: "lg",
+    act: "crane",
+    len: 70,
+    crew: [{ hat: HAT.orange }],
+    perch: [0.5],
+    Content: Smoodi,
   },
   {
     id: "rockpool",
@@ -734,13 +767,14 @@ export const BLOCKS = [
     Content: Rockpool,
   },
   {
-    id: "tiramisu",
+    id: "tennis",
     size: "tall",
-    act: "stamp",
-    len: 70,
-    crew: [{ hat: HAT.red, outfit: "chef" }],
-    perch: [0.72],
-    Content: Tiramisu,
+    act: "push",
+    from: "right",
+    len: 65,
+    crew: [{ hat: HAT.green, outfit: "tennis" }],
+    perch: [0.3],
+    Content: Tennis,
   },
   {
     id: "marathon",
@@ -753,14 +787,22 @@ export const BLOCKS = [
     Content: Marathon,
   },
   {
-    id: "music",
-    size: "band",
-    act: "push",
-    from: "right",
-    len: 65,
-    crew: [{ hat: HAT.green, outfit: "dj" }],
-    perch: [0.5],
-    Content: Music,
+    id: "running",
+    size: "md",
+    act: "run",
+    len: 85,
+    crew: [{ hat: HAT.orange, outfit: "runner" }],
+    perch: [0.84],
+    Content: Running,
+  },
+  {
+    id: "tiramisu",
+    size: "sm",
+    act: "stamp",
+    len: 70,
+    crew: [{ hat: HAT.red, outfit: "chef" }],
+    perch: [0.72],
+    Content: Tiramisu,
   },
   {
     id: "also",
@@ -773,33 +815,6 @@ export const BLOCKS = [
     Content: Also,
   },
   {
-    id: "smoodi",
-    size: "md",
-    act: "crane",
-    len: 70,
-    crew: [{ hat: HAT.orange }],
-    perch: [0.5],
-    Content: Smoodi,
-  },
-  {
-    id: "myrel",
-    size: "tall",
-    act: "balloon",
-    len: 75,
-    crew: [{ hat: HAT.violet }],
-    perch: [0.5],
-    Content: Myrel,
-  },
-  {
-    id: "quote",
-    size: "sm",
-    act: "balloon",
-    len: 75,
-    crew: [{ hat: HAT.yellow }],
-    perch: [0.5],
-    Content: Quote,
-  },
-  {
     id: "beli",
     size: "lg",
     act: "serve",
@@ -809,13 +824,23 @@ export const BLOCKS = [
     Content: Beli,
   },
   {
-    id: "running",
-    size: "md",
-    act: "run",
-    len: 85,
-    crew: [{ hat: HAT.orange, outfit: "runner" }],
-    perch: [0.84],
-    Content: Running,
+    id: "quote",
+    size: "xs",
+    act: "balloon",
+    len: 75,
+    crew: [{ hat: HAT.yellow }],
+    perch: [0.5],
+    Content: Quote,
+  },
+  {
+    id: "music",
+    size: "band",
+    act: "push",
+    from: "right",
+    len: 65,
+    crew: [{ hat: HAT.green, outfit: "dj" }],
+    perch: [0.5],
+    Content: Music,
   },
   {
     id: "banner",
