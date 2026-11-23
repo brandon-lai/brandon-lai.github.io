@@ -433,35 +433,73 @@ function Myrel() {
   );
 }
 
-/** loops silently; holds on the first frame for anyone who prefers less motion */
 /**
- * A muted, looping clip that starts from the top each time it comes into view
- * and pauses once it leaves. With reduced motion it stays on its poster.
+ * A muted, looping clip that stays paused on its poster until clicked, avoids
+ * downloading the video until then, and pauses again if scrolled out of view.
  */
-function Clip(props) {
+function Clip({ src, poster, ...rest }) {
   const ref = useRef(null);
+  const near = useNear(ref);
+  const [playing, setPlaying] = useState(false);
+
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return el.pause();
-    let inView = false;
+    const onPlay = () => setPlaying(true);
+    const onPause = () => setPlaying(false);
+    el.addEventListener("play", onPlay);
+    el.addEventListener("pause", onPause);
     const io = new IntersectionObserver(
       ([en]) => {
-        if (en.isIntersecting === inView) return;
-        inView = en.isIntersecting;
-        if (inView) {
-          el.currentTime = 0;
-          el.play?.().catch(() => {});
-        } else el.pause();
+        if (!en.isIntersecting && !el.paused) el.pause();
       },
-      { threshold: 0.35 },
+      { threshold: 0.1 },
     );
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      el.removeEventListener("play", onPlay);
+      el.removeEventListener("pause", onPause);
+    };
   }, []);
-  const near = useNear(ref);
-  const { src, poster, ...rest } = props;
-  return <video ref={ref} muted loop playsInline preload="metadata" src={near ? src : undefined} poster={near ? poster : undefined} {...rest} />;
+
+  const toggle = () => {
+    const el = ref.current;
+    if (!el) return;
+    if (el.paused) {
+      if (!el.getAttribute("src")) el.setAttribute("src", src);
+      el.play?.().catch(() => {});
+    } else {
+      el.pause();
+    }
+  };
+
+  return (
+    <>
+      <video
+        ref={ref}
+        muted
+        loop
+        playsInline
+        preload="none"
+        poster={near ? poster : undefined}
+        {...rest}
+      />
+      <button
+        type="button"
+        className="asm-clip-toggle"
+        data-playing={playing || undefined}
+        onClick={toggle}
+        aria-label={playing ? "Pause prototype video" : "Play prototype video"}
+      >
+        <span className="asm-clip-play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path d="M8 5.5v13l10.5-6.5z" fill="currentColor" />
+          </svg>
+        </span>
+      </button>
+    </>
+  );
 }
 
 function Smoodi() {

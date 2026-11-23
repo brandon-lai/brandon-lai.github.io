@@ -376,20 +376,49 @@ a.asm-inline:hover { text-decoration: underline; }
 .asm-photo-slot svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
 .asm-tiramisu .asm-badge { margin-bottom: 12px; }
 
-/* smoodi: the 2020 prototype on a loop beside the machine today */
+/* smoodi: the 2020 prototype beside the machine today */
 .asm-smoodi-card { display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr); width: 100%; height: 100%; }
 .asm-smoodi-clip { position: relative; margin: 0; overflow: hidden; background: #e9e6df; }
 .asm-smoodi-clip video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.asm-clip-toggle {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.asm-clip-play {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  background: rgba(10, 14, 12, 0.62);
+  color: #fff;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4);
+  transition: transform 150ms ease-out, background-color 150ms ease-out, opacity 180ms ease-out;
+}
+.asm-clip-play svg { transform: translateX(1px); }
+@media (hover: hover) {
+  .asm-clip-toggle:hover .asm-clip-play { background: rgba(10, 14, 12, 0.78); transform: scale(1.06); }
+}
+.asm-clip-toggle:active .asm-clip-play { transform: scale(0.96); }
+.asm-clip-toggle[data-playing] .asm-clip-play { opacity: 0; transform: scale(0.92); }
 .asm-smoodi-clip figcaption {
   position: absolute;
   left: 12px;
   bottom: 12px;
   padding: 5px 9px;
   border-radius: var(--pill);
-  background: rgba(10, 14, 12, 0.55);
+  background: rgba(10, 14, 12, 0.68);
   color: #fff;
   font: 500 11px/1 var(--asm-mono);
-  backdrop-filter: blur(6px);
+  pointer-events: none;
 }
 .asm-smoodi-copy { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 22px 24px; }
 .asm-smoodi-render {
