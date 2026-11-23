@@ -433,84 +433,13 @@ function Myrel() {
   );
 }
 
-/**
- * A muted, looping clip that stays paused on its poster until clicked, avoids
- * downloading the video until then, and pauses again if scrolled out of view.
- */
-function Clip({ src, poster, ...rest }) {
-  const ref = useRef(null);
-  const near = useNear(ref);
-  const [playing, setPlaying] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const onPlay = () => setPlaying(true);
-    const onPause = () => setPlaying(false);
-    el.addEventListener("play", onPlay);
-    el.addEventListener("pause", onPause);
-    const io = new IntersectionObserver(
-      ([en]) => {
-        if (!en.isIntersecting && !el.paused) el.pause();
-      },
-      { threshold: 0.1 },
-    );
-    io.observe(el);
-    return () => {
-      io.disconnect();
-      el.removeEventListener("play", onPlay);
-      el.removeEventListener("pause", onPause);
-    };
-  }, []);
-
-  const toggle = () => {
-    const el = ref.current;
-    if (!el) return;
-    if (el.paused) {
-      if (!el.getAttribute("src")) el.setAttribute("src", src);
-      el.play?.().catch(() => {});
-    } else {
-      el.pause();
-    }
-  };
-
-  return (
-    <>
-      <video
-        ref={ref}
-        muted
-        loop
-        playsInline
-        preload="none"
-        poster={near ? poster : undefined}
-        {...rest}
-      />
-      <button
-        type="button"
-        className="asm-clip-toggle"
-        data-playing={playing || undefined}
-        onClick={toggle}
-        aria-label={playing ? "Pause prototype video" : "Play prototype video"}
-      >
-        <span className="asm-clip-play" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="20" height="20">
-            <path d="M8 5.5v13l10.5-6.5z" fill="currentColor" />
-          </svg>
-        </span>
-      </button>
-    </>
-  );
-}
-
 function Smoodi() {
   return (
     <div className="asm-smoodi-card">
-      <figure className="asm-smoodi-clip">
-        <Clip src="/beta/smoodi-prototype.mp4" poster="/beta/smoodi-prototype.jpg" aria-label="Our 2020 prototype blending a smoothie, then cleaning itself, sped up" />
-        <figcaption>Prototype, 2020 · sped up</figcaption>
-      </figure>
-      <div className="asm-smoodi-copy">
+      <div className="asm-smoodi-media">
         <NearImg className="asm-smoodi-render" src="/beta/smoodi-render.jpg" alt="The smoodi machine today, next to a fridge of frozen smoothie cups" />
+      </div>
+      <div className="asm-smoodi-copy">
         <div className="eyebrow">2019–2020 · founding engineer</div>
         <div className="asm-big">smoodi</div>
         <p className="asm-note">
