@@ -145,7 +145,7 @@ export default function WatchBench() {
       if (!alive) return;
 
       const renderer = new THREE.WebGLRenderer({ canvas: el, antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 0.8;
       const scene = new THREE.Scene();
@@ -207,6 +207,8 @@ export default function WatchBench() {
       };
 
       const v = new THREE.Vector3();
+      const vAxis = new THREE.Vector3();
+      const vEdge = new THREE.Vector3();
       const placeTags = (t) => {
         const box = tags.current;
         if (!box) return;
@@ -215,8 +217,8 @@ export default function WatchBench() {
         if (t <= 0.01) return;
         // a column of labels just right of the watch, each level with its part
         turn.updateMatrixWorld();
-        const axis = turn.getWorldPosition(new THREE.Vector3()).project(camera);
-        const edge = turn.localToWorld(new THREE.Vector3(model.reach, 0, 0)).project(camera);
+        const axis = turn.getWorldPosition(vAxis).project(camera);
+        const edge = turn.localToWorld(vEdge.set(model.reach, 0, 0)).project(camera);
         const x = Math.min(w - 96, ((Math.max(axis.x, edge.x) + 1) / 2) * w + 14);
         const rows = model.meshes.map((m, i) => {
           v.copy(model.parts[i].center);

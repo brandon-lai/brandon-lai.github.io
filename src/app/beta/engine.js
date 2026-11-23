@@ -199,7 +199,7 @@ export function createAssembler(root) {
   });
 
   /* ---- layout --------------------------------------------------------- */
-  let vw = 0, vh = 0, sc = 1.25, worldH = 0, maxCam = 0;
+  let vw = 0, vh = 0, sc = 1.25, worldH = 0, maxCam = 0, trackTop = 0, signW = 0, signH = 0;
   const gridBox = { x: 0, y: 0, w: 0, h: 0 };
 
   function camFor(r) {
@@ -211,6 +211,9 @@ export function createAssembler(root) {
     vw = stage.clientWidth;
     vh = stage.clientHeight;
     sc = vw < 700 ? 1.05 : 1.45;
+    trackTop = track.getBoundingClientRect().top + window.scrollY;
+    signW = sign.offsetWidth;
+    signH = sign.offsetHeight;
     gridBox.x = grid.offsetLeft;
     gridBox.y = grid.offsetTop;
     gridBox.w = grid.offsetWidth;
@@ -691,9 +694,8 @@ export function createAssembler(root) {
 
   /* ---- intro + finale --------------------------------------------------- */
   const FIN = TIMELINE.finaleStart;
+  let signShown = true;
   function bookends(T, c) {
-    const banner = acts[acts.length - 1].rect;
-    const signW = sign.offsetWidth, signH = sign.offsetHeight;
     let p = null;
     if (T < INTRO + 25) {
       const q = seg(T, 6, INTRO + 25);
@@ -702,6 +704,7 @@ export function createAssembler(root) {
       const w = walkPose(x / (7 * sc), q > 0 ? 1 : 0);
       p = { x, y: y + w.bob, legL: w.legL, legR: w.legR, armL: 166, armR: -166 };
     } else if (T > FIN) {
+      const banner = acts[acts.length - 1].rect;
       const q = ease(seg(T, FIN, FIN + 30));
       const x = lerp(c.view.left - 80, banner.x + banner.w * 0.46, q);
       const w = walkPose(x / (7 * sc), q < 1 ? 1 : 0);
@@ -709,21 +712,25 @@ export function createAssembler(root) {
     }
     if (p) {
       foreman.pose(p, sc);
-      show(sign, true);
+      if (!signShown) {
+        show(sign, true);
+        signShown = true;
+      }
       sign.style.transform = `translate3d(${f1(p.x - signW / 2)}px,${f1(p.y - 60 * sc - signH)}px,0) rotate(${f1(Math.sin(T * 0.4) * 2)}deg)`;
-    } else {
+    } else if (signShown) {
       foreman.hide();
       show(sign, false);
+      signShown = false;
     }
   }
 
   /* ---- the frame -------------------------------------------------------- */
   let Tshow = 0, Ttarget = 0, raf = 0, last = performance.now(), dirty = true;
-  let phase = "";
+  let phase = "", lastDone = -1;
 
   function scrollT() {
     if (reduce) return TIMELINE.total;
-    const y = -track.getBoundingClientRect().top;
+    const y = window.scrollY - trackTop;
     return clamp((y / (vh * PACE)) * 100, 0, TIMELINE.total);
   }
 
@@ -791,16 +798,31 @@ export function createAssembler(root) {
       a.wrap.dispatchEvent(new CustomEvent("asm-hold", { detail: h }));
     }
 
-    // parallax: dots, then cube layers at their own depth
+    // parallax: dots, then cube layers at their own depth (skip transforms far off-screen)
     if (dots) dots.style.transform = `translate3d(0,${f1(-((camEff * 0.3) % 24))}px,0)`;
     for (const d of depthEls) {
       const y = d.y - camEff * d.f;
+      if (y < -420 || y > vh + 420) {
+        if (d.vis !== false) {
+          d.el.style.visibility = "hidden";
+          d.vis = false;
+        }
+        continue;
+      }
+      if (d.vis === false) {
+        d.el.style.visibility = "visible";
+        d.vis = true;
+      }
       const x = Math.sin(camEff * 0.0016 * d.f + d.seed) * 36 * d.f;
       d.el.style.transform = `translate3d(${f1(x)}px,${f1(y)}px,0) rotate(${f1(camEff * 0.03 * d.spin)}deg) scale(${lerp(1, 0.8 + 0.2 * s, d.f / 2.5).toFixed(3)})`;
     }
 
-    const done = acts.filter((a) => T >= a.end).length;
-    hud.count.textContent = done === acts.length ? "Built" : `${done}/${acts.length} blocks`;
+    let done = 0;
+    for (const a of acts) if (T >= a.end) done++;
+    if (done !== lastDone) {
+      lastDone = done;
+      hud.count.textContent = done === acts.length ? "Built" : `${done}/${acts.length} blocks`;
+    }
     hud.bar.style.transform = `scaleX(${(T / TIMELINE.total).toFixed(4)})`;
     const ph = T < INTRO ? "intro" : T >= FIN ? "done" : "build";
     if (ph !== phase) {
@@ -856,8 +878,6 @@ export function createAssembler(root) {
   window.addEventListener("scroll", wake, { passive: true });
   window.addEventListener("resize", onResize);
   document.fonts?.ready?.then(onResize).catch(() => {});
-  const imgs = [...root.querySelectorAll("img")];
-  imgs.forEach((im) => im.addEventListener("load", onResize, { once: true }));
 
   // test hook: jump the timeline without scrolling
   window.__assemble = {

@@ -71,9 +71,10 @@ function Card() {
 /** the painted watch keeps the visitor's real time; the primer sketch stays at ten past */
 function Dial({ sketch }) {
   const ticks = Array.from({ length: 12 }, (_, i) => i);
+  const svg = useRef(null);
   const hands = useRef(null);
   useEffect(() => {
-    if (sketch) return;
+    if (sketch || !svg.current || !hands.current) return;
     const [h, m, s] = hands.current.querySelectorAll("[data-hand]");
     const tick = () => {
       const d = new Date();
@@ -83,11 +84,24 @@ function Dial({ sketch }) {
       s.setAttribute("transform", `rotate(${sec * 6})`);
     };
     tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
+    let id = 0;
+    const io = new IntersectionObserver(([en]) => {
+      if (en.isIntersecting) {
+        tick();
+        if (!id) id = setInterval(tick, 1000);
+      } else if (id) {
+        clearInterval(id);
+        id = 0;
+      }
+    });
+    io.observe(svg.current);
+    return () => {
+      io.disconnect();
+      if (id) clearInterval(id);
+    };
   }, [sketch]);
   return (
-    <svg className={sketch ? "asm-dial is-sketch" : "asm-dial"} viewBox="-50 -50 100 100" aria-hidden="true">
+    <svg ref={svg} className={sketch ? "asm-dial is-sketch" : "asm-dial"} viewBox="-50 -50 100 100" aria-hidden="true">
       <circle r="44" className="d-case" />
       <circle r="38" className="d-face" />
       {ticks.map((i) => (
@@ -291,10 +305,18 @@ function Tiramisu() {
  * fish) but leaves the wheel and vertical swipes to this page, so scrolling
  * over it still drives the build.
  */
-const POOL = "https://rockpool-tide.vercel.app";
+const POOL = process.env.NEXT_PUBLIC_ROCKPOOL_URL || "https://rockpool-tide.vercel.app";
+const POOL_ORIGIN = (() => {
+  try {
+    return new URL(POOL).origin;
+  } catch {
+    return POOL;
+  }
+})();
 
 function Rockpool() {
   const box = useRef(null);
+  const frame = useRef(null);
   const near = useNear(box);
   const [live, setLive] = useState(false);
   const [shown, setShown] = useState(false);
@@ -303,21 +325,25 @@ function Rockpool() {
     if (!near || !el || !("gpu" in navigator) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // the pool posts { rockpool: "ready" } once it is actually drawing
     const ready = (e) => {
-      if (e.origin === POOL && e.data?.rockpool === "ready") setShown(true);
+      if (e.origin === POOL_ORIGIN && e.data?.rockpool === "ready") setShown(true);
     };
     window.addEventListener("message", ready);
     let off = 0;
     const io = new IntersectionObserver(
       ([en]) => {
         clearTimeout(off);
-        if (en.isIntersecting) setLive(true);
-        else
+        if (en.isIntersecting) {
+          setLive(true);
+          frame.current?.contentWindow?.postMessage({ rockpool: "resume" }, POOL_ORIGIN);
+        } else {
+          frame.current?.contentWindow?.postMessage({ rockpool: "pause" }, POOL_ORIGIN);
           off = setTimeout(() => {
             setLive(false);
             setShown(false);
-          }, 3000);
+          }, 400);
+        }
       },
-      { rootMargin: "150px" },
+      { rootMargin: "80px" },
     );
     io.observe(el);
     return () => {
@@ -337,6 +363,7 @@ function Rockpool() {
         )}
         {live && (
           <iframe
+            ref={frame}
             src={`${POOL}/?embed&hour=10&seed=7`}
             title="Rockpool, running live"
             tabIndex={-1}

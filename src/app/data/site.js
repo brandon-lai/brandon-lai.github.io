@@ -28,7 +28,7 @@ export const NAV = [
  */
 // "/" is the skyline, which wants the whole viewport; "/alpha" only
 // forwards to it, and would flash a nav on the way
-export const NAV_HIDDEN_ON = ["/", "/alpha"];
+export const NAV_HIDDEN_ON = ["/", "/alpha", "/beta"];
 
 /** Shown, in order, when someone knocks on a door that isn't open yet. */
 export const NAV_LOCKED_LINES = [
