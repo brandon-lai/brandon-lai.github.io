@@ -6,6 +6,7 @@ export const PROJECTS = [
   {
     id: "rockpool",
     name: "Rockpool",
+    tagline: "Live WebGPU tide pool & creatures",
     eyebrow: "WebGPU · Simulation",
     description:
       "A live rock pool in raw WebGPU and WGSL. Scroll to turn the tide, ripple the water, and watch the creatures scatter.",
@@ -18,6 +19,7 @@ export const PROJECTS = [
   {
     id: "etabli",
     name: "Établi",
+    tagline: "3D mechanical pocket-watch workshop",
     eyebrow: "3D · Watchmaking",
     description:
       "Disassemble, clean, oil, and regulate a 17-jewel mechanical pocket-watch caliber (ETA 6497-1) right in the browser.",
@@ -30,6 +32,7 @@ export const PROJECTS = [
   {
     id: "isochron",
     name: "Isochron",
+    tagline: "Acoustic WebAssembly watch timegrapher",
     eyebrow: "WebAssembly · Audio DSP",
     description:
       "Acoustic mechanical watch timegrapher powered by FFTW3f in WebAssembly. Hold a watch to your mic to measure rate and beat error.",
@@ -42,6 +45,7 @@ export const PROJECTS = [
   {
     id: "incognita",
     name: "Terra Incognita",
+    tagline: "Historic expeditions on a 3D fog globe",
     eyebrow: "3D Globe · History",
     description:
       "Ride along with historic expeditions on a 3D globe wrapped in fog. The fog lifts only where each crew could actually see.",
@@ -54,6 +58,7 @@ export const PROJECTS = [
   {
     id: "inkscroll",
     name: "Inkscroll",
+    tagline: "Endless ASCII shan-shui mountain scroll",
     eyebrow: "Generative · Art",
     description:
       "An endless Chinese mountain-and-water landscape scroll drawn live in monospace characters, inspired by shan-shui-inf.",
@@ -66,6 +71,7 @@ export const PROJECTS = [
   {
     id: "stilltea",
     name: "Stilltea",
+    tagline: "Quiet rainy-window tea ritual",
     eyebrow: "Interactive · Ritual",
     description:
       "A quiet, tactile tea ritual by a rainy window — pick a leaf, warm the pot, steep slowly, and pour one cup.",
@@ -78,6 +84,7 @@ export const PROJECTS = [
   {
     id: "woolmeadow",
     name: "Woolmeadow",
+    tagline: "Floating 3D sheep meadow in one file",
     eyebrow: "3D · Miniature",
     description:
       "A tiny floating 3D sheep meadow with a winding stream, wooden bridge, and grazing sheep — built in a single HTML file.",
@@ -90,6 +97,7 @@ export const PROJECTS = [
   {
     id: "bandits",
     name: "Bandits",
+    tagline: "Pixel-art multiplayer .io dogfights",
     eyebrow: "Multiplayer · Game",
     description:
       "Pixel-art .io dogfights over tropical islands: sprite-stack renderer paired with a live Cloudflare Durable Object arena.",
@@ -102,6 +110,7 @@ export const PROJECTS = [
   {
     id: "rolloutgp",
     name: "Rollout GP",
+    tagline: "Self-steering 3D mini racers",
     eyebrow: "3D Physics · Game",
     description:
       "Build a self-steering mini racer in the garage, release it on a walled track, or chase it through the city. Three.js + Rapier.",
@@ -114,6 +123,7 @@ export const PROJECTS = [
   {
     id: "fold",
     name: "Fold",
+    tagline: "Step-by-step interactive 3D origami",
     eyebrow: "3D · Craft",
     description:
       "Learn origami from one realistic sheet of paper that folds itself, one exact crease at a time. Scrub, orbit, and fold along.",
@@ -126,6 +136,7 @@ export const PROJECTS = [
   {
     id: "elsewhere",
     name: "Elsewhere",
+    tagline: "Live ambient soundscapes on a world map",
     eyebrow: "Soundscape · Maps",
     description:
       "Pick any place on a world map and hear what it sounds like to be there right now — synthesised atmosphere shaped by the local hour.",
@@ -138,6 +149,7 @@ export const PROJECTS = [
   {
     id: "impression",
     name: "Impression",
+    tagline: "Turn your voice into a painted canvas",
     eyebrow: "Audio · Generative Art",
     description:
       "Speak for thirty seconds and turn your voice into a deterministic, gesturally painted impressionist canvas in the browser.",
@@ -150,6 +162,7 @@ export const PROJECTS = [
   {
     id: "stubbook",
     name: "Stubbook",
+    tagline: "Ticket-stub & boarding pass collage",
     eyebrow: "Travel · Collage",
     description:
       "Scan boarding passes, train tickets, and concert stubs — barcodes blurred automatically — and arrange them on a shareable collage.",
@@ -162,6 +175,7 @@ export const PROJECTS = [
   {
     id: "raiseisright",
     name: "The Raise Is Right",
+    tagline: "Daily startup funding guessing game",
     eyebrow: "Daily Game",
     description:
       "Look at a real startup and guess how much it raised in one specific funding round. Scored on how close you land.",
@@ -174,6 +188,7 @@ export const PROJECTS = [
   {
     id: "byhand",
     name: "byhand",
+    tagline: "Lock-screen notes replayed in your rhythm",
     eyebrow: "Playful Utility",
     description:
       "One short lock-screen note typed by hand for one person, replayed in your exact typing rhythm.",

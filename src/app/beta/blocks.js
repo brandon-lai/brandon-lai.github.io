@@ -789,10 +789,10 @@ function ProjectsLink() {
         <div className="eyebrow">Side projects · {PROJECTS.length} live</div>
         <div className="asm-big">More things I&rsquo;ve built</div>
         <p className="asm-note">
-          Watchmaking tools, generative art, 3D toys, and daily games — laid out on a horizontal shelf of blocks.
+          Watchmaking tools, generative art, 3D toys, and daily games — all live in the browser.
         </p>
         <span className="asm-projects-cta">
-          Open the shelf <ArrowUpRight width={14} height={14} />
+          Explore all {PROJECTS.length} <ArrowUpRight width={14} height={14} />
         </span>
       </div>
       <div className="asm-projects-strip" aria-hidden="true">
