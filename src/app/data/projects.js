@@ -1,0 +1,186 @@
+/**
+ * Curated live side projects, shown in the horizontal block shelf at /projects
+ * and teased from the main /beta block page.
+ */
+export const PROJECTS = [
+  {
+    id: "rockpool",
+    name: "Rockpool",
+    eyebrow: "WebGPU · Simulation",
+    description:
+      "A live rock pool in raw WebGPU and WGSL. Scroll to turn the tide, ripple the water, and watch the creatures scatter.",
+    href: "https://rockpool-tide.vercel.app",
+    host: "rockpool-tide.vercel.app",
+    image: "/beta/rockpool.jpg",
+    alt: "Sunlit rocky tide pool with turquoise water, caustics, and sea creatures",
+    accent: "#1FA971",
+  },
+  {
+    id: "etabli",
+    name: "Établi",
+    eyebrow: "3D · Watchmaking",
+    description:
+      "Disassemble, clean, oil, and regulate a 17-jewel mechanical pocket-watch caliber (ETA 6497-1) right in the browser.",
+    href: "https://etabli-orcin.vercel.app",
+    host: "etabli-orcin.vercel.app",
+    image: "/projects/etabli.jpg",
+    alt: "Interactive 3D view of an ETA 6497-1 mechanical watch movement with brass gears and ruby jewels",
+    accent: "#C9A24A",
+  },
+  {
+    id: "isochron",
+    name: "Isochron",
+    eyebrow: "WebAssembly · Audio DSP",
+    description:
+      "Acoustic mechanical watch timegrapher powered by FFTW3f in WebAssembly. Hold a watch to your mic to measure rate and beat error.",
+    href: "https://isochron-eight.vercel.app",
+    host: "isochron-eight.vercel.app",
+    image: "/projects/isochron.jpg",
+    alt: "Minimalist acoustic timegrapher interface with paper trace, escapement beat readout, and six-position log",
+    accent: "#FF4D4F",
+  },
+  {
+    id: "incognita",
+    name: "Terra Incognita",
+    eyebrow: "3D Globe · History",
+    description:
+      "Ride along with historic expeditions on a 3D globe wrapped in fog. The fog lifts only where each crew could actually see.",
+    href: "https://terra-incognita-map.vercel.app",
+    host: "terra-incognita-map.vercel.app",
+    image: "/projects/incognita.jpg",
+    alt: "3D parchment globe shrouded in fog beside expedition cards for Columbus, Magellan, Cook, and Amundsen",
+    accent: "#D99B43",
+  },
+  {
+    id: "inkscroll",
+    name: "Inkscroll",
+    eyebrow: "Generative · Art",
+    description:
+      "An endless Chinese mountain-and-water landscape scroll drawn live in monospace characters, inspired by shan-shui-inf.",
+    href: "https://inkscroll-iota.vercel.app",
+    host: "inkscroll-iota.vercel.app",
+    image: "/projects/inkscroll.jpg",
+    alt: "Generative ASCII and watercolour mountain landscape with a riverside village under the sun",
+    accent: "#2F6B57",
+  },
+  {
+    id: "stilltea",
+    name: "Stilltea",
+    eyebrow: "Interactive · Ritual",
+    description:
+      "A quiet, tactile tea ritual by a rainy window — pick a leaf, warm the pot, steep slowly, and pour one cup.",
+    href: "https://stilltea.vercel.app",
+    host: "stilltea.vercel.app",
+    image: "/projects/stilltea.jpg",
+    alt: "Warm dimly lit table with kettle, teapot, tea tins, and rain outside the window",
+    accent: "#C8873A",
+  },
+  {
+    id: "woolmeadow",
+    name: "Woolmeadow",
+    eyebrow: "3D · Miniature",
+    description:
+      "A tiny floating 3D sheep meadow with a winding stream, wooden bridge, and grazing sheep — built in a single HTML file.",
+    href: "https://woolmeadow.vercel.app",
+    host: "woolmeadow.vercel.app",
+    image: "/projects/woolmeadow.jpg",
+    alt: "Floating 3D miniature island with green pasture, river waterfall, cherry trees, and small white sheep",
+    accent: "#59B574",
+  },
+  {
+    id: "bandits",
+    name: "Bandits",
+    eyebrow: "Multiplayer · Game",
+    description:
+      "Pixel-art .io dogfights over tropical islands: sprite-stack renderer paired with a live Cloudflare Durable Object arena.",
+    href: "https://bandits-zeta.vercel.app",
+    host: "bandits-zeta.vercel.app",
+    image: "/projects/bandits.jpg",
+    alt: "Top-down pixel-art archipelago with clouds and the Bandits dogfight lobby card",
+    accent: "#FF7A45",
+  },
+  {
+    id: "rolloutgp",
+    name: "Rollout GP",
+    eyebrow: "3D Physics · Game",
+    description:
+      "Build a self-steering mini racer in the garage, release it on a walled track, or chase it through the city. Three.js + Rapier.",
+    href: "https://rolloutgp.vercel.app",
+    host: "rolloutgp.vercel.app",
+    image: "/projects/rolloutgp.jpg",
+    alt: "Orange 3D mini racer spinning on a blue checkered turntable in Rollout GP",
+    accent: "#F5B300",
+  },
+  {
+    id: "fold",
+    name: "Fold",
+    eyebrow: "3D · Craft",
+    description:
+      "Learn origami from one realistic sheet of paper that folds itself, one exact crease at a time. Scrub, orbit, and fold along.",
+    href: "https://fold-origami-six.vercel.app",
+    host: "fold-origami-six.vercel.app",
+    image: "/projects/fold.jpg",
+    alt: "Clean white origami canvas with a cream square sheet of paper and crisp Swiss typography",
+    accent: "#3B82F6",
+  },
+  {
+    id: "elsewhere",
+    name: "Elsewhere",
+    eyebrow: "Soundscape · Maps",
+    description:
+      "Pick any place on a world map and hear what it sounds like to be there right now — synthesised atmosphere shaped by the local hour.",
+    href: "https://elsewhere-ecru.vercel.app",
+    host: "elsewhere-ecru.vercel.app",
+    image: "/projects/elsewhere.jpg",
+    alt: "Minimal world map showing the sunlit and night-shaded hemispheres with selectable locations",
+    accent: "#6B8E9B",
+  },
+  {
+    id: "impression",
+    name: "Impression",
+    eyebrow: "Audio · Generative Art",
+    description:
+      "Speak for thirty seconds and turn your voice into a deterministic, gesturally painted impressionist canvas in the browser.",
+    href: "https://impression-zeta.vercel.app",
+    host: "impression-zeta.vercel.app",
+    image: "/projects/impression.jpg",
+    alt: "Soft impressionist pastel painting above a voice recording prompt",
+    accent: "#8B5CF6",
+  },
+  {
+    id: "stubbook",
+    name: "Stubbook",
+    eyebrow: "Travel · Collage",
+    description:
+      "Scan boarding passes, train tickets, and concert stubs — barcodes blurred automatically — and arrange them on a shareable collage.",
+    href: "https://stubbook.vercel.app",
+    host: "stubbook.vercel.app",
+    image: "/projects/stubbook.jpg",
+    alt: "Warm paper collage of boarding passes, rail tickets, and concert stubs",
+    accent: "#E05A47",
+  },
+  {
+    id: "raiseisright",
+    name: "The Raise Is Right",
+    eyebrow: "Daily Game",
+    description:
+      "Look at a real startup and guess how much it raised in one specific funding round. Scored on how close you land.",
+    href: "https://raiseisright.vercel.app",
+    host: "raiseisright.vercel.app",
+    image: "/projects/raiseisright.jpg",
+    alt: "Dark editorial guessing slider showing a startup funding round challenge",
+    accent: "#F5B300",
+  },
+  {
+    id: "byhand",
+    name: "byhand",
+    eyebrow: "Playful Utility",
+    description:
+      "One short lock-screen note typed by hand for one person, replayed in your exact typing rhythm.",
+    href: "https://byhand-beta.vercel.app",
+    host: "byhand-beta.vercel.app",
+    image: "/projects/byhand.jpg",
+    alt: "Minimal white interface demonstrating a live keystroke-replayed lock screen note",
+    accent: "#3B82F6",
+  },
+];

@@ -383,6 +383,93 @@ a.asm-inline:hover { text-decoration: underline; }
 .asm-smoodi-copy { display: flex; flex: 1; flex-direction: column; gap: 6px; min-width: 0; padding: 24px 28px; }
 .asm-smoodi-card .asm-inline { margin-top: auto; padding-top: 8px; }
 
+/* side projects teaser strip, linking out to the horizontal shelf at /projects */
+.asm-projects-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(260px, 0.92fr) minmax(0, 1.35fr);
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  height: 100%;
+  padding: 24px 0 24px 30px;
+  overflow: hidden;
+  color: var(--ink);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.asm-projects-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.asm-projects-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.asm-projects-cta svg { transition: transform 180ms var(--ease); }
+.asm-projects-strip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding-right: 24px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, #000 78%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 78%, transparent 100%);
+}
+.asm-projects-mini {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 158px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--raised);
+  box-shadow: var(--shadow-sm);
+  transition: transform 280ms var(--ease), box-shadow 280ms var(--ease);
+}
+.asm-projects-mini img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+.asm-projects-mini span {
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (hover: hover) {
+  .asm-projects-card:hover .asm-projects-cta svg { transform: translate(2px, -2px); }
+  .asm-projects-card:hover .asm-projects-mini { transform: translateX(-6px); }
+}
+.asm-projects-card:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; border-radius: inherit; }
+
+@media (max-width: 900px) {
+  .asm-projects-card {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: space-between;
+    gap: 16px;
+    padding: 22px 24px;
+  }
+  .asm-projects-strip { padding-right: 0; }
+  .asm-projects-mini { width: 132px; }
+}
+
 /* one favourite line */
 .asm-quote-card { display: flex; flex-direction: column; justify-content: center; gap: 14px; width: 100%; height: 100%; box-sizing: border-box; margin: 0; padding: 28px; }
 .asm-quote-card svg { width: 26px; fill: var(--asm-gold, #c9a24a); }

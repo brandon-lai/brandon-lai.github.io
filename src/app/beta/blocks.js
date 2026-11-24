@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { ABOUT, SOCIALS } from "../data/site";
 import { EXPERIENCE } from "../data/experience";
+import { PROJECTS } from "../data/projects";
 import { ArrowUpRight, LinkedIn } from "../components/Icons";
 import ACTIVITY from "../data/live/activity.json";
 import BELI from "../data/beli.json";
@@ -778,6 +780,33 @@ function ChevronDown() {
   );
 }
 
+const PROJECTS_TEASE = PROJECTS.filter((p) => ["etabli", "inkscroll", "incognita", "woolmeadow", "stilltea"].includes(p.id));
+
+function ProjectsLink() {
+  return (
+    <Link href="/projects" className="asm-projects-card">
+      <div className="asm-projects-copy">
+        <div className="eyebrow">Side projects · {PROJECTS.length} live</div>
+        <div className="asm-big">More things I&rsquo;ve built</div>
+        <p className="asm-note">
+          Watchmaking tools, generative art, 3D toys, and daily games — laid out on a horizontal shelf of blocks.
+        </p>
+        <span className="asm-projects-cta">
+          Open the shelf <ArrowUpRight width={14} height={14} />
+        </span>
+      </div>
+      <div className="asm-projects-strip" aria-hidden="true">
+        {PROJECTS_TEASE.map((p) => (
+          <div key={p.id} className="asm-projects-mini">
+            <NearImg src={p.image} alt="" />
+            <span>{p.name}</span>
+          </div>
+        ))}
+      </div>
+    </Link>
+  );
+}
+
 function Banner() {
   return (
     <div className="asm-banner">
@@ -974,6 +1003,16 @@ export const BLOCKS = [
     Content: Music,
   },
   {
+    id: "projects",
+    size: "strip",
+    act: "push",
+    from: "left",
+    len: 75,
+    crew: [{ hat: HAT.violet }],
+    perch: [0.16],
+    Content: ProjectsLink,
+  },
+  {
     id: "banner",
     size: "wide",
     act: "unroll",
@@ -988,7 +1027,7 @@ export const BLOCKS = [
 export const HELPERS = BLOCKS.reduce((n, b) => n + b.crew.length, 0) + 1;
 
 /** grid footprint shown on each empty slot: columns × row units */
-export const FOOTPRINT = { xs: "1×2", sm: "1×3", tall: "1×5", md: "2×4", lg: "2×5", xl: "2×7", wide: "4×3", band: "2×3" };
+export const FOOTPRINT = { xs: "1×2", sm: "1×3", tall: "1×5", md: "2×4", lg: "2×5", xl: "2×7", wide: "4×3", strip: "4×2", band: "2×3" };
 
 /* ---- the timeline, in % of a viewport of scroll ---------------------- */
 export const INTRO = 35;

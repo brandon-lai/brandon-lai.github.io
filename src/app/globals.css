@@ -325,6 +325,7 @@ button.nav-item {
 .tile-wrap[data-size="lg"]   { --col: 2; --span: 5; }
 .tile-wrap[data-size="xl"]   { --col: 2; --span: 7; }
 .tile-wrap[data-size="wide"] { --col: 4; --span: 3; }
+.tile-wrap[data-size="strip"] { --col: 4; --span: 2; }
 .tile-wrap[data-size="band"] { --col: 2; --span: 3; }
 
 .tile {
@@ -662,7 +663,8 @@ a.xp-item:hover { background: var(--surface-hover); transform: translateX(3px); 
    Responsive
    ============================================================ */
 @media (max-width: 1180px) {
-  .tile-wrap[data-size="wide"] { --col: 2; }
+  .tile-wrap[data-size="wide"],
+  .tile-wrap[data-size="strip"] { --col: 2; }
   .tile-pad { padding: 32px; }
 }
 
@@ -691,6 +693,7 @@ a.xp-item:hover { background: var(--surface-hover); transform: translateX(3px); 
   .tile-wrap[data-size="md"],
   .tile-wrap[data-size="lg"],
   .tile-wrap[data-size="wide"],
+  .tile-wrap[data-size="strip"],
   .tile-wrap[data-size="band"] { --col: 1; --span: 4; }
   .tile-wrap[data-size="xs"] { --col: 1; --span: 2; }
   .tile-wrap[data-size="xl"] { --col: 1; --span: 5; }

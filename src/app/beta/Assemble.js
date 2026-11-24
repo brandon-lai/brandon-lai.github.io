@@ -162,6 +162,7 @@ const SAYS = {
   quote: "Words to build by.",
   beli: "Table for one?",
   running: "Can\u2019t talk. Tempo run.",
+  projects: "Fifteen more, all live.",
   banner: "That\u2019s a wrap!",
   foreman: "Union break in five.",
 };
