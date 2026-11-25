@@ -538,13 +538,12 @@ function activityStats(workouts, now = Date.now()) {
 /**
  * This week from Strava, via Strava's own activity-summary widget. It's a
  * cross-origin frame with a fixed 300x160 layout, so it can't be restyled
- * inside; instead it's cropped to its stats row (our own heading and a Strava
- * link stand in for its header and button), scaled to our type size, and
+ * inside; instead it's cropped to its stats row (our own heading stands in
+ * for its header), scaled to our type size, and
  * blended into the tile: multiplied in light mode so its white melts into the
  * surface, inverted and screened in dark mode.
  */
 const STRAVA = {
-  profile: "https://www.strava.com/athletes/70165341",
   summary: "https://www.strava.com/athletes/70165341/activity-summary/ad90afb35a87bed54247661f23519e2fd3b600ff",
   // same share token; this one lists the latest runs (cropped below to leave out the route maps)
   latest: "https://www.strava.com/athletes/70165341/latest-rides/ad90afb35a87bed54247661f23519e2fd3b600ff",
@@ -561,16 +560,11 @@ function NearFrame({ className, src, title }) {
   );
 }
 
-function StravaWeek({ link = true }) {
+function StravaWeek() {
   return (
     <div className="asm-strava">
       <div className="asm-strava-head">
         <span>This week</span>
-        {link && (
-          <a href={STRAVA.profile} target="_blank" rel="noreferrer">
-            Strava <ArrowUpRight width={11} height={11} />
-          </a>
-        )}
       </div>
       <NearFrame className="asm-strava-crop" src={STRAVA.summary} title="This week's distance, time and elevation on Strava" />
     </div>
@@ -596,11 +590,8 @@ function Running() {
       <div className="asm-pad asm-running is-strava">
         <div className="asm-head">
           <div className="eyebrow">Running</div>
-          <a className="asm-strava-link" href={STRAVA.profile} target="_blank" rel="noreferrer">
-            Follow on Strava <ArrowUpRight width={11} height={11} />
-          </a>
         </div>
-        <StravaWeek link={false} />
+        <StravaWeek />
         <StravaLatest />
       </div>
     );
@@ -609,9 +600,6 @@ function Running() {
     <div className="asm-pad asm-running asm-activity">
       <div className="asm-head">
         <div className="eyebrow">Staying active · {st.year}</div>
-        <a className="asm-strava-link" href={STRAVA.profile} target="_blank" rel="noreferrer">
-          Strava <ArrowUpRight width={11} height={11} />
-        </a>
       </div>
       <div className="asm-stats">
         <div>
@@ -756,9 +744,6 @@ function Beli() {
         <span>
           {view === "been" ? `My top ${rows.length}, by score` : "Next on my list"} · {asOf(BELI.asOf)}
         </span>
-        <a className="asm-beli-profile" href={BELI.profile} target="_blank" rel="noreferrer">
-          @{BELI.profile.split("/").pop()} on Beli <ArrowUpRight width={13} height={13} />
-        </a>
       </div>
     </div>
   );

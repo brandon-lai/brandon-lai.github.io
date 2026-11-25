@@ -1512,10 +1512,6 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
 /* Strava's week, cropped to its stats row and blended into the tile */
 .asm-strava { --k: 1.18; display: grid; gap: 6px; margin: 4px 0 6px; }
 .asm-strava-head { display: flex; align-items: baseline; justify-content: space-between; font: 500 11px/1 var(--asm-mono); color: var(--ink-3); }
-.asm-strava-head a,
-.asm-strava-link { display: inline-flex; align-items: center; gap: 3px; font: 500 11px/1 var(--asm-mono); color: #fc5200; text-decoration: none; }
-.asm-strava-head a:hover,
-.asm-strava-link:hover { text-decoration: underline; text-underline-offset: 2px; }
 .asm-running.is-strava { gap: 16px; }
 /* on the wide tile, set Strava's text a size up so the tile reads full */
 .asm-running.is-strava .asm-strava { --k: 1.34; }
@@ -1663,24 +1659,12 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
   font-variant-numeric: tabular-nums;
   color: var(--beli-green);
 }
-.asm-beli .asm-foot { align-items: center; padding-top: 4px; }
-.asm-beli-profile {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  min-height: 32px;
-  font-weight: 600;
-  color: var(--beli-green);
-  white-space: nowrap;
-}
-.asm-beli-profile:hover { text-decoration: underline; text-underline-offset: 3px; }
-.asm-beli-profile:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
+.asm-beli .asm-foot { align-items: center; min-height: 32px; padding-top: 4px; }
 
 @media (max-width: 700px) {
   /* one column: hold ten rows' height so switching lists never shifts the page */
   .asm-ranks { grid-auto-flow: row; grid-template-rows: none; grid-template-columns: minmax(0, 1fr); align-content: start; min-height: 840px; }
   .asm-beli-title select { font-size: 21px; }
-  .asm-beli .asm-foot { flex-direction: column; align-items: flex-start; gap: 0; }
 }
 
 /* served row by row while the waiter crosses */
