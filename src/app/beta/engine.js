@@ -141,10 +141,7 @@ export function createAssembler(root) {
   const lines = root.querySelector(".asm-lines");
   const dots = root.querySelector(".asm-dots");
   const confetti = root.querySelector(".asm-confetti");
-  const hud = {
-    count: root.querySelector("[data-hud=count]"),
-    bar: root.querySelector("[data-hud=bar]"),
-  };
+  const hudBar = root.querySelector("[data-hud=bar]");
   const depthEls = [...root.querySelectorAll("[data-depth]")].map((el) => ({
     el,
     f: +el.dataset.depth,
@@ -694,7 +691,8 @@ export function createAssembler(root) {
 
   /* ---- intro + finale --------------------------------------------------- */
   const FIN = TIMELINE.finaleStart;
-  let signShown = true;
+  // the sign starts hidden in CSS, so the first pose has to reveal it
+  let signShown = false;
   function bookends(T, c) {
     let p = null;
     if (T < INTRO + 25) {
@@ -726,7 +724,7 @@ export function createAssembler(root) {
 
   /* ---- the frame -------------------------------------------------------- */
   let Tshow = 0, Ttarget = 0, raf = 0, last = performance.now(), dirty = true;
-  let phase = "", lastDone = -1;
+  let phase = "";
 
   function scrollT() {
     if (reduce) return TIMELINE.total;
@@ -817,13 +815,7 @@ export function createAssembler(root) {
       d.el.style.transform = `translate3d(${f1(x)}px,${f1(y)}px,0) rotate(${f1(camEff * 0.03 * d.spin)}deg) scale(${lerp(1, 0.8 + 0.2 * s, d.f / 2.5).toFixed(3)})`;
     }
 
-    let done = 0;
-    for (const a of acts) if (T >= a.end) done++;
-    if (done !== lastDone) {
-      lastDone = done;
-      hud.count.textContent = done === acts.length ? "Built" : `${done}/${acts.length} blocks`;
-    }
-    hud.bar.style.transform = `scaleX(${(T / TIMELINE.total).toFixed(4)})`;
+    hudBar.style.transform = `scaleX(${(T / TIMELINE.total).toFixed(4)})`;
     const ph = T < INTRO ? "intro" : T >= FIN ? "done" : "build";
     if (ph !== phase) {
       phase = ph;
@@ -849,7 +841,7 @@ export function createAssembler(root) {
     let next = Math.abs(gap) < 0.01 ? Ttarget : lerp(Tshow, Ttarget, k);
     // A speed limit, so a fling doesn't flash the builds past: the timeline moves
     // at most MAX_RATE per second and catches up after the scroll stops. Far
-    // jumps (Skip, End, dragging the scrollbar) get faster the farther they are,
+    // jumps (End, dragging the scrollbar) get faster the farther they are,
     // so nobody sits through the whole show to reach the bottom.
     const limit = (MAX_RATE + Math.max(0, Math.abs(gap) - 150) * 2.5) * dt;
     if (Math.abs(next - Tshow) > limit) next = Tshow + Math.sign(gap) * limit;

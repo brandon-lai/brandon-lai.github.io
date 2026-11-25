@@ -242,12 +242,6 @@ export default function Assemble() {
     });
   };
 
-  const track = () => root.current?.querySelector(".asm-track");
-  const skip = () => {
-    const t = track();
-    if (t) window.scrollTo(0, t.offsetTop + t.offsetHeight - window.innerHeight);
-  };
-
   return (
     <>
       <button
@@ -352,16 +346,13 @@ export default function Assemble() {
 
               <div className="asm-hud">
                 <span className="asm-hud-dot" aria-hidden="true" />
-                <span className="asm-hud-label">Assembling</span>
-                <span className="asm-hud-count" data-hud="count" aria-live="off">
-                  0/{BLOCKS.length} blocks
+                <span className="asm-hud-label">
+                  <span className="s-intro">Assembling</span>
+                  <span className="s-done">Built</span>
                 </span>
                 <span className="asm-hud-bar" aria-hidden="true">
                   <i data-hud="bar" />
                 </span>
-                <button type="button" className="asm-skip" onClick={skip}>
-                  Skip
-                </button>
               </div>
             </div>
           </div>
