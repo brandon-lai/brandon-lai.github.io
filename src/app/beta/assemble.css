@@ -1038,6 +1038,270 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
   60% { transform: translateY(0) scale(1.06, 0.92); }
   100% { transform: none; }
 }
+
+/* ---- TL;DR toggle pill (fixed top-right, beside .theme-toggle) ---------- */
+.asm-tldr-toggle {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  right: calc(max(18px, env(safe-area-inset-right)) + 44px + 8px);
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 44px;
+  padding: 0 15px 0 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--pill);
+  background: color-mix(in srgb, var(--raised) 82%, transparent);
+  box-shadow: var(--shadow-nav);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--ink-2);
+  font: 600 13px/1 ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: color 150ms var(--ease), background-color 150ms var(--ease), border-color 150ms var(--ease), transform 150ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+.asm-tldr-toggle svg { width: 15px; height: 15px; flex: none; }
+@media (hover: hover) {
+  .asm-tldr-toggle:hover { color: var(--ink); }
+}
+.asm-tldr-toggle[data-on="true"] {
+  background: var(--ink);
+  border-color: transparent;
+  color: var(--bg);
+}
+@media (hover: hover) {
+  .asm-tldr-toggle[data-on="true"]:hover {
+    color: var(--bg);
+    opacity: 0.9;
+  }
+}
+.asm-tldr-toggle:active { transform: scale(0.96); }
+.asm-tldr-toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+/* ---- minimalist text-only TL;DR view ------------------------------------ */
+.tldr {
+  --tldr-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: clamp(88px, 11vh, 128px) 24px 96px;
+  color: var(--ink);
+}
+
+.tldr-eyebrow {
+  margin: 0;
+  font: 600 11px/1 var(--tldr-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.tldr-head {
+  padding-bottom: 34px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tldr-name {
+  margin: 12px 0 0;
+  font-size: clamp(28px, 4vw, 34px);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+
+.tldr-bio {
+  margin: 14px 0 0;
+  font-size: 16px;
+  line-height: 1.62;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.tldr-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 20px;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.tldr-links a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 150ms var(--ease);
+}
+@media (hover: hover) {
+  .tldr-links a:hover { text-decoration-color: var(--ink); }
+}
+
+.tldr-sec {
+  padding: 32px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.tldr-sec-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tldr-more {
+  font: 500 12.5px/1 var(--tldr-mono);
+  color: var(--ink-3);
+  transition: color 150ms var(--ease);
+}
+@media (hover: hover) {
+  .tldr-more:hover { color: var(--ink); }
+}
+
+.tldr-list {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tldr-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 4px 18px;
+  align-items: baseline;
+}
+
+.tldr-key {
+  font: 500 12px/1.6 var(--tldr-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+
+.tldr-val {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.tldr-val a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
+}
+@media (hover: hover) {
+  .tldr-val a:hover { text-decoration-color: var(--ink); }
+}
+
+.tldr-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 7px;
+  color: var(--ink);
+}
+.tldr-strong { font-weight: 600; color: var(--ink); }
+.tldr-sep { color: var(--ink-3); }
+.tldr-role { color: var(--ink-2); }
+.tldr-note {
+  margin: 3px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.tldr-proj-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+
+.tldr-proj + .tldr-proj {
+  border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.tldr-proj-link {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.tldr-proj-link .tldr-strong { flex: none; }
+.tldr-proj-tag {
+  flex: 1;
+  min-width: 0;
+  color: var(--ink-2);
+  font-size: 13.5px;
+}
+.tldr-proj-arrow {
+  flex: none;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  transition: color 150ms var(--ease), transform 150ms var(--ease);
+}
+@media (hover: hover) {
+  a.tldr-proj-link:hover .tldr-strong {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  a.tldr-proj-link:hover .tldr-proj-arrow {
+    color: var(--ink);
+    transform: translate(2px, -2px);
+  }
+}
+
+.tldr-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 20px;
+  padding-top: 28px;
+}
+
+.tldr-quote {
+  margin: 0;
+  font-size: 13.5px;
+  font-style: italic;
+  color: var(--ink-3);
+}
+
+.tldr-back {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 500 13px/1 var(--tldr-mono);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color 150ms var(--ease);
+}
+@media (hover: hover) {
+  .tldr-back:hover { color: var(--ink); }
+}
+.tldr-back:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+@media (max-width: 640px) {
+  .asm-tldr-toggle {
+    top: 14px;
+    right: calc(14px + 40px + 8px);
+    height: 40px;
+    padding: 0 13px 0 11px;
+    font-size: 12.5px;
+  }
+  .tldr { padding: 76px 20px 72px; }
+  .tldr-row { grid-template-columns: 1fr; gap: 2px; }
+  .tldr-proj-link { flex-wrap: wrap; gap: 2px 10px; }
+  .tldr-proj-tag { flex-basis: 100%; order: 3; }
+  .tldr-proj-arrow { margin-left: auto; }
+}
 .asm-say {
   position: absolute;
   left: 0;

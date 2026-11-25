@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BLOCKS, FOOTPRINT, HELPERS, MAX_CUBES, PACE, TIMELINE } from "./blocks";
 import { Bot, IsoCube } from "./Bot";
 import { createAssembler } from "./engine";
+import TldrView from "./TldrView";
 
 /** ropes, strings and cables, drawn in world space between helpers and blocks */
 const LINES = {
@@ -212,13 +213,34 @@ function pokeable(root) {
 
 export default function Assemble() {
   const root = useRef(null);
+  const savedY = useRef(0);
+  const [tldr, setTldr] = useState(false);
 
   useEffect(() => {
-    const engine = createAssembler(root.current);
-    return () => engine.destroy();
+    if (new URLSearchParams(window.location.search).has("tldr")) setTldr(true);
   }, []);
 
-  useEffect(() => pokeable(root.current), []);
+  useEffect(() => {
+    if (tldr || !root.current) return;
+    if (savedY.current > 0) window.scrollTo(0, savedY.current);
+    const engine = createAssembler(root.current);
+    return () => engine.destroy();
+  }, [tldr]);
+
+  useEffect(() => {
+    if (tldr || !root.current) return;
+    return pokeable(root.current);
+  }, [tldr]);
+
+  const toggleTldr = () => {
+    setTldr((on) => {
+      if (!on) {
+        savedY.current = window.scrollY;
+        window.scrollTo(0, 0);
+      }
+      return !on;
+    });
+  };
 
   const track = () => root.current?.querySelector(".asm-track");
   const skip = () => {
@@ -227,104 +249,124 @@ export default function Assemble() {
   };
 
   return (
-    <div className="asm" ref={root} data-phase="intro">
-      <noscript>
-        <style>{".asm .tile{opacity:1!important}.asm-stage{position:relative!important;height:auto!important}"}</style>
-      </noscript>
+    <>
+      <button
+        type="button"
+        className="asm-tldr-toggle"
+        data-on={tldr || undefined}
+        aria-pressed={tldr}
+        aria-label={tldr ? "Exit TL;DR mode and show tiles" : "Switch to text-only TL;DR mode"}
+        title={tldr ? "Back to tiles" : "Text-only TL;DR"}
+        onClick={toggleTldr}
+      >
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+          <path d="M2.5 4h11M2.5 8h8.5M2.5 12h6" />
+        </svg>
+        <span>tl;dr</span>
+      </button>
 
-      <div className="asm-track" style={{ height: `${TIMELINE.total * PACE + 100}vh` }}>
-        <div className="asm-stage">
-          <div className="asm-back" aria-hidden="true">
-            <div className="asm-dots" />
-            <div className="asm-depth asm-word" data-depth="0.1" data-x="0" data-y="260" data-spin="0" data-seed="0">
-              Brandon Lai
-            </div>
-            {BACK.map((c) => (
-              <DepthCube key={c.key} c={c} />
-            ))}
-          </div>
+      {tldr ? (
+        <TldrView onExit={toggleTldr} />
+      ) : (
+        <div className="asm" ref={root} data-phase="intro">
+          <noscript>
+            <style>{".asm .tile{opacity:1!important}.asm-stage{position:relative!important;height:auto!important}"}</style>
+          </noscript>
 
-          <div className="asm-world">
-            <div className="asm-grid bento">
-              {BLOCKS.map((b) => (
-                <div key={b.id} className="tile-wrap" data-size={b.size} data-block={b.id} data-interactive="true">
-                  <div className="asm-slot" aria-hidden="true">
-                    <span>{b.id}</span>
-                    <span>{FOOTPRINT[b.size]}</span>
-                  </div>
-                  <div className={`tile asm-${b.id}`}>
-                    {b.paint ? (
-                      <>
-                        <div className="asm-primer" aria-hidden="true">
-                          <b.Content layer="primer" />
-                        </div>
-                        <div className="asm-paint" data-paint="">
+          <div className="asm-track" style={{ height: `${TIMELINE.total * PACE + 100}vh` }}>
+            <div className="asm-stage">
+              <div className="asm-back" aria-hidden="true">
+                <div className="asm-dots" />
+                <div className="asm-depth asm-word" data-depth="0.1" data-x="0" data-y="260" data-spin="0" data-seed="0">
+                  Brandon Lai
+                </div>
+                {BACK.map((c) => (
+                  <DepthCube key={c.key} c={c} />
+                ))}
+              </div>
+
+              <div className="asm-world">
+                <div className="asm-grid bento">
+                  {BLOCKS.map((b) => (
+                    <div key={b.id} className="tile-wrap" data-size={b.size} data-block={b.id} data-interactive="true">
+                      <div className="asm-slot" aria-hidden="true">
+                        <span>{b.id}</span>
+                        <span>{FOOTPRINT[b.size]}</span>
+                      </div>
+                      <div className={`tile asm-${b.id}`}>
+                        {b.paint ? (
+                          <>
+                            <div className="asm-primer" aria-hidden="true">
+                              <b.Content layer="primer" />
+                            </div>
+                            <div className="asm-paint" data-paint="">
+                              <b.Content />
+                            </div>
+                          </>
+                        ) : (
                           <b.Content />
-                        </div>
-                      </>
-                    ) : (
-                      <b.Content />
-                    )}
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <svg className="asm-lines" aria-hidden="true">
+                  {BLOCKS.flatMap((b) =>
+                    (LINES[b.act] ?? []).map((n) => <path key={`${b.id}:${n}`} data-line={`${b.id}:${n}`} className={`ln-${b.act}`} />),
+                  )}
+                </svg>
+
+                <div className="asm-fx" aria-hidden="true">
+                  {BLOCKS.map((b) => (
+                    <Fx key={b.id} b={b} />
+                  ))}
+                </div>
+
+                <div className="asm-bots" aria-hidden="true">
+                  {BLOCKS.flatMap((b) =>
+                    b.crew.map((m, i) => <Bot key={`${b.id}:${i}`} id={`${b.id}:${i}`} hat={m.hat} tool={m.tool} prop={m.prop} outfit={m.outfit} />),
+                  )}
+                  <Bot id="foreman" hat="#FFD23F" />
+                  <div className="asm-sign" data-fx="foreman:sign">
+                    <span className="s-intro">Scroll to build ↓</span>
+                    <span className="s-done">Built ✓</span>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <svg className="asm-lines" aria-hidden="true">
-              {BLOCKS.flatMap((b) =>
-                (LINES[b.act] ?? []).map((n) => <path key={`${b.id}:${n}`} data-line={`${b.id}:${n}`} className={`ln-${b.act}`} />),
-              )}
-            </svg>
+              <div className="asm-front" aria-hidden="true">
+                {FRONT.map((c) => (
+                  <DepthCube key={c.key} c={c} front />
+                ))}
+              </div>
 
-            <div className="asm-fx" aria-hidden="true">
-              {BLOCKS.map((b) => (
-                <Fx key={b.id} b={b} />
-              ))}
-            </div>
+              <div className="asm-confetti" aria-hidden="true">
+                {PIECES.map((p) => (
+                  <i
+                    key={p.key}
+                    style={{ "--x": `${p.x}%`, "--d": `${p.d}s`, "--dl": `${p.dl}s`, "--c": p.c, "--r": `${p.r}deg`, "--sway": `${p.sway}px`, width: p.w }}
+                  />
+                ))}
+              </div>
 
-            <div className="asm-bots" aria-hidden="true">
-              {BLOCKS.flatMap((b) =>
-                b.crew.map((m, i) => <Bot key={`${b.id}:${i}`} id={`${b.id}:${i}`} hat={m.hat} tool={m.tool} prop={m.prop} outfit={m.outfit} />),
-              )}
-              <Bot id="foreman" hat="#FFD23F" />
-              <div className="asm-sign" data-fx="foreman:sign">
-                <span className="s-intro">Scroll to build ↓</span>
-                <span className="s-done">Built ✓</span>
+              <div className="asm-hud">
+                <span className="asm-hud-dot" aria-hidden="true" />
+                <span className="asm-hud-label">Assembling</span>
+                <span className="asm-hud-count" data-hud="count" aria-live="off">
+                  0/{BLOCKS.length} blocks
+                </span>
+                <span className="asm-hud-bar" aria-hidden="true">
+                  <i data-hud="bar" />
+                </span>
+                <button type="button" className="asm-skip" onClick={skip}>
+                  Skip
+                </button>
               </div>
             </div>
           </div>
-
-          <div className="asm-front" aria-hidden="true">
-            {FRONT.map((c) => (
-              <DepthCube key={c.key} c={c} front />
-            ))}
-          </div>
-
-          <div className="asm-confetti" aria-hidden="true">
-            {PIECES.map((p) => (
-              <i
-                key={p.key}
-                style={{ "--x": `${p.x}%`, "--d": `${p.d}s`, "--dl": `${p.dl}s`, "--c": p.c, "--r": `${p.r}deg`, "--sway": `${p.sway}px`, width: p.w }}
-              />
-            ))}
-          </div>
-
-          <div className="asm-hud">
-            <span className="asm-hud-dot" aria-hidden="true" />
-            <span className="asm-hud-label">Assembling</span>
-            <span className="asm-hud-count" data-hud="count" aria-live="off">
-              0/{BLOCKS.length} blocks
-            </span>
-            <span className="asm-hud-bar" aria-hidden="true">
-              <i data-hud="bar" />
-            </span>
-            <button type="button" className="asm-skip" onClick={skip}>
-              Skip
-            </button>
-          </div>
         </div>
-      </div>
-
-    </div>
+      )}
+    </>
   );
 }
