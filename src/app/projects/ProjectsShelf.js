@@ -4,21 +4,35 @@ import Link from "next/link";
 import { PROJECTS } from "../data/projects";
 import { ArrowUpRight } from "../components/Icons";
 
-// Interleave all 8 projects across 3 staggered rows so no project repeats within a viewport width
-const ROW_IDS = [
-  ["rockpool", "etabli", "bandits", "fold", "isochron", "incognita", "woolmeadow", "byhand"],
-  ["bandits", "fold", "etabli", "woolmeadow", "incognita", "byhand", "isochron", "rockpool"],
-  ["incognita", "isochron", "byhand", "fold", "rockpool", "etabli", "bandits", "woolmeadow"],
-];
+/**
+ * Partition any number of projects evenly across 1–3 rows with zero repeats.
+ * Thresholds keep at least 3–4 unique projects per row so a tile exits one
+ * viewport edge before re-entering the opposite edge.
+ */
+function buildRows(items) {
+  const n = items.length;
+  const rowCount = n <= 4 ? 1 : n <= 11 ? 2 : 3;
+  const rows = Array.from({ length: rowCount }, () => []);
+  // Deal round-robin so adjacent projects (and visual styles) spread across rows
+  items.forEach((item, index) => {
+    rows[index % rowCount].push(item);
+  });
 
-const BY_ID = Object.fromEntries(PROJECTS.map((p) => [p.id, p]));
+  const speedOffsets = [0, 6, 3];
+  const phaseOffsets = [-0.08, -0.58, -0.31];
 
-const ROWS = [
-  { dir: "left", duration: "64s", delay: "-2s", items: ROW_IDS[0].map((id) => BY_ID[id]) },
-  { dir: "right", duration: "72s", delay: "-44s", items: ROW_IDS[1].map((id) => BY_ID[id]) },
-  { dir: "left", duration: "68s", delay: "-20s", items: ROW_IDS[2].map((id) => BY_ID[id]) },
-];
+  return rows.map((rowItems, i) => {
+    const durationSec = Math.max(28, rowItems.length * 10 + speedOffsets[i % speedOffsets.length]);
+    return {
+      dir: i % 2 === 0 ? "left" : "right",
+      duration: `${durationSec}s`,
+      delay: `${(durationSec * phaseOffsets[i % phaseOffsets.length]).toFixed(1)}s`,
+      items: rowItems,
+    };
+  });
+}
 
+const ROWS = buildRows(PROJECTS);
 const COPIES = [0, 1];
 
 function BackArrow() {
@@ -44,62 +58,75 @@ export default function ProjectsShelf() {
         </div>
       </header>
 
-      <main className="ps-wall" aria-label="Side projects">
-        {ROWS.map((row, rowIndex) => (
-          <div className="ps-lane" key={rowIndex} data-dir={row.dir}>
+      <main className="ps-wall" aria-label="Side projects" data-rows={ROWS.length}>
+        {ROWS.map((row, rowIndex) => {
+          const cols = row.items.length;
+          const canFlow = cols >= 2;
+          return (
             <div
-              className="ps-lane-track"
+              className="ps-lane"
+              key={rowIndex}
+              data-dir={row.dir}
+              data-static={!canFlow || undefined}
               style={{
-                "--ps-duration": row.duration,
-                "--ps-delay": row.delay,
+                "--ps-cols": cols,
+                "--ps-span": Math.max(1, cols - 1),
               }}
             >
-              {COPIES.map((copy) => {
-                const isClone = copy > 0 || rowIndex > 0;
-                return (
-                  <div
-                    className="ps-lane-group"
-                    key={copy}
-                    data-copy={copy}
-                    aria-hidden={isClone || undefined}
-                  >
-                    {row.items.map((project) => (
-                      <a
-                        key={`${copy}-${project.id}`}
-                        href={project.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        tabIndex={isClone ? -1 : undefined}
-                        className="ps-tile"
-                      >
-                        <div className="ps-media">
-                          <img
-                            src={project.image}
-                            alt={isClone ? "" : project.alt}
-                            loading="eager"
-                            decoding="async"
-                          />
-                        </div>
-                        <div className="ps-meta">
-                          <div className="ps-meta-head">
-                            <span className="ps-name-wrap">
-                              <i style={{ background: project.accent }} aria-hidden="true" />
-                              <span className="ps-name">{project.name}</span>
-                            </span>
-                            <span className="ps-arrow" aria-hidden="true">
-                              <ArrowUpRight width={13} height={13} />
-                            </span>
+              <div
+                className="ps-lane-track"
+                style={{
+                  "--ps-duration": row.duration,
+                  "--ps-delay": row.delay,
+                }}
+              >
+                {(canFlow ? COPIES : [0]).map((copy) => {
+                  const isClone = copy > 0;
+                  return (
+                    <div
+                      className="ps-lane-group"
+                      key={copy}
+                      data-copy={copy}
+                      aria-hidden={isClone || undefined}
+                    >
+                      {row.items.map((project) => (
+                        <a
+                          key={`${copy}-${project.id}`}
+                          href={project.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          tabIndex={isClone ? -1 : undefined}
+                          className="ps-tile"
+                        >
+                          <div className="ps-media">
+                            <img
+                              src={project.image}
+                              alt={isClone ? "" : project.alt}
+                              loading="eager"
+                              decoding="async"
+                            />
                           </div>
-                          <p className="ps-desc">{project.tagline}</p>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                );
-              })}
+                          <div className="ps-meta">
+                            <div className="ps-meta-head">
+                              <span className="ps-name-wrap">
+                                <i style={{ background: project.accent }} aria-hidden="true" />
+                                <span className="ps-name">{project.name}</span>
+                              </span>
+                              <span className="ps-arrow" aria-hidden="true">
+                                <ArrowUpRight width={13} height={13} />
+                              </span>
+                            </div>
+                            <p className="ps-desc">{project.tagline}</p>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </main>
     </div>
   );

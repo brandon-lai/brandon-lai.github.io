@@ -780,7 +780,7 @@ function ChevronDown() {
   );
 }
 
-const PROJECTS_TEASE = PROJECTS.filter((p) => ["etabli", "incognita", "woolmeadow", "bandits", "fold"].includes(p.id));
+const PROJECTS_TEASE = PROJECTS.filter((p) => p.id !== "rockpool").slice(0, 5);
 
 function ProjectsLink() {
   return (

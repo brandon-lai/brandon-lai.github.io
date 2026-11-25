@@ -5,7 +5,7 @@
 .ps-page {
   --ps-dot: rgba(19, 19, 22, 0.085);
   --ps-gap: 16px;
-  --ps-tile-w: clamp(276px, 23vw, 344px);
+  --ps-min-tile-w: 280px;
 
   position: relative;
   display: flex;
@@ -115,10 +115,21 @@
   min-height: 0;
   width: 100%;
   overflow: hidden;
+  /* Size tiles so (cols - 1) tiles span > 100vw, guaranteeing zero simultaneous repeats */
+  --ps-tile-w: max(var(--ps-min-tile-w), calc(100vw / var(--ps-span, 3) - var(--ps-gap) + 16px));
   /* Extra vertical breathing room so tile hover elevation never clips */
   padding-block: 6px;
   margin-block: -6px;
 }
+
+.ps-lane[data-static] .ps-lane-track {
+  animation: none;
+  will-change: auto;
+  width: 100%;
+  justify-content: center;
+  padding-inline: var(--ps-gap);
+}
+.ps-lane[data-static] .ps-lane-group { padding-right: 0; }
 
 .ps-lane-track {
   display: flex;
@@ -222,6 +233,10 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding: 13px 16px 14px;
+}
+
+.ps-wall[data-rows="3"] .ps-meta {
   padding: 11px 14px 12px;
 }
 
@@ -300,7 +315,7 @@
 @media (max-width: 640px) {
   .ps-page {
     --ps-gap: 12px;
-    --ps-tile-w: 236px;
+    --ps-min-tile-w: 268px;
   }
   .ps-top {
     top: max(14px, env(safe-area-inset-top));
