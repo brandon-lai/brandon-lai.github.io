@@ -37,8 +37,8 @@ function Hero() {
     <div className="tile-pad is-hero">
       <h1 className="display">
         <span data-step="1">
-          <span className="em">Brandon</span> is a software engineer who makes creative, whimsical, clean experiences
-          for the web and apps.
+          <span className="em">Brandon</span> is a software engineer who makes odd little things for the web and
+          iPhone.
         </span>
       </h1>
     </div>
@@ -262,7 +262,7 @@ function Tennis() {
       <NearImg src="/beta/tennis-serve.jpg" alt="Brandon tossing the ball up to serve on a grass court at dusk" />
       <div className="asm-photo-cap">
         <div className="stat">Tennis</div>
-        <div className="stat-sub">Rain or shine. If there&rsquo;s a court, I&rsquo;m on it.</div>
+        <div className="stat-sub">If there&rsquo;s a free court, I&rsquo;m on it.</div>
       </div>
     </div>
   );
@@ -279,27 +279,19 @@ function restamp(e) {
 function Tiramisu() {
   return (
     <div className="stack asm-tiramisu">
-      {/* placeholder until there's a photo from the competition */}
-      <div className="asm-photo-slot" role="img" aria-label="Photo from the Tiramisu World Cup, coming soon">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
-          <circle cx="12" cy="13" r="3.5" />
-        </svg>
-        <span>Photo coming soon</span>
-      </div>
       <button type="button" className="asm-badge" onClick={restamp} aria-label="Semi-finalist stamp. Press it again.">
         <span>Semi</span>
         <span>finalist</span>
       </button>
       <div className="eyebrow">Tiramisu World Cup</div>
       <div className="stat">Canada</div>
-      <div className="stat-sub">Mascarpone, taken seriously</div>
+      <div className="stat-sub">Yes, it&rsquo;s a real competition.</div>
     </div>
   );
 }
 
 /**
- * Rockpool, my WebGPU tide pool, running live inside the tile. It loads only
+ * Tidepool, my WebGPU tide pool, running live inside the tile. It loads only
  * while the tile is on screen (and unloads after it leaves), only where the
  * browser has WebGPU and motion is welcome, and shows only once the pool says
  * it is drawing; until then, and for everyone else, the still stays up.
@@ -307,7 +299,7 @@ function Tiramisu() {
  * fish) but leaves the wheel and vertical swipes to this page, so scrolling
  * over it still drives the build.
  */
-const POOL = process.env.NEXT_PUBLIC_ROCKPOOL_URL || "https://rockpool-tide.vercel.app";
+const POOL = process.env.NEXT_PUBLIC_TIDEPOOL_URL || PROJECTS.find((p) => p.id === "tidepool").href;
 const POOL_ORIGIN = (() => {
   try {
     return new URL(POOL).origin;
@@ -316,7 +308,7 @@ const POOL_ORIGIN = (() => {
   }
 })();
 
-function Rockpool() {
+function Tidepool() {
   const box = useRef(null);
   const frame = useRef(null);
   const near = useNear(box);
@@ -325,7 +317,7 @@ function Rockpool() {
   useEffect(() => {
     const el = box.current;
     if (!near || !el || !("gpu" in navigator) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // the pool posts { rockpool: "ready" } once it is actually drawing
+    // the pool posts { rockpool: "ready" } once it is actually drawing (the key predates the rename)
     const ready = (e) => {
       if (e.origin === POOL_ORIGIN && e.data?.rockpool === "ready") setShown(true);
     };
@@ -359,15 +351,15 @@ function Rockpool() {
       <div className="asm-pool-view">
         {near && (
           <picture>
-            <source media="(max-width: 700px)" srcSet="/beta/rockpool-phone.jpg" />
-            <img src="/beta/rockpool.jpg" alt="" />
+            <source media="(max-width: 700px)" srcSet="/beta/tidepool-phone.jpg" />
+            <img src="/beta/tidepool.jpg" alt="" />
           </picture>
         )}
         {live && (
           <iframe
             ref={frame}
             src={`${POOL}/?embed&hour=10&seed=7`}
-            title="Rockpool, running live"
+            title="Tidepool, running live"
             tabIndex={-1}
             aria-hidden="true"
             data-on={shown || undefined}
@@ -376,13 +368,13 @@ function Rockpool() {
       </div>
       <div className="asm-pool-copy">
         <div className="eyebrow">
-          <span data-step="1">Side project · live</span>
+          <span data-step="1">Side project · WebGPU</span>
         </div>
         <div className="asm-big">
-          <span data-step="2">Rockpool</span>
+          <span data-step="2">Tidepool</span>
         </div>
         <p className="asm-note">
-          <span data-step="3">A tide pool running live in your browser: WebGPU water, caustics and creatures. Touch the water.</span>
+          <span data-step="3">It runs right here in your browser. Touch the water and the fish dart for cover.</span>
         </p>
         <a className="asm-inline" href={POOL} target="_blank" rel="noreferrer">
           <span data-step="3">Wade in</span> <ArrowUpRight width={13} height={13} />
@@ -422,7 +414,7 @@ function Myrel() {
       <div className="asm-myrel-copy">
         <div className="eyebrow">Side project · iOS</div>
         <div className="asm-big">myrel</div>
-        <p className="asm-note">A private notebook for the people in your life. Jot what matters, get nudged to catch up, swap cards by QR.</p>
+        <p className="asm-note">A private notebook for the people you know. It remembers how you met and whose birthday is next, and tells you when it&rsquo;s been too long.</p>
       </div>
       <div className="asm-myrel-phone" ref={box}>
         <div className="asm-myrel-screen">
@@ -445,8 +437,8 @@ function Smoodi() {
         <div className="eyebrow">2019–2020 · founding engineer</div>
         <div className="asm-big">smoodi</div>
         <p className="asm-note">
-          Second hire. We built the first fully self-cleaning smoothie robot: scan a cup, it blends in under a minute,
-          then washes itself for the next person.
+          Second hire. We built a smoothie robot that cleans itself. Scan a cup, it blends in under a minute, then
+          washes up for the next person.
         </p>
         <a className="asm-inline" href="https://www.getsmoodi.com/technology" target="_blank" rel="noreferrer">
           How it works <ArrowUpRight width={13} height={13} />
@@ -780,19 +772,17 @@ function ChevronDown() {
   );
 }
 
-const PROJECTS_TEASE = PROJECTS.filter((p) => p.id !== "rockpool").slice(0, 5);
+const PROJECTS_TEASE = PROJECTS.filter((p) => p.id !== "tidepool").slice(0, 5);
 
 function ProjectsLink() {
   return (
     <Link href="/projects" className="asm-projects-card">
       <div className="asm-projects-copy">
-        <div className="eyebrow">Side projects · {PROJECTS.length} live</div>
+        <div className="eyebrow">Side projects · {PROJECTS.length}</div>
         <div className="asm-big">More things I&rsquo;ve built</div>
-        <p className="asm-note">
-          Watchmaking tools, 3D miniatures, origami, and multiplayer games — all live in the browser.
-        </p>
+        <p className="asm-note">Two watch tools, a sheep meadow, some origami and a dogfight game. Nothing to install.</p>
         <span className="asm-projects-cta">
-          Explore all {PROJECTS.length} <ArrowUpRight width={14} height={14} />
+          See all {PROJECTS.length} <ArrowUpRight width={14} height={14} />
         </span>
       </div>
       <div className="asm-projects-strip" aria-hidden="true">
@@ -810,10 +800,9 @@ function ProjectsLink() {
 function Banner() {
   return (
     <div className="asm-banner">
-      <div className="asm-banner-title">Thanks for stopping by.</div>
+      <div className="asm-banner-title">Thanks for scrolling.</div>
       <p className="asm-banner-note">
-        Whether you&rsquo;re building something, hiring, or just want to swap notes on watches or tiramisu, I&rsquo;d
-        love to hear from you.
+        If you&rsquo;re hiring, or you have opinions about tiramisu, send me a message.
       </p>
       <span className="asm-banner-sign">&mdash; Brandon</span>
       <a className="btn" href={LINKEDIN} target="_blank" rel="noreferrer">
@@ -908,23 +897,23 @@ export const BLOCKS = [
     Content: Smoodi,
   },
   {
-    id: "rockpool",
+    id: "tidepool",
     size: "md",
     act: "agent",
     len: 105,
     crew: [{ hat: HAT.blue, tool: "laptop" }],
     perch: [0.5],
     term: { u: 0.62, v: 0.52 },
-    title: "agent · rockpool.jsx",
+    title: "agent · tidepool.jsx",
     script: [
-      { t: "$ agent build --block rockpool" },
-      { t: "+ <Eyebrow>Side project · live</Eyebrow>", add: true, step: 1 },
+      { t: "$ agent build --block tidepool" },
+      { t: "+ <Eyebrow>Side project · WebGPU</Eyebrow>", add: true, step: 1 },
       { t: "+ <LivePool webgpu tide={10} />", add: true },
-      { t: "+ <Title>Rockpool</Title>", add: true, step: 2 },
+      { t: "+ <Title>Tidepool</Title>", add: true, step: 2 },
       { t: "+ <Note>Touch the water.</Note>", add: true, step: 3 },
       { t: "  ✓ 60 fps, wet", ok: true },
     ],
-    Content: Rockpool,
+    Content: Tidepool,
   },
   {
     id: "tennis",

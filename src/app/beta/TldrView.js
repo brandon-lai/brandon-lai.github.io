@@ -2,10 +2,19 @@ import Link from "next/link";
 import { ABOUT, SOCIALS } from "../data/site";
 import { EXPERIENCE } from "../data/experience";
 import { PROJECTS } from "../data/projects";
+import BELI from "../data/beli.json";
 
 const LINKEDIN = SOCIALS.find((s) => s.label === "LinkedIn")?.href ?? "https://www.linkedin.com/in/brandon-lai";
 const STRAVA = "https://www.strava.com/athletes/70165341";
 const PLACES = ["Minnesota", "Nashville", "Boston", "Montreal", "Chicago", "Paris", "NYC"];
+
+/** the current #1 on the first Beli list, as "Name, City" */
+const BELI_TOP = (() => {
+  const top = [...(BELI.lists[0]?.been ?? [])].sort((a, b) => a.rank - b.rank)[0];
+  if (!top) return null;
+  const parts = top.location.split(", ");
+  return `${top.name}, ${parts.length >= 3 ? parts[parts.length - 2] : parts[0]}`;
+})();
 
 function years(start, end) {
   const s = start.slice(-4);
@@ -21,8 +30,7 @@ export default function TldrView({ onExit }) {
         <div className="tldr-eyebrow">TL;DR</div>
         <h1 className="tldr-name">Brandon Lai</h1>
         <p className="tldr-bio">
-          Software engineer in NYC who makes creative, whimsical, clean experiences for the web and apps. Currently
-          building full-stack, agentic-AI-powered products at LinkedIn.
+          Software engineer in NYC. I make odd little things for the web and iPhone, and I collect old watches.
         </p>
         <nav className="tldr-links" aria-label="Links">
           <a href={LINKEDIN} target="_blank" rel="noreferrer">
@@ -73,7 +81,7 @@ export default function TldrView({ onExit }) {
             Side projects
           </h2>
           <Link href="/projects" className="tldr-more">
-            Visual wall &#8594;
+            With screenshots &#8594;
           </Link>
         </div>
         <ul className="tldr-proj-list">
@@ -91,7 +99,7 @@ export default function TldrView({ onExit }) {
           <li className="tldr-proj">
             <div className="tldr-proj-link is-static">
               <span className="tldr-strong">myrel</span>
-              <span className="tldr-proj-tag">Private iOS notebook for the people in your life</span>
+              <span className="tldr-proj-tag">A private iOS notebook for the people you know</span>
             </div>
           </li>
         </ul>
@@ -105,24 +113,39 @@ export default function TldrView({ onExit }) {
           <div className="tldr-row">
             <dt className="tldr-key">Watches</dt>
             <dd className="tldr-val">
-              Collects and tinkers with vintage mechanical watches (
+              Vintage, mostly. Designing my own from scratch.{" "}
               <a href={ABOUT.watches.href} target="_blank" rel="noreferrer">
                 {ABOUT.watches.handle}
               </a>
-              ).
             </dd>
           </div>
           <div className="tldr-row">
             <dt className="tldr-key">Running</dt>
-            <dd className="tldr-val">3&times; marathoner &mdash; Toronto &rsquo;24, Toronto Waterfront &rsquo;24, Toronto &rsquo;26.</dd>
+            <dd className="tldr-val">Three marathons, all in Toronto (&rsquo;24, &rsquo;24, &rsquo;26). <span style={{ whiteSpace: "nowrap" }}>Ex-rower.</span></dd>
+          </div>
+          <div className="tldr-row">
+            <dt className="tldr-key">Tennis</dt>
+            <dd className="tldr-val">Whenever there&rsquo;s a free court.</dd>
           </div>
           <div className="tldr-row">
             <dt className="tldr-key">Food</dt>
-            <dd className="tldr-val">Tiramisu World Cup competitor, Canada semi-finalist.</dd>
+            <dd className="tldr-val">
+              Tiramisu World Cup semi-finalist (Canada).
+              {BELI_TOP && (
+                <>
+                  {" "}
+                  #1 on my{" "}
+                  <a href={BELI.profile} target="_blank" rel="noreferrer">
+                    Beli
+                  </a>{" "}
+                  right now: {BELI_TOP}.
+                </>
+              )}
+            </dd>
           </div>
           <div className="tldr-row">
             <dt className="tldr-key">Also</dt>
-            <dd className="tldr-val">Tennis, guitar, scuba diving, snowboarding.</dd>
+            <dd className="tldr-val">Beginner guitar, scuba, snowboarding.</dd>
           </div>
           <div className="tldr-row">
             <dt className="tldr-key">Lived</dt>

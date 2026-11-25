@@ -83,7 +83,7 @@ export const ABOUT = {
   ],
   watches: {
     before:
-      "I collect watches, mostly vintage. There's something worth admiring in a few hundred tiny parts that agree to keep time for fifty years without a battery, built by people who assumed someone would still be repairing them long after they were gone. I post them at ",
+      "I collect watches, mostly vintage. A good one runs for fifty years on a spring and a few hundred tiny parts, no battery. The people who made them expected someone to still be fixing them today. I post mine at ",
     short: "I collect watches and talk about them",
     handle: "@watcheswbrandon",
     href: "https://instagram.com/watcheswbrandon",

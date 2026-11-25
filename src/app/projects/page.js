@@ -3,7 +3,7 @@ import "./projects.css";
 
 export const metadata = {
   title: "Side Projects — Brandon Lai",
-  description: "Interactive toys, watchmaking tools, generative art, and tiny games — every one live in the browser.",
+  description: "Small things I made for the browser: watch tools, a tide pool, origami, sheep and a dogfight game.",
 };
 
 export default function ProjectsPage() {

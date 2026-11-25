@@ -4,22 +4,23 @@
  */
 export const PROJECTS = [
   {
-    id: "rockpool",
-    name: "Rockpool",
-    tagline: "Live WebGPU tide pool & creatures",
+    id: "tidepool",
+    name: "Tidepool",
+    tagline: "Touch the water, scare the fish",
     eyebrow: "WebGPU · Simulation",
     description:
-      "A live rock pool in raw WebGPU and WGSL. Scroll to turn the tide, ripple the water, and watch the creatures scatter.",
+      "A tide pool in raw WebGPU and WGSL. Touch the water and the fish dart for cover. Scroll to turn the tide.",
+    // switch both to tidepool.brandonlai.me once that subdomain points at the Vercel project
     href: "https://rockpool-tide.vercel.app",
     host: "rockpool-tide.vercel.app",
-    image: "/beta/rockpool.jpg",
+    image: "/beta/tidepool.jpg",
     alt: "Sunlit rocky tide pool with turquoise water, caustics, and sea creatures",
     accent: "#1FA971",
   },
   {
     id: "etabli",
     name: "Établi",
-    tagline: "3D mechanical pocket-watch workshop",
+    tagline: "Service a pocket watch, part by part",
     eyebrow: "3D · Watchmaking",
     description:
       "Disassemble, clean, oil, and regulate a 17-jewel mechanical pocket-watch caliber (ETA 6497-1) right in the browser.",
@@ -32,7 +33,7 @@ export const PROJECTS = [
   {
     id: "isochron",
     name: "Isochron",
-    tagline: "Acoustic WebAssembly watch timegrapher",
+    tagline: "Hold your watch to the mic. Is it fast?",
     eyebrow: "WebAssembly · Audio DSP",
     description:
       "Acoustic mechanical watch timegrapher powered by FFTW3f in WebAssembly. Hold a watch to your mic to measure rate and beat error.",
@@ -45,7 +46,7 @@ export const PROJECTS = [
   {
     id: "incognita",
     name: "Terra Incognita",
-    tagline: "Historic expeditions on a 3D fog globe",
+    tagline: "Sail with Magellan. See what he saw.",
     eyebrow: "3D Globe · History",
     description:
       "Ride along with historic expeditions on a 3D globe wrapped in fog. The fog lifts only where each crew could actually see.",
@@ -58,7 +59,7 @@ export const PROJECTS = [
   {
     id: "woolmeadow",
     name: "Woolmeadow",
-    tagline: "Floating 3D sheep meadow in one file",
+    tagline: "Sheep on a floating island",
     eyebrow: "3D · Miniature",
     description:
       "A tiny floating 3D sheep meadow with a winding stream, wooden bridge, and grazing sheep — built in a single HTML file.",
@@ -71,7 +72,7 @@ export const PROJECTS = [
   {
     id: "bandits",
     name: "Bandits",
-    tagline: "Pixel-art multiplayer .io dogfights",
+    tagline: "Dogfight strangers over pixel islands",
     eyebrow: "Multiplayer · Game",
     description:
       "Pixel-art .io dogfights over tropical islands: sprite-stack renderer paired with a live Cloudflare Durable Object arena.",
@@ -84,7 +85,7 @@ export const PROJECTS = [
   {
     id: "fold",
     name: "Fold",
-    tagline: "Step-by-step interactive 3D origami",
+    tagline: "Origami, one crease at a time",
     eyebrow: "3D · Craft",
     description:
       "Learn origami from one realistic sheet of paper that folds itself, one exact crease at a time. Scrub, orbit, and fold along.",
@@ -97,7 +98,7 @@ export const PROJECTS = [
   {
     id: "byhand",
     name: "byhand",
-    tagline: "Lock-screen notes replayed in your rhythm",
+    tagline: "A note that types itself the way you did",
     eyebrow: "Playful Utility",
     description:
       "One short lock-screen note typed by hand for one person, replayed in your exact typing rhythm.",

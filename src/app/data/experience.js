@@ -20,7 +20,7 @@ export const EXPERIENCE = [
     logo: "/logos/linkedin.png",
     start: "Sep 2022",
     end: "Present",
-    note: "Full-stack, agentic-AI-powered builder.",
+    note: "Full-stack. Lately, mostly building with AI agents.",
   },
   {
     role: "Full-Stack Software Engineer Intern",
@@ -30,7 +30,7 @@ export const EXPERIENCE = [
     start: "May 2022",
     end: "Aug 2022",
     duration: "4 mos",
-    note: "Core product, front-end infrastructure, and growth initiatives.",
+    note: "Front-end infrastructure, plus growth work on the core product.",
   },
   {
     role: "Engineering Fellow",
@@ -40,7 +40,7 @@ export const EXPERIENCE = [
     start: "May 2022",
     end: "Aug 2022",
     duration: "4 mos",
-    note: "Met some world-class founders and engineers.",
+    note: "A summer of meeting founders and engineers.",
     href: "https://www.8vc.com/fellowships",
   },
   {
@@ -51,7 +51,7 @@ export const EXPERIENCE = [
     start: "May 2021",
     end: "Aug 2021",
     duration: "4 mos",
-    note: "LinkedIn.com landing page.",
+    note: "Worked on the linkedin.com landing page.",
   },
   {
     role: "Founding Engineer",
@@ -61,6 +61,6 @@ export const EXPERIENCE = [
     end: "Sep 2020",
     duration: "1 yr 4 mos",
     location: "Boston, MA",
-    note: "Built the world's first fully self-cleaning autonomous smoothie machine.",
+    note: "Second hire. Helped build a smoothie robot that cleans itself.",
   },
 ];
