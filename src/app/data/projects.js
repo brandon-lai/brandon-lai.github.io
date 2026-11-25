@@ -1,5 +1,5 @@
 /**
- * Curated live side projects, shown in the horizontal block shelf at /projects
+ * Curated live side projects, shown in the kinetic tile wall at /projects
  * and teased from the main /beta block page.
  */
 export const PROJECTS = [
@@ -56,32 +56,6 @@ export const PROJECTS = [
     accent: "#D99B43",
   },
   {
-    id: "inkscroll",
-    name: "Inkscroll",
-    tagline: "Endless ASCII shan-shui mountain scroll",
-    eyebrow: "Generative · Art",
-    description:
-      "An endless Chinese mountain-and-water landscape scroll drawn live in monospace characters, inspired by shan-shui-inf.",
-    href: "https://inkscroll-iota.vercel.app",
-    host: "inkscroll-iota.vercel.app",
-    image: "/projects/inkscroll.jpg",
-    alt: "Generative ASCII and watercolour mountain landscape with a riverside village under the sun",
-    accent: "#2F6B57",
-  },
-  {
-    id: "stilltea",
-    name: "Stilltea",
-    tagline: "Quiet rainy-window tea ritual",
-    eyebrow: "Interactive · Ritual",
-    description:
-      "A quiet, tactile tea ritual by a rainy window — pick a leaf, warm the pot, steep slowly, and pour one cup.",
-    href: "https://stilltea.vercel.app",
-    host: "stilltea.vercel.app",
-    image: "/projects/stilltea.jpg",
-    alt: "Warm dimly lit table with kettle, teapot, tea tins, and rain outside the window",
-    accent: "#C8873A",
-  },
-  {
     id: "woolmeadow",
     name: "Woolmeadow",
     tagline: "Floating 3D sheep meadow in one file",
@@ -108,19 +82,6 @@ export const PROJECTS = [
     accent: "#FF7A45",
   },
   {
-    id: "rolloutgp",
-    name: "Rollout GP",
-    tagline: "Self-steering 3D mini racers",
-    eyebrow: "3D Physics · Game",
-    description:
-      "Build a self-steering mini racer in the garage, release it on a walled track, or chase it through the city. Three.js + Rapier.",
-    href: "https://rolloutgp.vercel.app",
-    host: "rolloutgp.vercel.app",
-    image: "/projects/rolloutgp.jpg",
-    alt: "Orange 3D mini racer spinning on a blue checkered turntable in Rollout GP",
-    accent: "#F5B300",
-  },
-  {
     id: "fold",
     name: "Fold",
     tagline: "Step-by-step interactive 3D origami",
@@ -132,58 +93,6 @@ export const PROJECTS = [
     image: "/projects/fold.jpg",
     alt: "Clean white origami canvas with a cream square sheet of paper and crisp Swiss typography",
     accent: "#3B82F6",
-  },
-  {
-    id: "elsewhere",
-    name: "Elsewhere",
-    tagline: "Live ambient soundscapes on a world map",
-    eyebrow: "Soundscape · Maps",
-    description:
-      "Pick any place on a world map and hear what it sounds like to be there right now — synthesised atmosphere shaped by the local hour.",
-    href: "https://elsewhere-ecru.vercel.app",
-    host: "elsewhere-ecru.vercel.app",
-    image: "/projects/elsewhere.jpg",
-    alt: "Minimal world map showing the sunlit and night-shaded hemispheres with selectable locations",
-    accent: "#6B8E9B",
-  },
-  {
-    id: "impression",
-    name: "Impression",
-    tagline: "Turn your voice into a painted canvas",
-    eyebrow: "Audio · Generative Art",
-    description:
-      "Speak for thirty seconds and turn your voice into a deterministic, gesturally painted impressionist canvas in the browser.",
-    href: "https://impression-zeta.vercel.app",
-    host: "impression-zeta.vercel.app",
-    image: "/projects/impression.jpg",
-    alt: "Soft impressionist pastel painting above a voice recording prompt",
-    accent: "#8B5CF6",
-  },
-  {
-    id: "stubbook",
-    name: "Stubbook",
-    tagline: "Ticket-stub & boarding pass collage",
-    eyebrow: "Travel · Collage",
-    description:
-      "Scan boarding passes, train tickets, and concert stubs — barcodes blurred automatically — and arrange them on a shareable collage.",
-    href: "https://stubbook.vercel.app",
-    host: "stubbook.vercel.app",
-    image: "/projects/stubbook.jpg",
-    alt: "Warm paper collage of boarding passes, rail tickets, and concert stubs",
-    accent: "#E05A47",
-  },
-  {
-    id: "raiseisright",
-    name: "The Raise Is Right",
-    tagline: "Daily startup funding guessing game",
-    eyebrow: "Daily Game",
-    description:
-      "Look at a real startup and guess how much it raised in one specific funding round. Scored on how close you land.",
-    href: "https://raiseisright.vercel.app",
-    host: "raiseisright.vercel.app",
-    image: "/projects/raiseisright.jpg",
-    alt: "Dark editorial guessing slider showing a startup funding round challenge",
-    accent: "#F5B300",
   },
   {
     id: "byhand",

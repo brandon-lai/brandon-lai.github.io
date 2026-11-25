@@ -4,22 +4,22 @@ import Link from "next/link";
 import { PROJECTS } from "../data/projects";
 import { ArrowUpRight } from "../components/Icons";
 
-// Split the 15 curated projects into 3 visually balanced rows of 5
+// Interleave all 8 projects across 3 staggered rows so no project repeats within a viewport width
 const ROW_IDS = [
-  ["rockpool", "etabli", "inkscroll", "bandits", "stubbook"],
-  ["incognita", "stilltea", "woolmeadow", "fold", "raiseisright"],
-  ["isochron", "rolloutgp", "elsewhere", "impression", "byhand"],
+  ["rockpool", "etabli", "bandits", "fold", "isochron", "incognita", "woolmeadow", "byhand"],
+  ["bandits", "fold", "etabli", "woolmeadow", "incognita", "byhand", "isochron", "rockpool"],
+  ["incognita", "isochron", "byhand", "fold", "rockpool", "etabli", "bandits", "woolmeadow"],
 ];
 
 const BY_ID = Object.fromEntries(PROJECTS.map((p) => [p.id, p]));
 
 const ROWS = [
-  { dir: "left", duration: "46s", delay: "-7s", items: ROW_IDS[0].map((id) => BY_ID[id]) },
-  { dir: "right", duration: "54s", delay: "-22s", items: ROW_IDS[1].map((id) => BY_ID[id]) },
-  { dir: "left", duration: "50s", delay: "-14s", items: ROW_IDS[2].map((id) => BY_ID[id]) },
+  { dir: "left", duration: "64s", delay: "-2s", items: ROW_IDS[0].map((id) => BY_ID[id]) },
+  { dir: "right", duration: "72s", delay: "-44s", items: ROW_IDS[1].map((id) => BY_ID[id]) },
+  { dir: "left", duration: "68s", delay: "-20s", items: ROW_IDS[2].map((id) => BY_ID[id]) },
 ];
 
-const COPIES = [0, 1, 2];
+const COPIES = [0, 1];
 
 function BackArrow() {
   return (
@@ -55,11 +55,12 @@ export default function ProjectsShelf() {
               }}
             >
               {COPIES.map((copy) => {
-                const isClone = copy > 0;
+                const isClone = copy > 0 || rowIndex > 0;
                 return (
                   <div
                     className="ps-lane-group"
                     key={copy}
+                    data-copy={copy}
                     aria-hidden={isClone || undefined}
                   >
                     {row.items.map((project) => (

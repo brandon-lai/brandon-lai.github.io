@@ -780,7 +780,7 @@ function ChevronDown() {
   );
 }
 
-const PROJECTS_TEASE = PROJECTS.filter((p) => ["etabli", "inkscroll", "incognita", "woolmeadow", "stilltea"].includes(p.id));
+const PROJECTS_TEASE = PROJECTS.filter((p) => ["etabli", "incognita", "woolmeadow", "bandits", "fold"].includes(p.id));
 
 function ProjectsLink() {
   return (
@@ -789,7 +789,7 @@ function ProjectsLink() {
         <div className="eyebrow">Side projects · {PROJECTS.length} live</div>
         <div className="asm-big">More things I&rsquo;ve built</div>
         <p className="asm-note">
-          Watchmaking tools, generative art, 3D toys, and daily games — all live in the browser.
+          Watchmaking tools, 3D miniatures, origami, and multiplayer games — all live in the browser.
         </p>
         <span className="asm-projects-cta">
           Explore all {PROJECTS.length} <ArrowUpRight width={14} height={14} />
