@@ -854,6 +854,10 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
   position: absolute;
   left: 0;
   top: 0;
+  visibility: hidden;
+  will-change: transform;
+}
+.asm-sign-card {
   padding: 9px 15px;
   border: 2px solid var(--ink);
   border-radius: 10px;
@@ -863,12 +867,77 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
   font-weight: 650;
   letter-spacing: -0.01em;
   white-space: nowrap;
-  visibility: hidden;
-  will-change: transform;
 }
 .asm .s-done { display: none; }
 .asm[data-phase="done"] .s-intro { display: none; }
 .asm[data-phase="done"] .s-done { display: inline; }
+.asm-sign .s-arrow { display: inline-block; }
+
+/* the foreman's "over here!" loop while he waits at the start: a crouch and
+   jump, a shake of the sign, then two nudges of the arrow. The bot and sign
+   are moved by JS, so these run on inner wrappers that share one 2.8s clock.
+   Sign offsets are the bot's SVG units at the sign's base (60 above the feet)
+   times --sc, so the two land together at any scale. */
+@media (prefers-reduced-motion: no-preference) {
+  .bot.is-hype .bot-jig {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: asm-hype-jig 2.8s infinite;
+  }
+  .bot.is-hype .bot-shadow {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: asm-hype-shadow 2.8s infinite;
+  }
+  .bot.is-hype .arm-wave {
+    transform-box: fill-box;
+    transform-origin: 50% 0;
+    animation: asm-hype-arms 2.8s ease-in-out infinite;
+  }
+  .asm-sign.is-hype .asm-sign-card {
+    transform-origin: 50% 100%;
+    animation: asm-hype-sign 2.8s infinite;
+  }
+  .asm-sign.is-hype .s-arrow { animation: asm-hype-arrow 2.8s ease-in-out infinite; }
+}
+@keyframes asm-hype-jig {
+  0%, 40%, 100% { transform: translateY(0) scale(1, 1); animation-timing-function: ease-in-out; }
+  7% { transform: translateY(0) scale(1.1, 0.86); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  16% { transform: translateY(-13px) scale(0.95, 1.07); animation-timing-function: ease-out; }
+  24% { transform: translateY(-15px) scale(1, 1); animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.4); }
+  33% { transform: translateY(0) scale(1.1, 0.88); animation-timing-function: ease-out; }
+}
+@keyframes asm-hype-shadow {
+  0%, 40%, 100% { transform: scale(1, 1); opacity: 1; animation-timing-function: ease-in-out; }
+  7% { transform: scale(1.12, 1); opacity: 1; animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  16% { transform: scale(0.74, 0.74); opacity: 0.6; animation-timing-function: ease-out; }
+  24% { transform: scale(0.7, 0.7); opacity: 0.55; animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.4); }
+  33% { transform: scale(1.12, 1); opacity: 1; animation-timing-function: ease-out; }
+}
+@keyframes asm-hype-sign {
+  0%, 40%, 68%, 100% { transform: translate(0, 0) rotate(0deg); animation-timing-function: ease-in-out; }
+  7% { transform: translate(0, calc(8.4px * var(--sc, 1))) rotate(0deg); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  16% { transform: translate(0, calc(-17.2px * var(--sc, 1))) rotate(-2deg); animation-timing-function: ease-out; }
+  24% { transform: translate(0, calc(-15px * var(--sc, 1))) rotate(1deg); animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.4); }
+  33% { transform: translate(0, calc(7.2px * var(--sc, 1))) rotate(0deg); animation-timing-function: ease-out; }
+  45% { transform: translate(-3px, 0) rotate(-9deg); }
+  50% { transform: translate(3px, 0) rotate(8deg); }
+  55% { transform: translate(-2px, 0) rotate(-6deg); }
+  60% { transform: translate(2px, 0) rotate(4deg); }
+  64% { transform: translate(-1px, 0) rotate(-2deg); }
+}
+@keyframes asm-hype-arms {
+  0%, 40%, 68%, 100% { transform: rotate(0deg); }
+  45% { transform: rotate(-12deg); }
+  50% { transform: rotate(11deg); }
+  55% { transform: rotate(-8deg); }
+  60% { transform: rotate(6deg); }
+  64% { transform: rotate(-3deg); }
+}
+@keyframes asm-hype-arrow {
+  0%, 70%, 82%, 94%, 100% { transform: translateY(0); }
+  76%, 88% { transform: translateY(3px); }
+}
 
 /* ---- celebration ------------------------------------------------------ */
 .asm-confetti {

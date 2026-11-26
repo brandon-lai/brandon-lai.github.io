@@ -141,6 +141,7 @@ export function Bot({ id, hat, tool, prop, outfit }) {
       <ellipse className="bot-shadow" cx="24" cy="67.5" rx="11" ry="2.2" />
       <g transform="translate(24 66)">
         <g className="bot-hop">
+        <g className="bot-jig">
         <g data-p="body">
           <g data-p="legL">
             <g className="leg-swing">
@@ -212,6 +213,7 @@ export function Bot({ id, hat, tool, prop, outfit }) {
               <circle cx="0" cy="-22.5" r="1.6" />
             </g>
           )}
+        </g>
         </g>
         </g>
       </g>

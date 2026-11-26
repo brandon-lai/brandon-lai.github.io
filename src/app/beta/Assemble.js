@@ -323,8 +323,12 @@ export default function Assemble() {
                   )}
                   <Bot id="foreman" hat="#FFD23F" />
                   <div className="asm-sign" data-fx="foreman:sign">
-                    <span className="s-intro">Scroll to build ↓</span>
-                    <span className="s-done">Built ✓</span>
+                    <div className="asm-sign-card">
+                      <span className="s-intro">
+                        Scroll to build <span className="s-arrow">↓</span>
+                      </span>
+                      <span className="s-done">Built ✓</span>
+                    </div>
                   </div>
                 </div>
               </div>

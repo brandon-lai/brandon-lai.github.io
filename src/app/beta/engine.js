@@ -73,6 +73,7 @@ function makeBot(el) {
   return {
     hide() {
       put("vis", (v) => (el.style.visibility = v), "hidden");
+      flag("is-hype", false);
     },
     pose(p, sc) {
       put("vis", (v) => (el.style.visibility = v), "visible");
@@ -88,6 +89,7 @@ function makeBot(el) {
       flag("has-laptop", p.laptop);
       flag("is-flying", p.fly);
       flag("is-riding", p.ride);
+      flag("is-hype", p.hype);
     },
   };
 }
@@ -211,6 +213,8 @@ export function createAssembler(root) {
     trackTop = track.getBoundingClientRect().top + window.scrollY;
     signW = sign.offsetWidth;
     signH = sign.offsetHeight;
+    // the sign's hop keyframes are in SVG units; this scales them to the bot
+    sign.style.setProperty("--sc", sc);
     gridBox.x = grid.offsetLeft;
     gridBox.y = grid.offsetTop;
     gridBox.w = grid.offsetWidth;
@@ -693,6 +697,8 @@ export function createAssembler(root) {
   const FIN = TIMELINE.finaleStart;
   // the sign starts hidden in CSS, so the first pose has to reveal it
   let signShown = false;
+  // while he waits at the start, the foreman hops and shakes the sign (CSS loop)
+  let signHype = false;
   function bookends(T, c) {
     let p = null;
     if (T < INTRO + 25) {
@@ -700,7 +706,7 @@ export function createAssembler(root) {
       const x = lerp(vw * 0.5, c.view.right + 90, easeIn(q));
       const y = c.view.top + vh - 70;
       const w = walkPose(x / (7 * sc), q > 0 ? 1 : 0);
-      p = { x, y: y + w.bob, legL: w.legL, legR: w.legR, armL: 166, armR: -166 };
+      p = { x, y: y + w.bob, legL: w.legL, legR: w.legR, armL: 166, armR: -166, hype: q === 0 };
     } else if (T > FIN) {
       const banner = acts[acts.length - 1].rect;
       const q = ease(seg(T, FIN, FIN + 30));
@@ -715,10 +721,16 @@ export function createAssembler(root) {
         signShown = true;
       }
       sign.style.transform = `translate3d(${f1(p.x - signW / 2)}px,${f1(p.y - 60 * sc - signH)}px,0) rotate(${f1(Math.sin(T * 0.4) * 2)}deg)`;
+      if (signHype !== !!p.hype) {
+        signHype = !!p.hype;
+        sign.classList.toggle("is-hype", signHype);
+      }
     } else if (signShown) {
       foreman.hide();
       show(sign, false);
       signShown = false;
+      signHype = false;
+      sign.classList.remove("is-hype");
     }
   }
 
