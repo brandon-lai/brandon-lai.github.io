@@ -5,7 +5,6 @@ import { PROJECTS } from "../data/projects";
 import BELI from "../data/beli.json";
 
 const LINKEDIN = SOCIALS.find((s) => s.label === "LinkedIn")?.href ?? "https://www.linkedin.com/in/brandon-lai";
-const STRAVA = "https://www.strava.com/athletes/70165341";
 const PLACES = ["Minnesota", "Nashville", "Boston", "Montreal", "Chicago", "Paris", "NYC"];
 
 /** the current #1 on the first Beli list, as "Name, City" */
@@ -37,9 +36,6 @@ export default function TldrView({ onExit }) {
             LinkedIn &#8599;
           </a>
           <Link href="/projects">Projects ({PROJECTS.length}) &#8594;</Link>
-          <a href={STRAVA} target="_blank" rel="noreferrer">
-            Strava &#8599;
-          </a>
           <a href={ABOUT.watches.href} target="_blank" rel="noreferrer">
             {ABOUT.watches.handle} &#8599;
           </a>
