@@ -3,6 +3,7 @@ import { ABOUT, SOCIALS } from "../data/site";
 import { EXPERIENCE } from "../data/experience";
 import { PROJECTS } from "../data/projects";
 import BELI from "../data/beli.json";
+import { PERCH } from "./perch/PerchDesk";
 
 const LINKEDIN = SOCIALS.find((s) => s.label === "LinkedIn")?.href ?? "https://www.linkedin.com/in/brandon-lai";
 const PLACES = ["Minnesota", "Nashville", "Boston", "Montreal", "Chicago", "Paris", "NYC"];
@@ -92,6 +93,15 @@ export default function TldrView({ onExit }) {
               </a>
             </li>
           ))}
+          <li className="tldr-proj">
+            <a href={PERCH} target="_blank" rel="noreferrer" className="tldr-proj-link">
+              <span className="tldr-strong">Perch</span>
+              <span className="tldr-proj-tag">A red panda that climbs your Mac&rsquo;s windows</span>
+              <span className="tldr-proj-arrow" aria-hidden="true">
+                &#8599;
+              </span>
+            </a>
+          </li>
           <li className="tldr-proj">
             <div className="tldr-proj-link is-static">
               <span className="tldr-strong">myrel</span>

@@ -562,6 +562,179 @@ button.asm-badge.is-restamped { animation: asm-restamp 0.42s cubic-bezier(0.2, 0
 .asm-pool-copy { pointer-events: none; }
 .asm-pool-copy a { pointer-events: auto; }
 
+/* perch: a little Mac desktop with the red panda loose on it. The panda is drawn on the canvas;
+   the windows it climbs are plain boxes, and --bw (its body width) spaces them so it fits. */
+/* the tile itself is the container, so the narrow-tile rules below can restyle the desk */
+.asm-perch { container-type: inline-size; }
+.asm-perch-desk {
+  --bw: 24px;
+  --dock: 46px;
+  --pw-wall: radial-gradient(90% 70% at 85% 105%, #f7c9a8, transparent 70%),
+    radial-gradient(80% 60% at 0% 100%, #c6b3ec, transparent 70%),
+    linear-gradient(170deg, #b8c7f2, #d9d2f1 55%, #efd4dc);
+  --pw-win: #fff;
+  --pw-bar: #f2f1f5;
+  --pw-rule: rgba(30, 24, 48, 0.08);
+  --pw-ink: #1d1b22;
+  --pw-ink-2: #5d5966;
+  --pw-faint: rgba(30, 24, 48, 0.09);
+  --pw-glass: rgba(255, 255, 255, 0.42);
+  --pw-shadow: 0 0 0 0.5px rgba(30, 20, 60, 0.14), 0 10px 26px -8px rgba(40, 28, 90, 0.32), 0 2px 6px rgba(40, 28, 90, 0.1);
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: var(--pw-wall);
+  color: var(--pw-ink);
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.asm-perch-desk canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+.asm-perch-menu {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 24px;
+  padding: 0 16px 0 20px;
+  background: var(--pw-glass);
+  font-size: 11.5px;
+  line-height: 1;
+  color: var(--pw-ink);
+}
+.asm-perch-menu span { color: var(--pw-ink-2); }
+.asm-perch-mark { width: 10px; height: 10px; border-radius: 3px; background: #d9643a; }
+.asm-perch-clock { margin-left: auto; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.asm-perch-win {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--pw-win);
+  box-shadow: var(--pw-shadow);
+}
+.asm-perch-bar {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  background: var(--pw-bar);
+  box-shadow: inset 0 -1px var(--pw-rule);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--pw-ink-2);
+}
+.asm-perch-bar i { width: 9px; height: 9px; border-radius: 50%; background: #ff5f57; }
+.asm-perch-bar i:nth-child(2) { background: #febc2e; }
+.asm-perch-bar i:nth-child(3) { background: #28c840; }
+.asm-perch-bar span { position: absolute; inset: 0 60px; display: grid; place-items: center; white-space: nowrap; }
+
+.asm-perch-win.is-about { left: 4.4%; width: 54%; bottom: calc(var(--dock) + 3.5 * var(--bw)); }
+.asm-perch-copy { display: grid; gap: 6px; padding: 14px 18px 18px; }
+.asm-perch-copy .asm-big { color: var(--pw-ink); }
+.asm-perch-copy .asm-note { color: var(--pw-ink-2); }
+.asm-perch-copy .asm-inline { margin-top: 4px; color: var(--pw-ink); cursor: pointer; }
+.asm-perch-desk .for-touch { display: none; }
+@media (hover: none) {
+  .asm-perch-desk .for-mouse { display: none; }
+  .asm-perch-desk .for-touch { display: inline; }
+}
+
+.asm-perch-win.is-photos {
+  top: calc(24px + 2 * var(--bw));
+  right: 4%;
+  left: calc(58.4% + 1.25 * var(--bw));
+  height: max(4.5 * var(--bw), 22%);
+}
+.asm-perch-photos { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 6px; }
+.asm-perch-photos i { border-radius: 4px; background: linear-gradient(150deg, #9cc7e8, #5d8fc4); }
+.asm-perch-photos i:nth-child(2) { background: linear-gradient(150deg, #f6c58f, #e07a5f); }
+.asm-perch-photos i:nth-child(3) { background: linear-gradient(150deg, #a7d8a1, #5a9c6a); }
+.asm-perch-photos i:nth-child(4) { background: linear-gradient(150deg, #e9b6cf, #b06a9b); }
+.asm-perch-photos i:nth-child(5) { background: linear-gradient(150deg, #f3e1a0, #d8a648); }
+.asm-perch-photos i:nth-child(6) { background: linear-gradient(150deg, #b9b3ea, #6f68b8); }
+
+.asm-perch-win.is-notes {
+  top: calc(24px + 4.25 * var(--bw) + max(4.5 * var(--bw), 22%));
+  right: 4%;
+  bottom: calc(var(--dock) + 1.5 * var(--bw));
+  left: 46%;
+}
+.asm-perch-lines { display: grid; align-content: start; gap: 9px; padding: 14px 14px 0 calc(24.8% + 14px); }
+.asm-perch-lines i { height: 6px; border-radius: 3px; background: var(--pw-faint); }
+.asm-perch-lines i:nth-child(1) { width: 55%; height: 8px; background: color-mix(in srgb, var(--pw-ink) 16%, transparent); }
+.asm-perch-lines i:nth-child(3n) { width: 82%; }
+.asm-perch-lines i:nth-child(3n + 2) { width: 68%; }
+
+.asm-perch-dock {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 6px;
+  border-radius: 13px;
+  background: var(--pw-glass);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.55), 0 4px 14px -4px rgba(40, 28, 90, 0.25);
+}
+.asm-perch-dock i { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(160deg, #7fb5ff, #3d6fe0); }
+.asm-perch-dock i:nth-child(2) { background: linear-gradient(160deg, #ffe08a, #f2a93b); }
+.asm-perch-dock i:nth-child(3) { background: linear-gradient(160deg, #9fe3a0, #3fa65a); }
+.asm-perch-dock i:nth-child(4) { background: linear-gradient(160deg, #f7a8a0, #e0524a); }
+.asm-perch-dock i:nth-child(5) { background: linear-gradient(160deg, #d9c7ff, #8a6ae6); }
+.asm-perch-dock i:nth-child(6) { background: linear-gradient(160deg, #f3f2f6, #c9c6d2); }
+/* Perch's own icon: the panda's coat */
+.asm-perch-dock i:nth-child(7) { background: linear-gradient(160deg, #f08a4b, #b9452a); }
+
+/* narrow tiles: no room for Photos, so the copy window widens and Notes reaches up */
+@container (max-width: 420px) {
+  .asm-perch-desk { --bw: 21px; }
+  .asm-perch-win.is-photos { display: none; }
+  .asm-perch-win.is-about { left: 4.4%; width: 66%; }
+  .asm-perch-win.is-notes { top: calc(24px + 2.25 * var(--bw)); left: 50%; }
+  .asm-perch-lines { padding-left: calc(44.3% + 14px); }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .asm-perch-desk {
+    --pw-wall: radial-gradient(90% 70% at 85% 105%, #7a4256, transparent 70%),
+      radial-gradient(80% 60% at 0% 100%, #3f3577, transparent 70%),
+      linear-gradient(170deg, #1d2447, #2e2a52 55%, #4a3350);
+    --pw-win: #2a2a30;
+    --pw-bar: #323239;
+    --pw-rule: rgba(0, 0, 0, 0.35);
+    --pw-ink: #f2f0f7;
+    --pw-ink-2: #aaa6b5;
+    --pw-faint: rgba(255, 255, 255, 0.1);
+    --pw-glass: rgba(20, 18, 34, 0.38);
+    --pw-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1), 0 10px 26px -8px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+}
+:root[data-theme="dark"] .asm-perch-desk {
+  --pw-wall: radial-gradient(90% 70% at 85% 105%, #7a4256, transparent 70%),
+    radial-gradient(80% 60% at 0% 100%, #3f3577, transparent 70%),
+    linear-gradient(170deg, #1d2447, #2e2a52 55%, #4a3350);
+  --pw-win: #2a2a30;
+  --pw-bar: #323239;
+  --pw-rule: rgba(0, 0, 0, 0.35);
+  --pw-ink: #f2f0f7;
+  --pw-ink-2: #aaa6b5;
+  --pw-faint: rgba(255, 255, 255, 0.1);
+  --pw-glass: rgba(20, 18, 34, 0.38);
+  --pw-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.1), 0 10px 26px -8px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
 /* myrel: the app's own violet, a phone rising out of the bottom edge */
 .asm-myrel-card {
   display: flex;

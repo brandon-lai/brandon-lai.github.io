@@ -8,6 +8,7 @@ import ACTIVITY from "../data/live/activity.json";
 import BELI from "../data/beli.json";
 import WatchBench from "./WatchBench";
 import { useNear } from "./near";
+import PerchDesk from "./perch/PerchDesk";
 
 /**
  * The page, block by block, and the act that builds each one.
@@ -901,6 +902,26 @@ export const BLOCKS = [
     Content: Tidepool,
   },
   {
+    id: "perch",
+    size: "md",
+    act: "agent",
+    len: 105,
+    crew: [{ hat: HAT.orange, tool: "laptop" }],
+    perch: [0.5],
+    term: { u: 0.5, v: 0.5 },
+    title: "agent · perch.jsx",
+    script: [
+      { t: "$ agent build --block perch" },
+      { t: "+ <Eyebrow>Side project · macOS</Eyebrow>", add: true, step: 1 },
+      { t: "+ <Desktop windows={3} />", add: true },
+      { t: "+ <RedPanda bamboo />", add: true, step: 4 },
+      { t: "+ <Title>Perch</Title>", add: true, step: 2 },
+      { t: "+ <Note>Bring the bamboo.</Note>", add: true, step: 3 },
+      { t: "  ✓ fed, napping", ok: true },
+    ],
+    Content: PerchDesk,
+  },
+  {
     id: "tennis",
     size: "tall",
     act: "push",
@@ -949,15 +970,6 @@ export const BLOCKS = [
     Content: Also,
   },
   {
-    id: "beli",
-    size: "lg",
-    act: "serve",
-    len: 110,
-    crew: [{ hat: HAT.green, tool: "tray" }],
-    perch: [0.5],
-    Content: Beli,
-  },
-  {
     id: "quote",
     size: "xs",
     act: "balloon",
@@ -965,6 +977,15 @@ export const BLOCKS = [
     crew: [{ hat: HAT.yellow }],
     perch: [0.5],
     Content: Quote,
+  },
+  {
+    id: "beli",
+    size: "lg",
+    act: "serve",
+    len: 110,
+    crew: [{ hat: HAT.green, tool: "tray" }],
+    perch: [0.5],
+    Content: Beli,
   },
   {
     id: "music",

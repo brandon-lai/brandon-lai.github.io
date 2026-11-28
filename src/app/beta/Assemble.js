@@ -157,6 +157,7 @@ const SAYS = {
   tennis: "Quiet, please.",
   tiramisu: "Press the stamp. Go on.",
   tidepool: "Heavy. It's full of water.",
+  perch: "Mind the bamboo. It bites.",
   myrel: "It never forgets a birthday.",
   smoodi: "Smoothie? It cleans up after itself.",
   also: "Equalizing. Back in a sec.",
